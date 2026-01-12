@@ -50,6 +50,7 @@ Most settings have sensible defaults. You only need to change them if you want t
 | **Auto Commit** | Automatically commit after generating the message. |
 | **Auto Push** | Automatically push after commit (requires Auto Commit). |
 | **Confirm Before Commit** | Show confirmation dialog before auto-committing. |
+| **Smart Stage** | Automatically stage all working tree changes if nothing is staged (Default: `true`). |
 | **Prompt** | The system prompt used by AI. |
 | **Language** | Choose between `English`, `简体中文`, `繁体中文`, `Japanese`, `Classical Chinese (文言文)`, or `Custom`. |
 | **Custom Language** | Enter any language description (e.g., `French`, `Emoji only`) when **Language** is set to `Custom`. |

@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -60,6 +60,12 @@
           "type": "boolean",
           "default": false,
           "description": "Automatically push changes after commit (requires autoCommit to be enabled).",
+          "order": 0
+        },
+        "wtfCommit.smartStage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically stage all changes if nothing is staged.",
           "order": 0
         },
         "wtfCommit.confirmBeforeCommit": {
