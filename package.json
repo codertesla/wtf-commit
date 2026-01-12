@@ -34,9 +34,35 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "wtf-commit.generate",
+        "key": "ctrl+alt+g",
+        "mac": "cmd+alt+g",
+        "when": "editorTextFocus"
+      }
+    ],
     "configuration": {
       "title": "WTF Commit",
       "properties": {
+        "wtfCommit.autoCommit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically commit changes after generating the message.",
+          "order": 0
+        },
+        "wtfCommit.autoPush": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically push changes after commit (requires autoCommit to be enabled).",
+          "order": 0
+        },
+        "wtfCommit.confirmBeforeCommit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a confirmation dialog before auto-committing.",
+          "order": 0
+        },
         "wtfCommit.prompt": {
           "type": "string",
           "default": "You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.\n\nRules:\n1. Use conventional commit format: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters\n4. Use imperative mood (e.g., 'add' not 'added')\n5. Focus on WHAT changed and WHY, not HOW\n6. If multiple changes, summarize the main purpose\n\nOnly output the commit message, nothing else.",

@@ -13,6 +13,18 @@ interface Repository {
   state: RepositoryState;
   inputBox: InputBox;
   diff(cached?: boolean): Promise<string>;
+  add(paths: string[]): Promise<void>;
+  commit(message: string, opts?: CommitOptions): Promise<void>;
+  push(): Promise<void>;
+}
+
+interface CommitOptions {
+  all?: boolean | 'tracked';
+  amend?: boolean;
+  signoff?: boolean;
+  signCommit?: boolean;
+  empty?: boolean;
+  noVerify?: boolean;
 }
 
 interface RepositoryState {
@@ -48,6 +60,9 @@ export function activate(context: vscode.ExtensionContext) {
       const apiKey = config.get<string>('apiKey');
       const model = config.get<string>('model') || 'gpt-4o-mini';
       const language = config.get<string>('language') || 'English';
+      const autoCommit = config.get<boolean>('autoCommit') || false;
+      const autoPush = config.get<boolean>('autoPush') || false;
+      const confirmBeforeCommit = config.get<boolean>('confirmBeforeCommit') ?? true;
       let systemPrompt = config.get<string>('prompt') || 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
 
       // Append language instruction if Chinese is selected
@@ -117,7 +132,42 @@ export function activate(context: vscode.ExtensionContext) {
           const commitMessage = await callLLM(baseUrl, apiKey, model, systemPrompt, diff);
           if (commitMessage) {
             repository.inputBox.value = commitMessage;
-            vscode.window.showInformationMessage('Commit message generated!');
+
+            if (!autoCommit) {
+              vscode.window.showInformationMessage('Commit message generated!');
+              return;
+            }
+
+            // Auto-commit flow
+            let shouldCommit = true;
+            if (confirmBeforeCommit) {
+              const response = await vscode.window.showInformationMessage(
+                `Confirm Commit: ${commitMessage}?`,
+                'Yes',
+                'No'
+              );
+              shouldCommit = response === 'Yes';
+            }
+
+            if (!shouldCommit) {
+              vscode.window.showInformationMessage('Commit cancelled.');
+              return;
+            }
+
+            // Perform commit
+            // If there are no staged changes, stage all working tree changes first
+            if (!hasStagedChanges && hasWorkingTreeChanges) {
+              const paths = repository.state.workingTreeChanges.map(c => c.uri.fsPath);
+              await repository.add(paths);
+            }
+            await repository.commit(commitMessage);
+            vscode.window.showInformationMessage('✅ Commit successful!');
+
+            // Auto-push if enabled
+            if (autoPush) {
+              await repository.push();
+              vscode.window.showInformationMessage('✅ Push successful!');
+            }
           }
         }
       );
