@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6] - 2026-01-12
 ### Added
-- Changelog update notification.
+- Multi-root workspace support: Automatically detects and uses the repository of the active file.
+- Repository selection dialog when working with multiple Git repositories.
+
+### Changed
+- Moved changelog notification to Unreleased section for better tracking.
 
 ## [0.0.5] - 2026-01-12
 ### Added
