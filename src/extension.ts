@@ -203,7 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
           cancellable: false,
         },
         async () => {
-          const commitMessage = await callLLM(baseUrl!, apiKey, model!, systemPrompt, diff);
+          const commitMessage = await callLLM(baseUrl!, apiKey, model!, systemPrompt, diff, provider);
           if (commitMessage) {
             repository.inputBox.value = commitMessage;
 
@@ -272,9 +272,16 @@ async function callLLM(
   apiKey: string,
   model: string,
   systemPrompt: string,
-  diff: string
+  diff: string,
+  provider: string
 ): Promise<string | null> {
-  const url = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
+  // Avoid duplicate path if Custom provider already includes /chat/completions
+  let url: string;
+  if (provider === 'Custom' && baseUrl.replace(/\/$/, '').endsWith('/chat/completions')) {
+    url = baseUrl.replace(/\/$/, '');
+  } else {
+    url = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
+  }
 
   const requestBody = {
     model: model,

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.7] - 2026-01-12
+### Fixed
+- API URL concatenation: Prevents duplicate `/chat/completions` path when Custom provider URL already includes it.
+
 ## [0.0.6] - 2026-01-12
 ### Added
 - Multi-root workspace support: Automatically detects and uses the repository of the active file.
