@@ -28,6 +28,14 @@ interface InputBox {
   value: string;
 }
 
+// Provider URL mapping
+const PROVIDER_URLS: Record<string, string> = {
+  OpenAI: 'https://api.openai.com/v1',
+  DeepSeek: 'https://api.deepseek.com',
+  Moonshot: 'https://api.moonshot.cn/v1',
+  GLM: 'https://open.bigmodel.cn/api/paas/v4',
+};
+
 export function activate(context: vscode.ExtensionContext) {
   console.log('WTF Commit extension is now active!');
 
@@ -35,10 +43,14 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       // Get configuration
       const config = vscode.workspace.getConfiguration('wtfCommit');
-      const baseUrl = config.get<string>('baseUrl') || 'https://api.openai.com/v1';
+      const provider = config.get<string>('provider') || 'OpenAI';
+      const customBaseUrl = config.get<string>('baseUrl') || 'https://api.openai.com/v1';
       const apiKey = config.get<string>('apiKey');
       const model = config.get<string>('model') || 'gpt-4o-mini';
-      const systemPrompt = config.get<string>('prompt') || 'Generate a concise git commit message based on the following diff. Only output the message.';
+      const systemPrompt = config.get<string>('prompt') || 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
+
+      // Determine the actual base URL: use provider preset or custom URL
+      const baseUrl = provider === 'Custom' ? customBaseUrl : (PROVIDER_URLS[provider] || customBaseUrl);
 
       // Validate API Key
       if (!apiKey) {
@@ -47,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
           'Open Settings'
         );
         if (action === 'Open Settings') {
-          vscode.commands.executeCommand('workbench.action.openSettings', 'wtfCommit.apiKey');
+          vscode.commands.executeCommand('workbench.action.openSettings', 'wtfCommit');
         }
         return;
       }
@@ -105,7 +117,19 @@ export function activate(context: vscode.ExtensionContext) {
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error occurred';
-      vscode.window.showErrorMessage(`Failed to generate commit message: ${message}`);
+      
+      // Check if it's an authentication error
+      if (message.includes('401') || message.toLowerCase().includes('auth') || message.toLowerCase().includes('key')) {
+        const action = await vscode.window.showErrorMessage(
+          `Authentication failed: ${message}`,
+          'Open Settings'
+        );
+        if (action === 'Open Settings') {
+          vscode.commands.executeCommand('workbench.action.openSettings', 'wtfCommit');
+        }
+      } else {
+        vscode.window.showErrorMessage(`Failed to generate commit message: ${message}`);
+      }
     }
   });
 
