@@ -70,7 +70,7 @@
         },
         "wtfCommit.prompt": {
           "type": "string",
-          "default": "You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.\n\nRules:\n1. Use conventional commit format: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters\n4. Use imperative mood (e.g., 'add' not 'added')\n5. Focus on WHAT changed and WHY, not HOW\n6. If multiple changes, summarize the main purpose\n\nOnly output the commit message, nothing else.",
+          "default": "You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.\n\nRules:\n1. Use conventional commit format: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters. If necessary, add a blank line and a bulleted list for details.\n4. Use imperative mood (e.g., 'add' not 'added')\n5. Focus on WHAT changed and WHY, not HOW\n6. CRITICAL: If a new file is created (especially documentation or features), it MUST be mentioned in the description.\n7. If multiple changes exist, prioritize the most significant impact (e.g., \"add Chinese documentation\" is more significant than \"add link\").\n8. Only output the commit message, nothing else.",
           "description": "System Prompt for AI (supports multi-line)",
           "editPresentation": "multilineText",
           "order": 1
