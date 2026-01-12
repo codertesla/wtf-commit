@@ -55,6 +55,9 @@ const PROVIDERS: Record<string, ProviderConfig> = {
 export function activate(context: vscode.ExtensionContext) {
   console.log('WTF Commit extension is now active!');
 
+  // Check for updates and show changelog
+  checkChangelog(context);
+
   // Command to set API Key safely
   const setApiKeyDisposable = vscode.commands.registerCommand('wtf-commit.setApiKey', async () => {
     const provider = await vscode.window.showQuickPick(
@@ -287,6 +290,30 @@ async function callLLM(
   }
 
   return content.trim();
+}
+
+async function checkChangelog(context: vscode.ExtensionContext) {
+  const extension = vscode.extensions.getExtension('codertesla.wtf-commit');
+  if (!extension) { return; }
+
+  const currentVersion = extension.packageJSON.version;
+  const lastVersion = context.globalState.get<string>('wtfCommit.lastVersion');
+
+  if (currentVersion !== lastVersion) {
+    const action = await vscode.window.showInformationMessage(
+      `WTF Commit has been updated to v${currentVersion}!`,
+      'View Changelog'
+    );
+
+    if (action === 'View Changelog') {
+      const changelogPath = vscode.Uri.file(
+        vscode.Uri.joinPath(context.extensionUri, 'CHANGELOG.md').fsPath
+      );
+      vscode.commands.executeCommand('markdown.showPreview', changelogPath);
+    }
+
+    await context.globalState.update('wtfCommit.lastVersion', currentVersion);
+  }
 }
 
 export function deactivate() {}
