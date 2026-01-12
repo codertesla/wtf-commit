@@ -87,16 +87,18 @@ export function activate(context: vscode.ExtensionContext) {
       // Get configuration
       const config = vscode.workspace.getConfiguration('wtfCommit');
       const provider = config.get<string>('provider') || 'OpenAI';
-      const language = config.get<string>('language') || 'English';
+      const languageSetting = config.get<string>('language') || 'English';
+      const customLanguage = config.get<string>('customLanguage') || 'English';
       const autoCommit = config.get<boolean>('autoCommit') || false;
       const autoPush = config.get<boolean>('autoPush') || false;
       const confirmBeforeCommit = config.get<boolean>('confirmBeforeCommit') ?? true;
       let systemPrompt = config.get<string>('prompt') || 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
 
-      // Append language instruction if Chinese is selected
-      if (language === '中文') {
-        systemPrompt += '\n\nIMPORTANT: Please write the commit message in Chinese (中文).';
-      }
+      // Determine final language: use customLanguage if 'Custom' is selected
+      const language = languageSetting === 'Custom' ? customLanguage : languageSetting;
+
+      // Dynamically append language instruction
+      systemPrompt += `\n\nIMPORTANT: Please write the commit message in ${language}.`;
 
       // Resolve Base URL and Model
       let baseUrl = config.get<string>('baseUrl');

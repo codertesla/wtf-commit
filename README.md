@@ -16,8 +16,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 
 ## 🚀 Features
 
-- **Multi-Provider Support**: Compatible with OpenAI, DeepSeek, Moonshot (Kimi), Zhipu GLM, and any OpenAI-compatible API.
-- **Bi-lingual**: Supports generating commit messages in both **English** and **中文**.
+- **Multi-lingual Support**: Preset support for English, Chinese (Simplified/Traditional), Japanese, Classical Chinese (文言文), and **Custom** language strings (e.g., "French", "Emoji").
 - **Conventional Commits**: Automatically follows conventional commit standards (feat, fix, docs, etc.).
 - **Smart Diffing**: Prioritizes staged changes and falls back to working tree changes.
 - **Multi-Root Workspace**: Automatically detects the correct repository for your active file in multi-root workspaces.
@@ -52,7 +51,8 @@ Most settings have sensible defaults. You only need to change them if you want t
 | **Auto Push** | Automatically push after commit (requires Auto Commit). |
 | **Confirm Before Commit** | Show confirmation dialog before auto-committing. |
 | **Prompt** | The system prompt used by AI. |
-| **Language** | Choose between `English` or `中文`. |
+| **Language** | Choose between `English`, `简体中文`, `繁体中文`, `Japanese`, `Classical Chinese (文言文)`, or `Custom`. |
+| **Custom Language** | Enter any language description (e.g., `French`, `Emoji only`) when **Language** is set to `Custom`. |
 
 ## 🕹️ How to Use
 

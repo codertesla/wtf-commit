@@ -15,8 +15,7 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 
 ## 🚀 功能特性
 
-- **多服务商支持**：兼容 OpenAI, DeepSeek, Moonshot (Kimi), Zhipu GLM 以及任何兼容 OpenAI 接口的服务。
-- **双语支持**：支持生成 **英文** 和 **中文** 的提交信息。
+- **多语言支持**：预设支持 英文、简体中文、繁体中文、日语、文言文，并支持**自定义语言**（如 "French", "Emoji"）。
 - **约定式提交**：自动遵循约定式提交标准（feat, fix, docs 等）。
 - **智能差异化**：优先处理暂存的更改，若无则回退到工作区更改。
 - **多根工作区支持**：在多根工作区中自动检测当前活动文件所属的仓库。
@@ -51,7 +50,8 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 | **Auto Push** | 提交后自动推送（需要开启 Auto Commit）。 |
 | **Confirm Before Commit** | 自动提交前显示确认对话框。 |
 | **Prompt** | AI 使用的系统提示词。 |
-| **Language** | 选择 `English` 或 `中文`。 |
+| **Language** | 可选择 `English`, `简体中文`, `繁体中文`, `Japanese`, `Classical Chinese (文言文)` 或 `Custom`。 |
+| **Custom Language** | 当 **Language** 设置为 `Custom` 时，可手动输入任何语言描述（如 `French`, `Emoji only`, `粤语`）。 |
 
 ## 🕹️ 使用方法
 
