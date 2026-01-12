@@ -4,6 +4,7 @@
   "description": "AI-powered Git commit message generator",
   "version": "0.0.1",
   "publisher": "Tesla",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.70.0"
   },
