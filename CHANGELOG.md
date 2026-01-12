@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.8] - 2026-01-12
+### Fixed
+- Progress notification: The "Generating commit message..." notification now disappears immediately after generation, even if awaiting user confirmation for auto-commit.
+
 ## [0.0.7] - 2026-01-12
 ### Fixed
 - API URL concatenation: Prevents duplicate `/chat/completions` path when Custom provider URL already includes it.
