@@ -5,6 +5,13 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.10] - 2026-01-12
+### Added
+- New configuration `wtfCommit.smartStage`:
+  - Prevents accidental commits by allowing users to disable auto-staging when the staging area is empty.
+  - Default is `true` (maintain existing behavior).
+  - If set to `false`, an error will be shown if you try to commit with an empty staging area.
+
 ## [0.0.9] - 2026-01-12
 ### Added
 - Enhanced Multi-language support:

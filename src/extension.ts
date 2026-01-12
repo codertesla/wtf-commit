@@ -91,6 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
       const customLanguage = config.get<string>('customLanguage') || 'English';
       const autoCommit = config.get<boolean>('autoCommit') || false;
       const autoPush = config.get<boolean>('autoPush') || false;
+      const smartStage = config.get<boolean>('smartStage') ?? true;
       const confirmBeforeCommit = config.get<boolean>('confirmBeforeCommit') ?? true;
       let systemPrompt = config.get<string>('prompt') || 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
 
@@ -186,7 +187,12 @@ export function activate(context: vscode.ExtensionContext) {
       if (hasStagedChanges) {
         diff = await repository.diff(true); // cached = true for staged changes
       } else if (hasWorkingTreeChanges) {
-        diff = await repository.diff(false); // cached = false for working tree changes
+        if (smartStage) {
+          diff = await repository.diff(false); // cached = false for working tree changes
+        } else {
+          vscode.window.showErrorMessage('No staged changes found. Please stage your changes first.');
+          return;
+        }
       } else {
         vscode.window.showInformationMessage('No changes to commit.');
         return;
