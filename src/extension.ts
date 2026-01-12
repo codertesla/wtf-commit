@@ -195,56 +195,59 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      // Call AI API
-      await vscode.window.withProgress(
+      // Call AI API - only wrap the LLM call in progress notification
+      const commitMessage = await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
           title: 'Generating commit message...',
           cancellable: false,
         },
         async () => {
-          const commitMessage = await callLLM(baseUrl!, apiKey, model!, systemPrompt, diff, provider);
-          if (commitMessage) {
-            repository.inputBox.value = commitMessage;
-
-            if (!autoCommit) {
-              vscode.window.showInformationMessage('Commit message generated!');
-              return;
-            }
-
-            // Auto-commit flow
-            let shouldCommit = true;
-            if (confirmBeforeCommit) {
-              const response = await vscode.window.showInformationMessage(
-                `Confirm Commit: ${commitMessage}?`,
-                'Yes',
-                'No'
-              );
-              shouldCommit = response === 'Yes';
-            }
-
-            if (!shouldCommit) {
-              vscode.window.showInformationMessage('Commit cancelled.');
-              return;
-            }
-
-            // Perform commit
-            // If there are no staged changes, stage all working tree changes first
-            if (!hasStagedChanges && hasWorkingTreeChanges) {
-              const paths = repository.state.workingTreeChanges.map(c => c.uri.fsPath);
-              await repository.add(paths);
-            }
-            await repository.commit(commitMessage);
-            vscode.window.showInformationMessage('Commit successful.');
-
-            // Auto-push if enabled
-            if (autoPush) {
-              await repository.push();
-              vscode.window.showInformationMessage('Push successful.');
-            }
-          }
+          return await callLLM(baseUrl!, apiKey, model!, systemPrompt, diff, provider);
         }
       );
+
+      if (!commitMessage) {
+        return;
+      }
+
+      repository.inputBox.value = commitMessage;
+
+      if (!autoCommit) {
+        vscode.window.showInformationMessage('Commit message generated!');
+        return;
+      }
+
+      // Auto-commit flow
+      let shouldCommit = true;
+      if (confirmBeforeCommit) {
+        const response = await vscode.window.showInformationMessage(
+          `Confirm Commit: ${commitMessage}?`,
+          'Yes',
+          'No'
+        );
+        shouldCommit = response === 'Yes';
+      }
+
+      if (!shouldCommit) {
+        vscode.window.showInformationMessage('Commit cancelled.');
+        return;
+      }
+
+      // Perform commit
+      // If there are no staged changes, stage all working tree changes first
+      if (!hasStagedChanges && hasWorkingTreeChanges) {
+        const paths = repository.state.workingTreeChanges.map(c => c.uri.fsPath);
+        await repository.add(paths);
+      }
+      await repository.commit(commitMessage);
+      vscode.window.showInformationMessage('Commit successful.');
+
+      // Auto-push if enabled
+      if (autoPush) {
+        await repository.push();
+        vscode.window.showInformationMessage('Push successful.');
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error occurred';
       
