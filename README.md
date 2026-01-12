@@ -1,4 +1,7 @@
+English | [简体中文](README_zh.md)
+
 # WTF Commit ✨
+
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
