@@ -7,9 +7,11 @@ interface GitExtension {
 
 interface API {
   repositories: Repository[];
+  getRepository(uri: vscode.Uri): Repository | null;
 }
 
 interface Repository {
+  rootUri: vscode.Uri;
   state: RepositoryState;
   inputBox: InputBox;
   diff(cached?: boolean): Promise<string>;
@@ -138,13 +140,41 @@ export function activate(context: vscode.ExtensionContext) {
 
       const git = gitExtension.isActive ? gitExtension.exports.getAPI(1) : (await gitExtension.activate()).getAPI(1);
 
-      // Get repository
+      // Get repository with multi-root workspace support
       if (git.repositories.length === 0) {
         vscode.window.showErrorMessage('No Git repository found.');
         return;
       }
 
-      const repository = git.repositories[0];
+      let repository: Repository | null = null;
+
+      // 1. Try to get repository from active text editor
+      const activeEditor = vscode.window.activeTextEditor;
+      if (activeEditor) {
+        repository = git.getRepository(activeEditor.document.uri);
+      }
+
+      // 2. Fallback: if only one repository, use it
+      if (!repository && git.repositories.length === 1) {
+        repository = git.repositories[0];
+      }
+
+      // 3. Fallback: prompt user to select a repository
+      if (!repository) {
+        const repoItems = git.repositories.map(repo => ({
+          label: repo.rootUri.fsPath,
+          repository: repo,
+        }));
+
+        const selected = await vscode.window.showQuickPick(repoItems, {
+          placeHolder: 'Select a Git repository',
+        });
+
+        if (!selected) {
+          return; // User cancelled
+        }
+        repository = selected.repository;
+      }
 
       // Get diff: prioritize staged changes, fallback to working tree changes
       let diff: string;

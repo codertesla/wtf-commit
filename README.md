@@ -20,6 +20,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 - **Bi-lingual**: Supports generating commit messages in both **English** and **中文**.
 - **Conventional Commits**: Automatically follows conventional commit standards (feat, fix, docs, etc.).
 - **Smart Diffing**: Prioritizes staged changes and falls back to working tree changes.
+- **Multi-Root Workspace**: Automatically detects the correct repository for your active file in multi-root workspaces.
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 - **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
