@@ -161,12 +161,12 @@ export function activate(context: vscode.ExtensionContext) {
               await repository.add(paths);
             }
             await repository.commit(commitMessage);
-            vscode.window.showInformationMessage('✅ Commit successful!');
+            vscode.window.showInformationMessage('Commit successful.');
 
             // Auto-push if enabled
             if (autoPush) {
               await repository.push();
-              vscode.window.showInformationMessage('✅ Push successful!');
+              vscode.window.showInformationMessage('Push successful.');
             }
           }
         }
