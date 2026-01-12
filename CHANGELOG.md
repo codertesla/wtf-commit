@@ -5,6 +5,13 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.9] - 2026-01-12
+### Added
+- Enhanced Multi-language support:
+  - New presets: 简体中文, 繁体中文, Japanese, Classical Chinese (文言文).
+  - Custom Language support: Select "Custom" and enter any target language (e.g., "French", "Emoji only").
+- Dynamic prompt injection: Removed hardcoded language logic for better flexibility.
+
 ## [Unreleased]
 
 ## [0.0.8] - 2026-01-12

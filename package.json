@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -77,10 +77,16 @@
         },
         "wtfCommit.language": {
           "type": "string",
-          "enum": ["English", "中文"],
+          "enum": ["English", "简体中文", "繁体中文", "Japanese", "Classical Chinese (文言文)", "Custom"],
           "default": "English",
           "description": "Language for the generated commit message",
           "order": 2
+        },
+        "wtfCommit.customLanguage": {
+          "type": "string",
+          "default": "English",
+          "description": "Enter your target language (only used when Language is set to 'Custom'). e.g. 'French', 'Emoji only', 'Cantonese'.",
+          "order": 3
         },
         "wtfCommit.provider": {
           "type": "string",
