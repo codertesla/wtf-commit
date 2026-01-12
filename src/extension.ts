@@ -40,25 +40,48 @@ interface InputBox {
   value: string;
 }
 
-// Provider URL mapping
-const PROVIDER_URLS: Record<string, string> = {
-  OpenAI: 'https://api.openai.com/v1',
-  DeepSeek: 'https://api.deepseek.com',
-  Moonshot: 'https://api.moonshot.cn/v1',
-  GLM: 'https://open.bigmodel.cn/api/paas/v4',
+interface ProviderConfig {
+  baseUrl: string;
+  model: string;
+}
+
+const PROVIDERS: Record<string, ProviderConfig> = {
+  OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
+  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview' },
+  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7' },
 };
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('WTF Commit extension is now active!');
 
-  const disposable = vscode.commands.registerCommand('wtf-commit.generate', async () => {
+  // Command to set API Key safely
+  const setApiKeyDisposable = vscode.commands.registerCommand('wtf-commit.setApiKey', async () => {
+    const provider = await vscode.window.showQuickPick(
+      [...Object.keys(PROVIDERS), 'Custom'],
+      { placeHolder: 'Select Provider to set API Key for' }
+    );
+
+    if (!provider) { return; }
+
+    const apiKey = await vscode.window.showInputBox({
+      title: `Set API Key for ${provider}`,
+      prompt: 'Enter your API Key',
+      password: true,
+      ignoreFocusOut: true,
+    });
+
+    if (apiKey) {
+      await context.secrets.store(`wtfCommit.key.${provider}`, apiKey);
+      vscode.window.showInformationMessage(`API Key for ${provider} saved successfully.`);
+    }
+  });
+
+  const generateDisposable = vscode.commands.registerCommand('wtf-commit.generate', async () => {
     try {
       // Get configuration
       const config = vscode.workspace.getConfiguration('wtfCommit');
       const provider = config.get<string>('provider') || 'OpenAI';
-      const customBaseUrl = config.get<string>('baseUrl') || 'https://api.openai.com/v1';
-      const apiKey = config.get<string>('apiKey');
-      const model = config.get<string>('model') || 'gpt-4o-mini';
       const language = config.get<string>('language') || 'English';
       const autoCommit = config.get<boolean>('autoCommit') || false;
       const autoPush = config.get<boolean>('autoPush') || false;
@@ -70,17 +93,35 @@ export function activate(context: vscode.ExtensionContext) {
         systemPrompt += '\n\nIMPORTANT: Please write the commit message in Chinese (中文).';
       }
 
-      // Determine the actual base URL: use provider preset or custom URL
-      const baseUrl = provider === 'Custom' ? customBaseUrl : (PROVIDER_URLS[provider] || customBaseUrl);
+      // Resolve Base URL and Model
+      let baseUrl = config.get<string>('baseUrl');
+      let model = config.get<string>('model');
 
-      // Validate API Key
+      if (!baseUrl && provider !== 'Custom') {
+        baseUrl = PROVIDERS[provider]?.baseUrl;
+      }
+      if (!model && provider !== 'Custom') {
+        model = PROVIDERS[provider]?.model;
+      }
+
+      if (!baseUrl) {
+        vscode.window.showErrorMessage(`Base URL is missing for ${provider}. Please check your settings.`);
+        return;
+      }
+      if (!model) {
+        vscode.window.showErrorMessage(`Model is missing for ${provider}. Please check your settings.`);
+        return;
+      }
+
+      // Get API Key from Secrets
+      const apiKey = await context.secrets.get(`wtfCommit.key.${provider}`);
       if (!apiKey) {
         const action = await vscode.window.showErrorMessage(
-          'API Key is not configured. Please set it in settings.',
-          'Open Settings'
+          `API Key for ${provider} is not set.`,
+          'Set API Key'
         );
-        if (action === 'Open Settings') {
-          vscode.commands.executeCommand('workbench.action.openSettings', 'wtfCommit');
+        if (action === 'Set API Key') {
+          vscode.commands.executeCommand('wtf-commit.setApiKey');
         }
         return;
       }
@@ -129,7 +170,7 @@ export function activate(context: vscode.ExtensionContext) {
           cancellable: false,
         },
         async () => {
-          const commitMessage = await callLLM(baseUrl, apiKey, model, systemPrompt, diff);
+          const commitMessage = await callLLM(baseUrl!, apiKey, model!, systemPrompt, diff);
           if (commitMessage) {
             repository.inputBox.value = commitMessage;
 
@@ -178,10 +219,10 @@ export function activate(context: vscode.ExtensionContext) {
       if (message.includes('401') || message.toLowerCase().includes('auth') || message.toLowerCase().includes('key')) {
         const action = await vscode.window.showErrorMessage(
           `Authentication failed: ${message}`,
-          'Open Settings'
+          'Set API Key'
         );
-        if (action === 'Open Settings') {
-          vscode.commands.executeCommand('workbench.action.openSettings', 'wtfCommit');
+        if (action === 'Set API Key') {
+          vscode.commands.executeCommand('wtf-commit.setApiKey');
         }
       } else {
         vscode.window.showErrorMessage(`Failed to generate commit message: ${message}`);
@@ -189,7 +230,8 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  context.subscriptions.push(disposable);
+  context.subscriptions.push(setApiKeyDisposable);
+  context.subscriptions.push(generateDisposable);
 }
 
 async function callLLM(

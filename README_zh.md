@@ -16,23 +16,32 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 
 ## 🛠️ 配置
 
-在开始使用 WTF Commit 之前，您需要配置您的 AI 服务商和 API Key。
+现在开始使用 WTF Commit，请按照以下步骤操作：
 
-1. 打开 **设置** (Cmd+, 或 Ctrl+,)。
+### 1. 设置 API Key 🔑 (安全存储)
+您**不再**需要将 API Key 明文写入 `settings.json`。我们将使用 VS Code 的安全存储机制。
+
+1. 打开命令面板 (`Cmd+Shift+P` 或 `Ctrl+Shift+P`)。
+2. 输入并运行命令：**`WTF Commit: Set API Key`**。
+3. 选择您的 AI 服务商 (例如 `DeepSeek`, `OpenAI`)。
+4. 输入您的 API Key。
+
+### 2.配置设置 (可选)
+大多数设置项都有合理的默认值。只有当您想要自定义行为时才需要修改。
+
+1. 打开 **设置** (`Cmd+,`)。
 2. 搜索 `WTF Commit`。
-3. 配置以下字段：
 
 | 设置项目 | 描述 |
 |---------|-------------|
+| **Provider** | 选择您的 AI 服务商 (默认为 `OpenAI`)。选择服务商后，会自动使用其默认的 API 地址和模型。 |
+| **Base URL** | **可选**。留空则使用服务商的默认地址。仅在需要覆盖默认值（如使用代理）时填写。 |
+| **Model** | **可选**。留空则使用服务商的默认模型。仅在需要更换模型时填写。 |
 | **Auto Commit** | 生成信息后自动提交。 |
 | **Auto Push** | 提交后自动推送（需要开启 Auto Commit）。 |
 | **Confirm Before Commit** | 自动提交前显示确认对话框。 |
 | **Prompt** | AI 使用的系统提示词。 |
 | **Language** | 选择 `English` 或 `中文`。 |
-| **Provider** | 选择您的 AI 服务商 (OpenAI, DeepSeek, Moonshot, GLM 或 Custom)。 |
-| **Base URL** | API 终结点（已知服务商会自动填充）。 |
-| **Model** | 模型名称（如 `gpt-4o-mini`, `deepseek-chat`）。 |
-| **Api Key** | 所选服务商的 API 密钥。 |
 
 ## 🕹️ 使用方法
 
