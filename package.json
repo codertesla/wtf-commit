@@ -3,6 +3,7 @@
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
   "version": "0.0.1",
+  "license": "MIT",
   "publisher": "Tesla",
   "icon": "icon.png",
   "repository": {
