@@ -47,7 +47,13 @@ export function activate(context: vscode.ExtensionContext) {
       const customBaseUrl = config.get<string>('baseUrl') || 'https://api.openai.com/v1';
       const apiKey = config.get<string>('apiKey');
       const model = config.get<string>('model') || 'gpt-4o-mini';
-      const systemPrompt = config.get<string>('prompt') || 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
+      const language = config.get<string>('language') || 'English';
+      let systemPrompt = config.get<string>('prompt') || 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
+
+      // Append language instruction if Chinese is selected
+      if (language === '中文') {
+        systemPrompt += '\n\nIMPORTANT: Please write the commit message in Chinese (中文).';
+      }
 
       // Determine the actual base URL: use provider preset or custom URL
       const baseUrl = provider === 'Custom' ? customBaseUrl : (PROVIDER_URLS[provider] || customBaseUrl);
