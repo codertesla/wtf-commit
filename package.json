@@ -1,0 +1,81 @@
+{
+  "name": "wtf-commit",
+  "displayName": "WTF Commit",
+  "description": "AI-powered Git commit message generator",
+  "version": "0.0.1",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "wtf-commit.generate",
+        "title": "WTF Commit: Generate",
+        "icon": "$(sparkle)"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "wtf-commit.generate",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "WTF Commit",
+      "properties": {
+        "wtfCommit.baseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "description": "API Base URL (e.g. https://api.deepseek.com/v1 or https://open.bigmodel.cn/api/paas/v4)"
+        },
+        "wtfCommit.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key for the LLM service"
+        },
+        "wtfCommit.model": {
+          "type": "string",
+          "default": "gpt-4o-mini",
+          "description": "Model name (e.g. deepseek-chat, glm-4, gpt-4)"
+        },
+        "wtfCommit.prompt": {
+          "type": "string",
+          "default": "Generate a concise git commit message based on the following diff. Only output the message.",
+          "description": "Custom System Prompt",
+          "editPresentation": "multilineText"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "pnpm run compile && pnpm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.70.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.52.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
