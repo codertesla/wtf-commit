@@ -43,30 +43,37 @@
           "editPresentation": "multilineText",
           "order": 1
         },
+        "wtfCommit.language": {
+          "type": "string",
+          "enum": ["English", "中文"],
+          "default": "English",
+          "description": "Language for the generated commit message",
+          "order": 2
+        },
         "wtfCommit.provider": {
           "type": "string",
           "enum": ["OpenAI", "DeepSeek", "Moonshot", "GLM", "Custom"],
           "default": "OpenAI",
           "description": "Select an AI provider",
-          "order": 2
+          "order": 3
         },
         "wtfCommit.baseUrl": {
           "type": "string",
           "default": "https://api.openai.com/v1",
           "description": "API Base URL (auto-filled based on Provider, but you can customize it)",
-          "order": 3
+          "order": 4
         },
         "wtfCommit.model": {
           "type": "string",
           "default": "gpt-4o-mini",
           "description": "Model name (e.g. gpt-4o-mini, deepseek-chat, moonshot-v1-8k, glm-4)",
-          "order": 4
+          "order": 5
         },
         "wtfCommit.apiKey": {
           "type": "string",
           "default": "",
           "description": "API Key for the LLM service",
-          "order": 5
+          "order": 6
         }
       }
     }
