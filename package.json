@@ -3,7 +3,7 @@
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
   "version": "0.0.1",
-  "publisher": "your-publisher-name",
+  "publisher": "Tesla",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -36,26 +36,37 @@
     "configuration": {
       "title": "WTF Commit",
       "properties": {
+        "wtfCommit.prompt": {
+          "type": "string",
+          "default": "You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.\n\nRules:\n1. Use conventional commit format: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters\n4. Use imperative mood (e.g., 'add' not 'added')\n5. Focus on WHAT changed and WHY, not HOW\n6. If multiple changes, summarize the main purpose\n\nOnly output the commit message, nothing else.",
+          "description": "System Prompt for AI (supports multi-line)",
+          "editPresentation": "multilineText",
+          "order": 1
+        },
+        "wtfCommit.provider": {
+          "type": "string",
+          "enum": ["OpenAI", "DeepSeek", "Moonshot", "GLM", "Custom"],
+          "default": "OpenAI",
+          "description": "Select an AI provider",
+          "order": 2
+        },
         "wtfCommit.baseUrl": {
           "type": "string",
           "default": "https://api.openai.com/v1",
-          "description": "API Base URL (e.g. https://api.deepseek.com/v1 or https://open.bigmodel.cn/api/paas/v4)"
-        },
-        "wtfCommit.apiKey": {
-          "type": "string",
-          "default": "",
-          "description": "API Key for the LLM service"
+          "description": "API Base URL (auto-filled based on Provider, but you can customize it)",
+          "order": 3
         },
         "wtfCommit.model": {
           "type": "string",
           "default": "gpt-4o-mini",
-          "description": "Model name (e.g. deepseek-chat, glm-4, gpt-4)"
+          "description": "Model name (e.g. gpt-4o-mini, deepseek-chat, moonshot-v1-8k, glm-4)",
+          "order": 4
         },
-        "wtfCommit.prompt": {
+        "wtfCommit.apiKey": {
           "type": "string",
-          "default": "Generate a concise git commit message based on the following diff. Only output the message.",
-          "description": "Custom System Prompt",
-          "editPresentation": "multilineText"
+          "default": "",
+          "description": "API Key for the LLM service",
+          "order": 5
         }
       }
     }
