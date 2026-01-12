@@ -4,11 +4,11 @@
   "description": "AI-powered Git commit message generator",
   "version": "0.0.1",
   "license": "MIT",
-  "publisher": "Tesla",
+  "publisher": "codertesla",
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sos/wtf-commit"
+    "url": "https://github.com/codertesla/wtf-commit"
   },
   "engines": {
     "vscode": "^1.70.0"
