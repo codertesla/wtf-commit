@@ -52,6 +52,7 @@ const PROVIDERS: Record<string, ProviderConfig> = {
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
   Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview' },
   GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7' },
+  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.5-flash-lite' },
 };
 
 export function activate(context: vscode.ExtensionContext) {

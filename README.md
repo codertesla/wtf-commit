@@ -44,7 +44,7 @@ Most settings have sensible defaults. You only need to change them if you want t
 
 | Setting | Description |
 |---------|-------------|
-| **Provider** | Select your AI provider (Default: `OpenAI`). Selecting a provider automatically uses its default Base URL and Model. |
+| **Provider** | Select your AI provider (Default: `OpenAI`). Supports OpenAI, DeepSeek, Moonshot, GLM, Gemini, and Custom. Selecting a provider automatically uses its default Base URL and Model. |
 | **Base URL** | **Optional**. Leave empty to use the provider's default. For Custom provider, you can provide a full endpoint URL (e.g. `https://example.com/v1/chat/completions`). |
 | **Model** | **Optional**. Leave empty to use the provider's default. Set this to override the model name. |
 | **Auto Commit** | Automatically commit after generating the message. |
