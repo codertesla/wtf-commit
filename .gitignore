@@ -1,5 +1,14 @@
-out
-dist
-node_modules
-.vscode-test/
+# Dependency directories
+node_modules/
+
+# Build artifacts
+out/
+dist/
 *.vsix
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode-test/
