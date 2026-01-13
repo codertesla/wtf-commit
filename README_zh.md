@@ -43,7 +43,7 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 
 | 设置项目 | 描述 |
 |---------|-------------|
-| **Provider** | 选择您的 AI 服务商 (默认为 `OpenAI`)。选择服务商后，会自动使用其默认的 API 地址和模型。 |
+| **Provider** | 选择您的 AI 服务商 (默认为 `OpenAI`)。支持 OpenAI、DeepSeek、Moonshot、GLM、Gemini 和 Custom。选择服务商后，会自动使用其默认的 API 地址和模型。 |
 | **Base URL** | **可选**。留空则使用服务商的默认地址。使用 Custom 模式时，可填写完整的接口地址（如 `https://example.com/v1/chat/completions`）。 |
 | **Model** | **可选**。留空则使用服务商的默认模型。仅在需要更换模型时填写。 |
 | **Auto Commit** | 生成信息后自动提交。 |
