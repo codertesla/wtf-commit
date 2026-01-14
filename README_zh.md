@@ -56,6 +56,19 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 | **Language** | 可选择 `English`, `简体中文`, `繁体中文`, `Japanese`, `Classical Chinese (文言文)` 或 `Custom`。 |
 | **Custom Language** | 当 **Language** 设置为 `Custom` 时，可手动输入任何语言描述（如 `French`, `Emoji only`, `粤语`）。 |
 
+### 3. 支持的服务商与模型
+
+WTF Commit 内置了主流 AI 服务商的配置。若 **Base URL** 和 **Model** 留空，将自动使用以下默认值：
+
+| 服务商 (Provider) | 默认 Base URL | 默认模型 (Model) |
+|----------|-----------------|---------------|
+| **OpenAI** | `https://api.openai.com/v1` | `gpt-4o-mini` |
+| **DeepSeek** | `https://api.deepseek.com` | `deepseek-chat` |
+| **Moonshot** | `https://api.moonshot.cn/v1` | `kimi-k2-turbo-preview` |
+| **GLM** | `https://open.bigmodel.cn/api/paas/v4` | `glm-4.7` |
+| **Gemini** | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.5-flash-lite` |
+| **Custom** | - | - |
+
 ## 🕹️ 使用方法
 
 ### 方法 1: 键盘快捷键 ⚡ (推荐)
