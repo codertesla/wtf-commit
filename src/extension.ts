@@ -210,7 +210,7 @@ export function activate(context: vscode.ExtensionContext) {
       const commitMessage = await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: 'Generating commit message...',
+          title: `Generating commit message (${provider})...`,
           cancellable: false,
         },
         async () => {
@@ -225,7 +225,7 @@ export function activate(context: vscode.ExtensionContext) {
       repository.inputBox.value = commitMessage;
 
       if (!autoCommit) {
-        vscode.window.showInformationMessage('Commit message generated!');
+        vscode.window.showInformationMessage(`[${provider}] Commit message generated!`);
         return;
       }
 
@@ -233,7 +233,7 @@ export function activate(context: vscode.ExtensionContext) {
       let shouldCommit = true;
       if (confirmBeforeCommit) {
         const response = await vscode.window.showInformationMessage(
-          `Confirm Commit: ${commitMessage}?`,
+          `[${provider}] Confirm Commit: ${commitMessage}?`,
           'Yes',
           'No'
         );
