@@ -57,6 +57,19 @@ Most settings have sensible defaults. You only need to change them if you want t
 | **Language** | Choose between `English`, `简体中文`, `繁体中文`, `Japanese`, `Classical Chinese (文言文)`, or `Custom`. |
 | **Custom Language** | Enter any language description (e.g., `French`, `Emoji only`) when **Language** is set to `Custom`. |
 
+### 3. Supported Providers & Models
+
+WTF Commit comes with pre-configured settings for popular AI providers. Leave **Base URL** and **Model** empty to use these defaults:
+
+| Provider | Default Base URL | Default Model |
+|----------|-----------------|---------------|
+| **OpenAI** | `https://api.openai.com/v1` | `gpt-4o-mini` |
+| **DeepSeek** | `https://api.deepseek.com` | `deepseek-chat` |
+| **Moonshot** | `https://api.moonshot.cn/v1` | `kimi-k2-turbo-preview` |
+| **GLM** | `https://open.bigmodel.cn/api/paas/v4` | `glm-4.7` |
+| **Gemini** | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.5-flash-lite` |
+| **Custom** | - | - |
+
 ## 🕹️ How to Use
 
 ### Method 1: Keyboard Shortcut ⚡ (Recommended)
