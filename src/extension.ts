@@ -79,7 +79,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (apiKey) {
       await context.secrets.store(`wtfCommit.key.${provider}`, apiKey);
-      vscode.window.showInformationMessage(`API Key for ${provider} saved successfully.`);
+      // Auto-switch provider to match the newly set API Key
+      await vscode.workspace.getConfiguration('wtfCommit').update('provider', provider, vscode.ConfigurationTarget.Global);
+      vscode.window.showInformationMessage(`API Key for ${provider} saved. Provider switched to ${provider}.`);
     }
   });
 

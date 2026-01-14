@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-01-14
+### Fixed
+- **Provider Auto-Selection**: Automatically switches the active provider when a new API Key is set via the command palette. This ensures users don't see "OpenAI key not set" errors after configuring a different provider (e.g., GLM).
+
 ## [0.1.0] - 2026-01-13
 ### Added
 - New AI provider: **Gemini** (Google) with default model `gemini-2.5-flash-lite`.
