@@ -24,7 +24,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 
 Get started with AI commits in 3 simple steps:
 
-1. **Install**: Search for `WTF Commit` in the VS Code Extensions marketplace and install.
+1. **Install**: Search for `WTF Commit` in the Open VSX Extensions marketplace and install.
 2. **Set API Key**: Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows), type **`WTF Commit: Set API Key`**, select your provider, and paste your key.
 3. **Generate**: Press **`Cmd+Alt+G`** (Mac) or **`Ctrl+Alt+G`** (Windows). The extension will automatically generate a message based on your code diff.
 
