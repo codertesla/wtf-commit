@@ -36,6 +36,8 @@ You **do not** put your API Key in `settings.json` anymore. Instead, we use VS C
 3. Select your provider (e.g., `DeepSeek`, `OpenAI`).
 4. Enter your API Key.
 
+Selecting a provider and setting its key will **automatically switch** your active provider to that selection.
+
 ### 2. Configure Settings (Optional)
 Most settings have sensible defaults. You only need to change them if you want to customize behavior.
 
