@@ -9,97 +9,83 @@ English | [简体中文](README_zh.md)
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 📥 Installation
-
-[**Install via Open VSX Registry**](https://open-vsx.org/extension/codertesla/wtf-commit)
-
-
 ## 🚀 Features
 
-- **Multi-lingual Support**: Preset support for English, Chinese (Simplified/Traditional), Japanese, Classical Chinese (文言文), and **Custom** language strings (e.g., "French", "Emoji").
+- **Multi-lingual Support**: Preset support for English, Chinese, Japanese, Classical Chinese, and **Custom** strings.
 - **Conventional Commits**: Automatically follows conventional commit standards (feat, fix, docs, etc.).
 - **Smart Diffing**: Prioritizes staged changes and falls back to working tree changes.
-- **Multi-Root Workspace**: Automatically detects the correct repository for your active file in multi-root workspaces.
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 - **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
 
-## 🛠️ Configuration
+---
 
-To start using WTF Commit, follow these steps:
+## ⏱️ Quick Start Tutorial
 
-### 1. Set API Key 🔑 (Secure)
-You **do not** put your API Key in `settings.json` anymore. Instead, we use VS Code's secure storage.
+Get started with AI commits in 3 simple steps:
 
-1. Open Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`).
-2. Run command: **`WTF Commit: Set API Key`**.
-3. Select your provider (e.g., `DeepSeek`, `OpenAI`).
-4. Enter your API Key.
+1. **Install**: Search for `WTF Commit` in the VS Code Extensions marketplace and install.
+2. **Set API Key**: Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows), type **`WTF Commit: Set API Key`**, select your provider, and paste your key.
+3. **Generate**: Press **`Cmd+Alt+G`** (Mac) or **`Ctrl+Alt+G`** (Windows). The extension will automatically generate a message based on your code diff.
 
-Selecting a provider and setting its key will **automatically switch** your active provider to that selection.
+---
 
-### 2. Configure Settings (Optional)
-Most settings have sensible defaults. You only need to change them if you want to customize behavior.
+## 🛠️ Advanced Tutorial
 
-1. Open **Settings** (`Cmd+,`).
-2. Search for `WTF Commit`.
+### 1. Plugin Settings
+Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit` to customize the behavior:
 
 | Setting | Description |
 |---------|-------------|
-| **Provider** | Select your AI provider (Default: `OpenAI`). Supports OpenAI, DeepSeek, Moonshot, GLM, Gemini, and Custom. Selecting a provider automatically uses its default Base URL and Model. |
-| **Base URL** | **Optional**. Leave empty to use the provider's default. For Custom provider, you can provide a full endpoint URL (e.g. `https://example.com/v1/chat/completions`). |
-| **Model** | **Optional**. Leave empty to use the provider's default. Set this to override the model name. |
 | **Auto Commit** | Automatically commit after generating the message. |
 | **Auto Push** | Automatically push after commit (requires Auto Commit). |
-| **Confirm Before Commit** | Show confirmation dialog before auto-committing. |
-| **Smart Stage** | Automatically stage all working tree changes if nothing is staged (Default: `true`). |
-| **Prompt** | The system prompt used by AI. |
-| **Language** | Choose between `English`, `简体中文`, `繁体中文`, `Japanese`, `Classical Chinese (文言文)`, or `Custom`. |
-| **Custom Language** | Enter any language description (e.g., `French`, `Emoji only`) when **Language** is set to `Custom`. |
+| **Confirm Before Commit** | Show a confirmation dialog before auto-committing. |
+| **Smart Stage** | Automatically stage all changes if nothing is staged (Default: `true`). |
+| **Prompt** | Customize the AI's persona and generation rules. |
 
-### 3. Supported Providers & Models
+### 2. Custom Model & Endpoints
+You can use any OpenAI-compatible model (like local models via Ollama) by changing the **Provider** or **Model/Base URL**:
 
-WTF Commit comes with pre-configured settings for popular AI providers. Leave **Base URL** and **Model** empty to use these defaults:
+1. In Settings, set **Provider** to `Custom`.
+2. Enter the **Base URL** (e.g., `http://localhost:11434/v1`).
+3. Enter the **Model** name (e.g., `llama3`).
 
-| Provider | Default Base URL | Default Model |
-|----------|-----------------|---------------|
-| **OpenAI** | `https://api.openai.com/v1` | `gpt-4o-mini` |
-| **DeepSeek** | `https://api.deepseek.com` | `deepseek-chat` |
-| **Moonshot** | `https://api.moonshot.cn/v1` | `kimi-k2-turbo-preview` |
-| **GLM** | `https://open.bigmodel.cn/api/paas/v4` | `glm-4.7` |
-| **Gemini** | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.5-flash-lite` |
+### 3. Custom Commit Language
+If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji-only):
+
+1. Set **Language** to `Custom`.
+2. Enter your target language in **Custom Language** (e.g., `Emoji only`).
+
+---
+
+## ℹ️ Supported Providers & Models
+
+If **Base URL** and **Model** are left empty, the extension uses these defaults:
+
+| Provider | Default Model | Default Base URL |
+|----------|---------------|-----------------|
+| **OpenAI** | `gpt-4o-mini` | `https://api.openai.com/v1` |
+| **DeepSeek** | `deepseek-chat` | `https://api.deepseek.com` |
+| **Moonshot** | `kimi-k2-turbo-preview` | `https://api.moonshot.cn/v1` |
+| **GLM** | `glm-4.7` | `https://open.bigmodel.cn/api/paas/v4` |
+| **Gemini** | `gemini-2.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |
 | **Custom** | - | - |
 
-### 4. Custom LLM Provider
-
-You can use any AI provider that supports the **OpenAI-compatible API** (e.g., Local LLMs via Ollama, LM Studio, etc.).
-
 > [!IMPORTANT]
-> **OpenAI Compatibility**: Currently, ONLY providers that follow the OpenAI API format (`/v1/chat/completions`) are supported.
->
-> **Claude Support**: Claude (Anthropic) is **NOT** supported natively at this time because it uses a different API format and does not provide an official OpenAI-compatible endpoint. To use Claude, you would need a proxy service that translates the API to OpenAI format.
+> **Claude Support**: Native Claude format is not supported yet. Please use a proxy service that provides an OpenAI-compatible endpoint.
 
-## 🕹️ How to Use
+## 🕹️ Other Ways to Trigger
 
-### Method 1: Keyboard Shortcut ⚡ (Recommended)
-Press `Cmd+Alt+G` (Mac) or `Ctrl+Alt+G` (Windows/Linux) to generate a commit message instantly.
-
-### Method 2: Source Control Button
-In the **Source Control** view (the Git side-bar), look for the ✨ (sparkle) icon in the title bar. Click it to generate your message.
-
-### Method 3: Command Palette
-1. Open the Command Palette (**Cmd+Shift+P** or **Ctrl+Shift+P**).
-2. Type `WTF Commit: Generate` and press Enter.
-
-The generated message will be automatically filled into the Source Control input box.
+- **Source Control Icon**: Click the ✨ icon at the top of the Git panel.
+- **Command Palette**: Run `WTF Commit: Generate`.
+- **Chorded Keybinding**: You can bind a double-press like `Cmd+G` `Cmd+G`. See `💡 Pro Tips`.
 
 ## 💡 Pro Tips
 
-**Want to trigger commits even faster?** You can bind this command to a chord keybinding (double-press):
-
-1. Open Keyboard Shortcuts (`Cmd+K Cmd+S`)
-2. Search for `WTF Commit: Generate`
-3. Double-click and press `Cmd+G` twice (Chord)
+**How to set a chorded keybinding?**
+1. Open Keyboard Shortcuts (`Cmd+K Cmd+S`).
+2. Search for `WTF Commit: Generate`.
+3. Double-click and press `Cmd+G` twice.
 
 ## 📄 License
 MIT License.
