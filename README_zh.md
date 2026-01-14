@@ -69,6 +69,15 @@ WTF Commit 内置了主流 AI 服务商的配置。若 **Base URL** 和 **Model*
 | **Gemini** | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.5-flash-lite` |
 | **Custom** | - | - |
 
+### 4. 自定义 LLM 提供商
+
+您可以使用任何支持 **OpenAI 兼容 API** 的 AI 服务商（例如通过 Ollama, LM Studio 运行的本地模型等）。
+
+> [!IMPORTANT]
+> **OpenAI 兼容性**: 目前，本插件**仅支持**遵循 OpenAI API 格式（`/v1/chat/completions`）的服务商。
+>
+> **关于 Claude**: 目前**暂不支持** Claude (Anthropic) 供应商，因为其 API 格式不同，且官方不直接提供 OpenAI 兼容端点。如果您想使用 Claude，需要通过第三方中转服务将其转换为 OpenAI 兼容格式。
+
 ## 🕹️ 使用方法
 
 ### 方法 1: 键盘快捷键 ⚡ (推荐)
