@@ -70,6 +70,15 @@ WTF Commit comes with pre-configured settings for popular AI providers. Leave **
 | **Gemini** | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.5-flash-lite` |
 | **Custom** | - | - |
 
+### 4. Custom LLM Provider
+
+You can use any AI provider that supports the **OpenAI-compatible API** (e.g., Local LLMs via Ollama, LM Studio, etc.).
+
+> [!IMPORTANT]
+> **OpenAI Compatibility**: Currently, ONLY providers that follow the OpenAI API format (`/v1/chat/completions`) are supported.
+>
+> **Claude Support**: Claude (Anthropic) is **NOT** supported natively at this time because it uses a different API format and does not provide an official OpenAI-compatible endpoint. To use Claude, you would need a proxy service that translates the API to OpenAI format.
+
 ## 🕹️ How to Use
 
 ### Method 1: Keyboard Shortcut ⚡ (Recommended)
