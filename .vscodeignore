@@ -9,3 +9,19 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+
+# Environment files (contains sensitive data)
+.env
+.env.local
+
+# Development files
+.vsix
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build dependencies
+node_modules/**
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

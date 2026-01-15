@@ -83,7 +83,14 @@
         },
         "wtfCommit.language": {
           "type": "string",
-          "enum": ["English", "简体中文", "繁体中文", "Japanese", "Classical Chinese (文言文)", "Custom"],
+          "enum": [
+            "English",
+            "简体中文",
+            "繁体中文",
+            "Japanese",
+            "Classical Chinese (文言文)",
+            "Custom"
+          ],
           "default": "English",
           "description": "Language for the generated commit message",
           "order": 2
@@ -96,7 +103,14 @@
         },
         "wtfCommit.provider": {
           "type": "string",
-          "enum": ["OpenAI", "DeepSeek", "Moonshot", "GLM", "Gemini", "Custom"],
+          "enum": [
+            "OpenAI",
+            "DeepSeek",
+            "Moonshot",
+            "GLM",
+            "Gemini",
+            "Custom"
+          ],
           "default": "OpenAI",
           "description": "Select an AI provider",
           "order": 3
@@ -124,16 +138,20 @@
     "watch": "tsc -watch -p ./",
     "pretest": "pnpm run compile && pnpm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "package": "vsce package",
+    "publish:ovsx": "ovsx publish",
+    "release": "pnpm run package && pnpm run publish:ovsx"
   },
   "devDependencies": {
-    "@types/vscode": "^1.70.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.52.0",
-    "eslint": "^9.39.2",
-    "typescript": "^5.9.3",
+    "@types/vscode": "^1.70.0",
     "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.2",
+    "ovsx": "^0.10.8",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.52.0"
   }
 }
