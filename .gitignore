@@ -6,6 +6,10 @@ out/
 dist/
 *.vsix
 
+# Environment variables (contains sensitive data)
+.env
+.env.local
+
 # OS metadata
 .DS_Store
 Thumbs.db
