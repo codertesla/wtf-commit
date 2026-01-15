@@ -13,6 +13,15 @@ Thumbs.db
 # VS Code
 .vscode-test/
 
+# VS Code personal settings (keep shared configs)
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+
+# NPM config (developer-specific)
+.npmrc
+
 
 # TODO
 TODO.md

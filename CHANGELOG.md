@@ -5,6 +5,11 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-01-15
+### Changed
+- **Repository Cleanup**: Removed developer-specific configuration files (`.npmrc`, `.vscode/settings.json`) for better open source practices
+- **Updated .gitignore**: Added rules to ignore `.npmrc` and `.vscode` personal settings while preserving shared configurations (`launch.json`, `tasks.json`, `extensions.json`)
+
 ## [0.1.2] - 2026-01-14
 ### Added
 - **Provider Info in Notifications**: The active AI provider (e.g., [OpenAI], [GLM]) is now displayed in the generation progress and confirmation dialogs, making it clear which model is being used.
