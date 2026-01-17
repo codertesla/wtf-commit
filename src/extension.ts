@@ -53,6 +53,7 @@ const PROVIDERS: Record<string, ProviderConfig> = {
   Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview' },
   GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.5-flash-lite' },
+  OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'mistralai/devstral-2512:free' },
 };
 
 export function activate(context: vscode.ExtensionContext) {
