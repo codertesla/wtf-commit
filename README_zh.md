@@ -69,6 +69,7 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 | **Moonshot** | `kimi-k2-turbo-preview` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-4.7` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Gemini** | `gemini-2.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |
+| **OpenRouter** | `mistralai/devstral-2512:free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
 
 > [!IMPORTANT]
