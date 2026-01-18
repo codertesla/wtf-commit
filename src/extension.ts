@@ -184,21 +184,13 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       // Get diff: prioritize staged changes, fallback to working tree changes
-      let diff: string;
       const hasStagedChanges = repository.state.indexChanges.length > 0;
       const hasWorkingTreeChanges = repository.state.workingTreeChanges.length > 0;
 
-      if (hasStagedChanges) {
-        diff = await repository.diff(true); // cached = true for staged changes
-      } else if (hasWorkingTreeChanges) {
-        if (smartStage) {
-          diff = await repository.diff(false); // cached = false for working tree changes
-        } else {
-          vscode.window.showErrorMessage('No staged changes found. Please stage your changes first.');
-          return;
-        }
-      } else {
-        vscode.window.showInformationMessage('No changes to commit.');
+      const diff = await getOptimizedDiff(repository, hasStagedChanges, smartStage);
+
+      if (!diff || diff.trim() === '') {
+        vscode.window.showInformationMessage('No diff content found.');
         return;
       }
 
@@ -346,6 +338,58 @@ async function callLLM(
   result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 
   return result;
+}
+
+async function getOptimizedDiff(repository: Repository, hasStagedChanges: boolean, smartStage: boolean): Promise<string> {
+  let diff: string;
+  if (hasStagedChanges) {
+    diff = await repository.diff(true);
+  } else {
+    if (smartStage) {
+      diff = await repository.diff(false);
+    } else {
+      throw new Error('No staged changes found. Please stage your changes first.');
+    }
+  }
+
+  // If diff is small enough, return it directly
+  // 20000 characters is roughly 30k-40k tokens depending on content, well within 128k limits
+  if (diff.length < 20000) {
+    return diff;
+  }
+
+  // If diff is too large, generate a summary
+  const changes = hasStagedChanges ? repository.state.indexChanges : repository.state.workingTreeChanges;
+  
+  if (changes.length === 0) {
+    return diff;
+  }
+
+  let summary = `The diff is too large (${diff.length} characters). Here is a summary of the changes:\n\n`;
+  summary += `Total changed files: ${changes.length}\n\n`;
+
+  // Group changes by directory to detect moves/refactors
+  const dirCounts: Record<string, number> = {};
+  changes.forEach(change => {
+    const parts = change.uri.fsPath.split(/[\\/]/);
+    if (parts.length > 1) {
+      const dir = parts.slice(0, -1).join('/');
+      dirCounts[dir] = (dirCounts[dir] || 0) + 1;
+    }
+  });
+
+  summary += 'Changes by directory:\n';
+  Object.entries(dirCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .forEach(([dir, count]) => {
+      summary += `- ${dir}: ${count} files\n`;
+    });
+
+  summary += '\nPartial diff (first 5000 characters):\n';
+  summary += diff.substring(0, 5000) + '\n... (truncated)';
+
+  return summary;
 }
 
 async function checkChangelog(context: vscode.ExtensionContext) {
