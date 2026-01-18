@@ -341,7 +341,11 @@ async function callLLM(
     throw new Error('No content in API response');
   }
 
-  return content.trim();
+  // Filter out <think>...</think> tags from models that include CoT reasoning (e.g., DeepSeek-R1, MiniMax-M2.1)
+  let result = content.trim();
+  result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+  return result;
 }
 
 async function checkChangelog(context: vscode.ExtensionContext) {

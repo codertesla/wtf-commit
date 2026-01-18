@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2026-01-18
+### Fixed
+- **Thinking Tag Filter**: Automatically strips `<think>...</think>` tags from AI responses. This fixes the issue where models with Chain-of-Thought reasoning (e.g., DeepSeek-R1, MiniMax-M2.1) would include their reasoning process in the commit message. ([#1](https://github.com/codertesla/wtf-commit/issues/1))
+
 ## [0.1.4] - 2026-01-17
 ### Added
 - New AI provider: **OpenRouter** with default model `mistralai/devstral-2512:free`.
