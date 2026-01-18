@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 2026-01-18
+### Fixed
+- **Support for Untracked Files**: Fixed the "No diff content found" error when only new (untracked) files are present. The extension now intelligently reads content from these files and generates a pseudo-diff for AI processing.
+
 ## [0.1.6] - 2026-01-18
 ### Added
 - **Optimization for Large Refactors**: Improved support for large commits (e.g., massive file moves or renames). If the diff exceeds 20,000 characters, the extension now provides a high-level summary of the changes and directory statistics to prevent API context length errors while maintaining generation accuracy.

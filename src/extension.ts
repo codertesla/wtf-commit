@@ -32,11 +32,18 @@ interface CommitOptions {
 interface RepositoryState {
   indexChanges: Change[];
   workingTreeChanges: Change[];
+  untrackedChanges: Change[];
 }
 
 interface Change {
   uri: vscode.Uri;
+  status: number;
 }
+
+// Git Status enum values (from vscode.git extension)
+const GitStatus = {
+  UNTRACKED: 7,
+};
 
 interface InputBox {
   value: string;
@@ -350,6 +357,44 @@ async function getOptimizedDiff(repository: Repository, hasStagedChanges: boolea
     } else {
       throw new Error('No staged changes found. Please stage your changes first.');
     }
+  }
+
+  // Handle untracked files - git diff doesn't include them
+  const untrackedFiles = repository.state.workingTreeChanges.filter(
+    (change) => change.status === GitStatus.UNTRACKED
+  );
+
+  if (untrackedFiles.length > 0) {
+    let untrackedDiff = '';
+    for (const file of untrackedFiles) {
+      try {
+        const document = await vscode.workspace.openTextDocument(file.uri);
+        const content = document.getText();
+        const fileName = vscode.workspace.asRelativePath(file.uri);
+        
+        // Format as a pseudo-diff for new files
+        untrackedDiff += `\ndiff --git a/${fileName} b/${fileName}\n`;
+        untrackedDiff += `new file\n`;
+        untrackedDiff += `--- /dev/null\n`;
+        untrackedDiff += `+++ b/${fileName}\n`;
+        
+        // Add line numbers and + prefix for each line
+        const lines = content.split('\n');
+        untrackedDiff += `@@ -0,0 +1,${lines.length} @@\n`;
+        lines.forEach(line => {
+          untrackedDiff += `+${line}\n`;
+        });
+      } catch (error) {
+        // Skip files that can't be read (e.g., binary files)
+        console.warn(`Could not read untracked file: ${file.uri.fsPath}`);
+      }
+    }
+    diff = diff + untrackedDiff;
+  }
+
+  // If diff is empty after all processing, return empty
+  if (!diff || diff.trim() === '') {
+    return '';
   }
 
   // If diff is small enough, return it directly
