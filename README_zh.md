@@ -65,7 +65,7 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 
 | 服务商 (Provider) | 默认模型 (Model) | 默认 Base URL |
 |----------|---------------|-----------------|
-| **OpenAI** | `gpt-4o-mini` | `https://api.openai.com/v1` |
+| **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
 | **DeepSeek** | `deepseek-chat` | `https://api.deepseek.com` |
 | **Moonshot** | `kimi-k2-turbo-preview` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-4.7` | `https://open.bigmodel.cn/api/paas/v4` |
