@@ -23,6 +23,9 @@ importers:
       '@vscode/test-electron':
         specifier: ^2.5.2
         version: 2.5.2
+      '@vscode/vsce':
+        specifier: ^3.7.1
+        version: 3.7.1
       eslint:
         specifier: ^9.39.2
         version: 9.39.2

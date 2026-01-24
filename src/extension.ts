@@ -55,7 +55,7 @@ interface ProviderConfig {
 }
 
 const PROVIDERS: Record<string, ProviderConfig> = {
-  OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
   Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview' },
   GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7' },
