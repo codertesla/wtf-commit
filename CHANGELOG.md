@@ -5,9 +5,15 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.9] - 2026-01-24
+## [0.2.0] - 2026-02-04
 ### Changed
 - **Default Model Update**: Updated the default OpenAI model to `gpt-5-nano`.
+
+### Fixed
+- **Improved Error Handling**: Fixed misleading error messages during Git operations. Now displays specific error messages for each stage:
+  - `Failed to stage changes` for `git add` errors
+  - `Failed to commit` for `git commit` errors
+  - `Commit successful, but push failed` for `git push` errors
 
 ## [0.1.8] - 2026-01-18
 ### Changed
