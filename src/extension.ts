@@ -249,15 +249,33 @@ export function activate(context: vscode.ExtensionContext) {
       // If there are no staged changes, stage all working tree changes first
       if (!hasStagedChanges && hasWorkingTreeChanges) {
         const paths = repository.state.workingTreeChanges.map(c => c.uri.fsPath);
-        await repository.add(paths);
+        try {
+          await repository.add(paths);
+        } catch (addError) {
+          const addMessage = addError instanceof Error ? addError.message : 'Unknown error';
+          vscode.window.showErrorMessage(`Failed to stage changes: ${addMessage}`);
+          return;
+        }
       }
-      await repository.commit(commitMessage);
-      vscode.window.showInformationMessage('Commit successful.');
+      
+      try {
+        await repository.commit(commitMessage);
+        vscode.window.showInformationMessage('Commit successful.');
+      } catch (commitError) {
+        const commitMessage = commitError instanceof Error ? commitError.message : 'Unknown error';
+        vscode.window.showErrorMessage(`Failed to commit: ${commitMessage}`);
+        return;
+      }
 
       // Auto-push if enabled
       if (autoPush) {
-        await repository.push();
-        vscode.window.showInformationMessage('Push successful.');
+        try {
+          await repository.push();
+          vscode.window.showInformationMessage('Push successful.');
+        } catch (pushError) {
+          const pushMessage = pushError instanceof Error ? pushError.message : 'Unknown error';
+          vscode.window.showErrorMessage(`Commit successful, but push failed: ${pushMessage}`);
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -272,7 +290,7 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.commands.executeCommand('wtf-commit.setApiKey');
         }
       } else {
-        vscode.window.showErrorMessage(`Failed to generate commit message: ${message}`);
+        vscode.window.showErrorMessage(`Failed: ${message}`);
       }
     }
   });
