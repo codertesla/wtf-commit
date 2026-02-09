@@ -71,6 +71,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-09
+### Changed
+- Updated OpenRouter default model to `openrouter/free` while keeping the OpenAI-compatible base URL as `https://openrouter.ai/api/v1`.
+
 ## [0.0.8] - 2026-01-12
 ### Fixed
 - Progress notification: The "Generating commit message..." notification now disappears immediately after generation, even if awaiting user confirmation for auto-commit.

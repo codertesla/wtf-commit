@@ -70,8 +70,10 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 | **Moonshot** | `kimi-k2-turbo-preview` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-4.7` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Gemini** | `gemini-2.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |
-| **OpenRouter** | `mistralai/devstral-2512:free` | `https://openrouter.ai/api/v1` |
+| **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
+
+> OpenRouter 默认使用免费路由模型：`openrouter/free`。
 
 > [!IMPORTANT]
 > **关于 Claude**: 目前**暂不支持** Claude 原生格式。请使用支持 OpenAI 兼容端点的中转服务。

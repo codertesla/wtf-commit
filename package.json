@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -127,7 +127,7 @@
           "type": "string",
           "default": "",
           "description": "Model name. Leave empty to use the provider's default.",
-          "markdownDescription": "Model name. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-chat`\n- Moonshot: `kimi-k2-turbo-preview`\n- GLM: `glm-4.7`\n- Gemini: `gemini-2.5-flash-lite`\n- OpenRouter: `mistralai/devstral-2512:free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
+          "markdownDescription": "Model name. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-chat`\n- Moonshot: `kimi-k2-turbo-preview`\n- GLM: `glm-4.7`\n- Gemini: `gemini-2.5-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
           "order": 5
         }
       }
@@ -141,7 +141,7 @@
     "lint": "eslint src",
     "test": "vscode-test",
     "package": "vsce package",
-    "publish:ovsx": "ovsx publish",
+    "publish:ovsx": "ovsx publish wtf-commit-${npm_package_version}.vsix",
     "release": "pnpm run package && pnpm run publish:ovsx"
   },
   "devDependencies": {
