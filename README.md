@@ -70,8 +70,10 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 | **Moonshot** | `kimi-k2-turbo-preview` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-4.7` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Gemini** | `gemini-2.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |
-| **OpenRouter** | `mistralai/devstral-2512:free` | `https://openrouter.ai/api/v1` |
+| **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
+
+> OpenRouter default now targets the free route model: `openrouter/free`.
 
 > [!IMPORTANT]
 > **Claude Support**: Native Claude format is not supported yet. Please use a proxy service that provides an OpenAI-compatible endpoint.
