@@ -1,6 +1,6 @@
+import * as path from 'path';
 import * as vscode from 'vscode';
 
-// Git Extension API types
 interface GitExtension {
   getAPI(version: number): API;
 }
@@ -40,11 +40,6 @@ interface Change {
   status: number;
 }
 
-// Git Status enum values (from vscode.git extension)
-const GitStatus = {
-  UNTRACKED: 7,
-};
-
 interface InputBox {
   value: string;
 }
@@ -53,6 +48,54 @@ interface ProviderConfig {
   baseUrl: string;
   model: string;
 }
+
+interface ExtensionConfig {
+  provider: ProviderName;
+  language: string;
+  autoCommit: boolean;
+  autoPush: boolean;
+  smartStage: boolean;
+  confirmBeforeCommit: boolean;
+  systemPrompt: string;
+  baseUrl: string;
+  model: string;
+}
+
+interface LlmCallInput {
+  endpoint: string;
+  apiKey: string;
+  model: string;
+  systemPrompt: string;
+  diff: string;
+  token: vscode.CancellationToken;
+  timeoutMs: number;
+}
+
+interface LlmResponse {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+}
+
+type ProviderName = keyof typeof PROVIDERS | 'Custom';
+type RequestFailureCode = 'auth' | 'rate_limit' | 'timeout' | 'network' | 'cancelled' | 'invalid_response' | 'api';
+
+const SECRET_KEY_PREFIX = 'wtfCommit.key.';
+const DEFAULT_SYSTEM_PROMPT = 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
+const DEFAULT_PROVIDER: ProviderName = 'OpenAI';
+const DEFAULT_TIMEOUT_MS = 45_000;
+const MAX_DIFF_CHARS = 20_000;
+const MAX_PARTIAL_DIFF_CHARS = 5_000;
+const MAX_UNTRACKED_FILE_BYTES = 120 * 1024;
+const MAX_UNTRACKED_FILE_LINES = 400;
+const MAX_UNTRACKED_FILES = 30;
+const MAX_SUMMARY_DIRS = 10;
+
+const GitStatus = {
+  UNTRACKED: 7,
+};
 
 const PROVIDERS: Record<string, ProviderConfig> = {
   OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
@@ -63,20 +106,54 @@ const PROVIDERS: Record<string, ProviderConfig> = {
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 };
 
+const PROVIDER_NAMES = [...Object.keys(PROVIDERS), 'Custom'] as ProviderName[];
+
+let outputChannel: vscode.OutputChannel | undefined;
+
+class RequestFailure extends Error {
+  constructor(
+    public readonly code: RequestFailureCode,
+    message: string,
+    public readonly status?: number
+  ) {
+    super(message);
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
-  console.log('WTF Commit extension is now active!');
+  outputChannel = vscode.window.createOutputChannel('WTF Commit');
+  context.subscriptions.push(outputChannel);
 
-  // Check for updates and show changelog
-  checkChangelog(context);
+  logInfo('Extension activated');
 
-  // Command to set API Key safely
+  checkChangelog(context).catch((error) => {
+    logError('Failed to check changelog', error);
+  });
+
   const setApiKeyDisposable = vscode.commands.registerCommand('wtf-commit.setApiKey', async () => {
-    const provider = await vscode.window.showQuickPick(
-      [...Object.keys(PROVIDERS), 'Custom'],
-      { placeHolder: 'Select Provider to set API Key for' }
-    );
+    await runSetApiKey(context);
+  });
 
-    if (!provider) { return; }
+  const generateDisposable = vscode.commands.registerCommand('wtf-commit.generate', async () => {
+    await runGenerate(context);
+  });
+
+  context.subscriptions.push(setApiKeyDisposable, generateDisposable);
+}
+
+export function deactivate() {
+  outputChannel?.dispose();
+}
+
+async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
+  try {
+    const provider = await vscode.window.showQuickPick(PROVIDER_NAMES, {
+      placeHolder: 'Select Provider to set API Key for',
+    });
+
+    if (!provider) {
+      return;
+    }
 
     const apiKey = await vscode.window.showInputBox({
       title: `Set API Key for ${provider}`,
@@ -85,398 +162,579 @@ export function activate(context: vscode.ExtensionContext) {
       ignoreFocusOut: true,
     });
 
-    if (apiKey) {
-      await context.secrets.store(`wtfCommit.key.${provider}`, apiKey);
-      // Auto-switch provider to match the newly set API Key
-      await vscode.workspace.getConfiguration('wtfCommit').update('provider', provider, vscode.ConfigurationTarget.Global);
-      vscode.window.showInformationMessage(`API Key for ${provider} saved. Provider switched to ${provider}.`);
+    const trimmedApiKey = apiKey?.trim();
+    if (!trimmedApiKey) {
+      return;
     }
-  });
 
-  const generateDisposable = vscode.commands.registerCommand('wtf-commit.generate', async () => {
-    try {
-      // Get configuration
-      const config = vscode.workspace.getConfiguration('wtfCommit');
-      const provider = config.get<string>('provider') || 'OpenAI';
-      const languageSetting = config.get<string>('language') || 'English';
-      const customLanguage = config.get<string>('customLanguage') || 'English';
-      const autoCommit = config.get<boolean>('autoCommit') || false;
-      const autoPush = config.get<boolean>('autoPush') || false;
-      const smartStage = config.get<boolean>('smartStage') ?? true;
-      const confirmBeforeCommit = config.get<boolean>('confirmBeforeCommit') ?? true;
-      let systemPrompt = config.get<string>('prompt') || 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
+    await context.secrets.store(getSecretKeyName(provider), trimmedApiKey);
+    await vscode.workspace
+      .getConfiguration('wtfCommit')
+      .update('provider', provider, vscode.ConfigurationTarget.Global);
 
-      // Determine final language: use customLanguage if 'Custom' is selected
-      const language = languageSetting === 'Custom' ? customLanguage : languageSetting;
-
-      // Dynamically append language instruction
-      systemPrompt += `\n\nIMPORTANT: Please write the commit message in ${language}.`;
-
-      // Resolve Base URL and Model
-      let baseUrl = config.get<string>('baseUrl');
-      let model = config.get<string>('model');
-
-      if (!baseUrl && provider !== 'Custom') {
-        baseUrl = PROVIDERS[provider]?.baseUrl;
-      }
-      if (!model && provider !== 'Custom') {
-        model = PROVIDERS[provider]?.model;
-      }
-
-      if (!baseUrl) {
-        vscode.window.showErrorMessage(`Base URL is missing for ${provider}. Please check your settings.`);
-        return;
-      }
-      if (!model) {
-        vscode.window.showErrorMessage(`Model is missing for ${provider}. Please check your settings.`);
-        return;
-      }
-
-      // Get API Key from Secrets
-      const apiKey = await context.secrets.get(`wtfCommit.key.${provider}`);
-      if (!apiKey) {
-        const action = await vscode.window.showErrorMessage(
-          `API Key for ${provider} is not set.`,
-          'Set API Key'
-        );
-        if (action === 'Set API Key') {
-          vscode.commands.executeCommand('wtf-commit.setApiKey');
-        }
-        return;
-      }
-
-      // Get Git extension
-      const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git');
-      if (!gitExtension) {
-        vscode.window.showErrorMessage('Git extension is not available.');
-        return;
-      }
-
-      const git = gitExtension.isActive ? gitExtension.exports.getAPI(1) : (await gitExtension.activate()).getAPI(1);
-
-      // Get repository with multi-root workspace support
-      if (git.repositories.length === 0) {
-        vscode.window.showErrorMessage('No Git repository found.');
-        return;
-      }
-
-      let repository: Repository | null = null;
-
-      // 1. Try to get repository from active text editor
-      const activeEditor = vscode.window.activeTextEditor;
-      if (activeEditor) {
-        repository = git.getRepository(activeEditor.document.uri);
-      }
-
-      // 2. Fallback: if only one repository, use it
-      if (!repository && git.repositories.length === 1) {
-        repository = git.repositories[0];
-      }
-
-      // 3. Fallback: prompt user to select a repository
-      if (!repository) {
-        const repoItems = git.repositories.map(repo => ({
-          label: repo.rootUri.fsPath,
-          repository: repo,
-        }));
-
-        const selected = await vscode.window.showQuickPick(repoItems, {
-          placeHolder: 'Select a Git repository',
-        });
-
-        if (!selected) {
-          return; // User cancelled
-        }
-        repository = selected.repository;
-      }
-
-      // Get diff: prioritize staged changes, fallback to working tree changes
-      const hasStagedChanges = repository.state.indexChanges.length > 0;
-      const hasWorkingTreeChanges = repository.state.workingTreeChanges.length > 0;
-
-      const diff = await getOptimizedDiff(repository, hasStagedChanges, smartStage);
-
-      if (!diff || diff.trim() === '') {
-        vscode.window.showInformationMessage('No diff content found.');
-        return;
-      }
-
-      if (!diff || diff.trim() === '') {
-        vscode.window.showInformationMessage('No diff content found.');
-        return;
-      }
-
-      // Call AI API - only wrap the LLM call in progress notification
-      const commitMessage = await vscode.window.withProgress(
-        {
-          location: vscode.ProgressLocation.Notification,
-          title: `Generating commit message (${provider})...`,
-          cancellable: false,
-        },
-        async () => {
-          return await callLLM(baseUrl!, apiKey, model!, systemPrompt, diff, provider);
-        }
-      );
-
-      if (!commitMessage) {
-        return;
-      }
-
-      repository.inputBox.value = commitMessage;
-
-      if (!autoCommit) {
-        vscode.window.showInformationMessage(`[${provider}] Commit message generated!`);
-        return;
-      }
-
-      // Auto-commit flow
-      let shouldCommit = true;
-      if (confirmBeforeCommit) {
-        const response = await vscode.window.showInformationMessage(
-          `[${provider}] Confirm Commit: ${commitMessage}?`,
-          'Yes',
-          'No'
-        );
-        shouldCommit = response === 'Yes';
-      }
-
-      if (!shouldCommit) {
-        vscode.window.showInformationMessage('Commit cancelled.');
-        return;
-      }
-
-      // Perform commit
-      // If there are no staged changes, stage all working tree changes first
-      if (!hasStagedChanges && hasWorkingTreeChanges) {
-        const paths = repository.state.workingTreeChanges.map(c => c.uri.fsPath);
-        try {
-          await repository.add(paths);
-        } catch (addError) {
-          const addMessage = addError instanceof Error ? addError.message : 'Unknown error';
-          vscode.window.showErrorMessage(`Failed to stage changes: ${addMessage}`);
-          return;
-        }
-      }
-      
-      try {
-        await repository.commit(commitMessage);
-        vscode.window.showInformationMessage('Commit successful.');
-      } catch (commitError) {
-        const commitMessage = commitError instanceof Error ? commitError.message : 'Unknown error';
-        vscode.window.showErrorMessage(`Failed to commit: ${commitMessage}`);
-        return;
-      }
-
-      // Auto-push if enabled
-      if (autoPush) {
-        try {
-          await repository.push();
-          vscode.window.showInformationMessage('Push successful.');
-        } catch (pushError) {
-          const pushMessage = pushError instanceof Error ? pushError.message : 'Unknown error';
-          vscode.window.showErrorMessage(`Commit successful, but push failed: ${pushMessage}`);
-        }
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error occurred';
-      
-      // Check if it's an authentication error
-      if (message.includes('401') || message.toLowerCase().includes('auth') || message.toLowerCase().includes('key')) {
-        const action = await vscode.window.showErrorMessage(
-          `Authentication failed: ${message}`,
-          'Set API Key'
-        );
-        if (action === 'Set API Key') {
-          vscode.commands.executeCommand('wtf-commit.setApiKey');
-        }
-      } else {
-        vscode.window.showErrorMessage(`Failed: ${message}`);
-      }
-    }
-  });
-
-  context.subscriptions.push(setApiKeyDisposable);
-  context.subscriptions.push(generateDisposable);
+    vscode.window.showInformationMessage(`API Key for ${provider} saved. Provider switched to ${provider}.`);
+  } catch (error) {
+    logError('Failed to set API key', error);
+    vscode.window.showErrorMessage(`Failed to save API key: ${getErrorMessage(error)}`);
+  }
 }
 
-async function callLLM(
-  baseUrl: string,
-  apiKey: string,
-  model: string,
-  systemPrompt: string,
-  diff: string,
-  provider: string
-): Promise<string | null> {
-  // Avoid duplicate path if Custom provider already includes /chat/completions
-  let url: string;
-  if (provider === 'Custom' && baseUrl.replace(/\/$/, '').endsWith('/chat/completions')) {
-    url = baseUrl.replace(/\/$/, '');
-  } else {
-    url = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
+async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
+  try {
+    const config = readExtensionConfig();
+    const apiKey = await context.secrets.get(getSecretKeyName(config.provider));
+
+    if (!apiKey) {
+      const action = await vscode.window.showErrorMessage(
+        `API Key for ${config.provider} is not set.`,
+        'Set API Key'
+      );
+      if (action === 'Set API Key') {
+        void vscode.commands.executeCommand('wtf-commit.setApiKey');
+      }
+      return;
+    }
+
+    const endpoint = buildChatCompletionsEndpoint(config.baseUrl, config.provider);
+    const repository = await resolveRepository();
+    if (!repository) {
+      return;
+    }
+
+    const hasStagedChanges = repository.state.indexChanges.length > 0;
+    const hasWorkingTreeChanges =
+      repository.state.workingTreeChanges.length > 0 || repository.state.untrackedChanges.length > 0;
+
+    if (!hasStagedChanges && !hasWorkingTreeChanges) {
+      vscode.window.showInformationMessage('No changes detected in working tree or staging area.');
+      return;
+    }
+
+    const diff = await getOptimizedDiff(repository, hasStagedChanges, config.smartStage);
+    if (!diff.trim()) {
+      vscode.window.showInformationMessage('No diff content found.');
+      return;
+    }
+
+    const commitMessage = await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `Generating commit message (${config.provider})...`,
+        cancellable: true,
+      },
+      async (_progress, token) => {
+        return callLLM({
+          endpoint,
+          apiKey,
+          model: config.model,
+          systemPrompt: config.systemPrompt,
+          diff,
+          token,
+          timeoutMs: DEFAULT_TIMEOUT_MS,
+        });
+      }
+    );
+
+    if (!commitMessage) {
+      return;
+    }
+
+    const normalizedCommitMessage = normalizeCommitMessage(commitMessage);
+    if (!normalizedCommitMessage) {
+      vscode.window.showErrorMessage('Generated commit message is empty. Please try again.');
+      return;
+    }
+
+    repository.inputBox.value = normalizedCommitMessage;
+
+    if (!looksLikeConventionalCommit(normalizedCommitMessage)) {
+      vscode.window.showWarningMessage('Generated message may not follow Conventional Commits format.');
+    }
+
+    if (!config.autoCommit) {
+      vscode.window.showInformationMessage(`[${config.provider}] Commit message generated.`);
+      return;
+    }
+
+    let shouldCommit = true;
+    if (config.confirmBeforeCommit) {
+      const response = await vscode.window.showInformationMessage(
+        `[${config.provider}] Confirm Commit: ${normalizedCommitMessage}?`,
+        'Yes',
+        'No'
+      );
+      shouldCommit = response === 'Yes';
+    }
+
+    if (!shouldCommit) {
+      vscode.window.showInformationMessage('Commit cancelled.');
+      return;
+    }
+
+    if (!hasStagedChanges && hasWorkingTreeChanges) {
+      const stagePaths = collectStageablePaths(repository.state);
+      if (stagePaths.length > 0) {
+        await repository.add(stagePaths);
+      }
+    }
+
+    await repository.commit(normalizedCommitMessage);
+    vscode.window.showInformationMessage('Commit successful.');
+
+    if (config.autoPush) {
+      try {
+        await repository.push();
+        vscode.window.showInformationMessage('Push successful.');
+      } catch (error) {
+        logError('Push failed after commit', error);
+        vscode.window.showErrorMessage(`Commit successful, but push failed: ${getErrorMessage(error)}`);
+      }
+    }
+  } catch (error) {
+    if (error instanceof RequestFailure) {
+      await handleRequestFailure(error);
+      return;
+    }
+
+    logError('Generate flow failed', error);
+    vscode.window.showErrorMessage(`Failed: ${getErrorMessage(error)}`);
+  }
+}
+
+function readExtensionConfig(): ExtensionConfig {
+  const config = vscode.workspace.getConfiguration('wtfCommit');
+
+  const provider = asProviderName(config.get<string>('provider'));
+  const languageSetting = config.get<string>('language') || 'English';
+  const customLanguage = config.get<string>('customLanguage') || 'English';
+  const language = languageSetting === 'Custom' ? customLanguage : languageSetting;
+
+  let baseUrl = config.get<string>('baseUrl')?.trim() || '';
+  let model = config.get<string>('model')?.trim() || '';
+
+  if (!baseUrl && provider !== 'Custom') {
+    baseUrl = PROVIDERS[provider]?.baseUrl || '';
+  }
+  if (!model && provider !== 'Custom') {
+    model = PROVIDERS[provider]?.model || '';
   }
 
+  if (!baseUrl) {
+    throw new Error(`Base URL is missing for ${provider}. Please check your settings.`);
+  }
+  if (!model) {
+    throw new Error(`Model is missing for ${provider}. Please check your settings.`);
+  }
+
+  let systemPrompt = config.get<string>('prompt') || DEFAULT_SYSTEM_PROMPT;
+  systemPrompt += `\n\nIMPORTANT: Please write the commit message in ${language}.`;
+
+  return {
+    provider,
+    language,
+    autoCommit: config.get<boolean>('autoCommit') || false,
+    autoPush: config.get<boolean>('autoPush') || false,
+    smartStage: config.get<boolean>('smartStage') ?? true,
+    confirmBeforeCommit: config.get<boolean>('confirmBeforeCommit') ?? true,
+    systemPrompt,
+    baseUrl,
+    model,
+  };
+}
+
+function asProviderName(rawProvider: string | undefined): ProviderName {
+  if (rawProvider && PROVIDER_NAMES.includes(rawProvider as ProviderName)) {
+    return rawProvider as ProviderName;
+  }
+  return DEFAULT_PROVIDER;
+}
+
+function getSecretKeyName(provider: ProviderName): string {
+  return `${SECRET_KEY_PREFIX}${provider}`;
+}
+
+function buildChatCompletionsEndpoint(baseUrl: string, provider: ProviderName): string {
+  const sanitized = baseUrl.trim().replace(/\/+$/, '');
+  if (!sanitized) {
+    throw new Error('Base URL is empty.');
+  }
+
+  const endpoint =
+    provider === 'Custom' && sanitized.endsWith('/chat/completions')
+      ? sanitized
+      : `${sanitized}/chat/completions`;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(endpoint);
+  } catch {
+    throw new Error(`Invalid Base URL: ${baseUrl}`);
+  }
+
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    throw new Error(`Unsupported URL protocol: ${parsed.protocol}`);
+  }
+
+  return parsed.toString();
+}
+
+async function resolveRepository(): Promise<Repository | null> {
+  const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git');
+  if (!gitExtension) {
+    vscode.window.showErrorMessage('Git extension is not available.');
+    return null;
+  }
+
+  const git = gitExtension.isActive
+    ? gitExtension.exports.getAPI(1)
+    : (await gitExtension.activate()).getAPI(1);
+
+  if (git.repositories.length === 0) {
+    vscode.window.showErrorMessage('No Git repository found.');
+    return null;
+  }
+
+  const activeEditor = vscode.window.activeTextEditor;
+  if (activeEditor) {
+    const activeRepo = git.getRepository(activeEditor.document.uri);
+    if (activeRepo) {
+      return activeRepo;
+    }
+  }
+
+  if (git.repositories.length === 1) {
+    return git.repositories[0];
+  }
+
+  const selected = await vscode.window.showQuickPick(
+    git.repositories.map((repository) => ({
+      label: repository.rootUri.fsPath,
+      repository,
+    })),
+    { placeHolder: 'Select a Git repository' }
+  );
+
+  return selected?.repository || null;
+}
+
+async function callLLM(input: LlmCallInput): Promise<string> {
   const requestBody = {
-    model: model,
+    model: input.model,
     messages: [
-      {
-        role: 'system',
-        content: systemPrompt,
-      },
-      {
-        role: 'user',
-        content: `Here is the git diff:\n\n${diff}`,
-      },
+      { role: 'system', content: input.systemPrompt },
+      { role: 'user', content: `Here is the git diff:\n\n${input.diff}` },
     ],
     temperature: 0.7,
     max_tokens: 256,
   };
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestBody),
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeoutHandle = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, input.timeoutMs);
+
+  const cancellationDisposable = input.token.onCancellationRequested(() => {
+    controller.abort();
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API request failed (${response.status}): ${errorText}`);
+  try {
+    const response = await fetch(input.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${input.apiKey}`,
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorText = await safeReadResponseText(response);
+      if (response.status === 401 || response.status === 403) {
+        throw new RequestFailure('auth', `Authentication failed (${response.status})`, response.status);
+      }
+      if (response.status === 429) {
+        throw new RequestFailure('rate_limit', 'Rate limit reached. Please retry later.', response.status);
+      }
+      throw new RequestFailure(
+        'api',
+        `API request failed (${response.status}): ${errorText || 'No error details returned.'}`,
+        response.status
+      );
+    }
+
+    let data: LlmResponse;
+    try {
+      data = (await response.json()) as LlmResponse;
+    } catch (error) {
+      throw new RequestFailure('invalid_response', `Failed to parse API response: ${getErrorMessage(error)}`);
+    }
+
+    const content = data.choices?.[0]?.message?.content;
+    if (!content || !content.trim()) {
+      throw new RequestFailure('invalid_response', 'No content in API response.');
+    }
+
+    return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  } catch (error) {
+    if (error instanceof RequestFailure) {
+      throw error;
+    }
+
+    if (input.token.isCancellationRequested) {
+      throw new RequestFailure('cancelled', 'Commit message generation cancelled.');
+    }
+
+    if (timedOut) {
+      throw new RequestFailure('timeout', `Request timed out after ${Math.round(input.timeoutMs / 1000)} seconds.`);
+    }
+
+    throw new RequestFailure('network', `Network request failed: ${getErrorMessage(error)}`);
+  } finally {
+    clearTimeout(timeoutHandle);
+    cancellationDisposable.dispose();
   }
-
-  const data = (await response.json()) as {
-    choices?: Array<{
-      message?: {
-        content?: string;
-      };
-    }>;
-  };
-
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) {
-    throw new Error('No content in API response');
-  }
-
-  // Filter out <think>...</think> tags from models that include CoT reasoning (e.g., DeepSeek-R1, MiniMax-M2.1)
-  let result = content.trim();
-  result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-
-  return result;
 }
 
-async function getOptimizedDiff(repository: Repository, hasStagedChanges: boolean, smartStage: boolean): Promise<string> {
-  let diff: string;
+async function safeReadResponseText(response: Response): Promise<string> {
+  try {
+    const text = await response.text();
+    return text.slice(0, 500);
+  } catch {
+    return '';
+  }
+}
+
+async function handleRequestFailure(error: RequestFailure): Promise<void> {
+  logError('LLM request failed', error);
+
+  if (error.code === 'cancelled') {
+    vscode.window.showInformationMessage(error.message);
+    return;
+  }
+
+  if (error.code === 'auth') {
+    const action = await vscode.window.showErrorMessage(error.message, 'Set API Key');
+    if (action === 'Set API Key') {
+      void vscode.commands.executeCommand('wtf-commit.setApiKey');
+    }
+    return;
+  }
+
+  if (error.code === 'rate_limit') {
+    vscode.window.showErrorMessage(error.message);
+    return;
+  }
+
+  if (error.code === 'timeout') {
+    vscode.window.showErrorMessage(error.message);
+    return;
+  }
+
+  if (error.code === 'invalid_response') {
+    vscode.window.showErrorMessage(`Invalid API response: ${error.message}`);
+    return;
+  }
+
+  vscode.window.showErrorMessage(error.message);
+}
+
+async function getOptimizedDiff(
+  repository: Repository,
+  hasStagedChanges: boolean,
+  smartStage: boolean
+): Promise<string> {
+  let diff = '';
+
   if (hasStagedChanges) {
     diff = await repository.diff(true);
+  } else if (smartStage) {
+    diff = await repository.diff(false);
   } else {
-    if (smartStage) {
-      diff = await repository.diff(false);
-    } else {
-      throw new Error('No staged changes found. Please stage your changes first.');
+    throw new Error('No staged changes found. Please stage your changes first.');
+  }
+
+  const untrackedChanges = getUntrackedChanges(repository.state).slice(0, MAX_UNTRACKED_FILES);
+  if (untrackedChanges.length > 0) {
+    const untrackedPatches = await Promise.all(untrackedChanges.map((change) => buildUntrackedPatch(change.uri)));
+    const validPatches = untrackedPatches.filter((patch): patch is string => Boolean(patch));
+    if (validPatches.length > 0) {
+      diff = `${diff}\n${validPatches.join('\n')}`;
     }
   }
 
-  // Handle untracked files - git diff doesn't include them
-  const untrackedFiles = repository.state.workingTreeChanges.filter(
-    (change) => change.status === GitStatus.UNTRACKED
-  );
-
-  if (untrackedFiles.length > 0) {
-    let untrackedDiff = '';
-    for (const file of untrackedFiles) {
-      try {
-        const document = await vscode.workspace.openTextDocument(file.uri);
-        const content = document.getText();
-        const fileName = vscode.workspace.asRelativePath(file.uri);
-        
-        // Format as a pseudo-diff for new files
-        untrackedDiff += `\ndiff --git a/${fileName} b/${fileName}\n`;
-        untrackedDiff += `new file\n`;
-        untrackedDiff += `--- /dev/null\n`;
-        untrackedDiff += `+++ b/${fileName}\n`;
-        
-        // Add line numbers and + prefix for each line
-        const lines = content.split('\n');
-        untrackedDiff += `@@ -0,0 +1,${lines.length} @@\n`;
-        lines.forEach(line => {
-          untrackedDiff += `+${line}\n`;
-        });
-      } catch (error) {
-        // Skip files that can't be read (e.g., binary files)
-        console.warn(`Could not read untracked file: ${file.uri.fsPath}`);
-      }
-    }
-    diff = diff + untrackedDiff;
-  }
-
-  // If diff is empty after all processing, return empty
-  if (!diff || diff.trim() === '') {
+  if (!diff.trim()) {
     return '';
   }
 
-  // If diff is small enough, return it directly
-  // 20000 characters is roughly 30k-40k tokens depending on content, well within 128k limits
-  if (diff.length < 20000) {
+  if (diff.length < MAX_DIFF_CHARS) {
     return diff;
   }
 
-  // If diff is too large, generate a summary
   const changes = hasStagedChanges ? repository.state.indexChanges : repository.state.workingTreeChanges;
-  
-  if (changes.length === 0) {
-    return diff;
-  }
-
-  let summary = `The diff is too large (${diff.length} characters). Here is a summary of the changes:\n\n`;
-  summary += `Total changed files: ${changes.length}\n\n`;
-
-  // Group changes by directory to detect moves/refactors
-  const dirCounts: Record<string, number> = {};
-  changes.forEach(change => {
-    const parts = change.uri.fsPath.split(/[\\/]/);
-    if (parts.length > 1) {
-      const dir = parts.slice(0, -1).join('/');
-      dirCounts[dir] = (dirCounts[dir] || 0) + 1;
-    }
-  });
-
-  summary += 'Changes by directory:\n';
-  Object.entries(dirCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .forEach(([dir, count]) => {
-      summary += `- ${dir}: ${count} files\n`;
-    });
-
-  summary += '\nPartial diff (first 5000 characters):\n';
-  summary += diff.substring(0, 5000) + '\n... (truncated)';
-
-  return summary;
+  return buildLargeDiffSummary(diff, changes);
 }
 
-async function checkChangelog(context: vscode.ExtensionContext) {
-  const extension = vscode.extensions.getExtension('codertesla.wtf-commit');
-  if (!extension) { return; }
+function getUntrackedChanges(state: RepositoryState): Change[] {
+  const changesByPath = new Map<string, Change>();
 
-  const currentVersion = extension.packageJSON.version;
+  for (const change of state.untrackedChanges) {
+    changesByPath.set(change.uri.fsPath, change);
+  }
+
+  for (const change of state.workingTreeChanges) {
+    if (change.status === GitStatus.UNTRACKED) {
+      changesByPath.set(change.uri.fsPath, change);
+    }
+  }
+
+  return [...changesByPath.values()];
+}
+
+async function buildUntrackedPatch(uri: vscode.Uri): Promise<string | null> {
+  const relativePath = vscode.workspace.asRelativePath(uri, false).replace(/\\/g, '/');
+
+  try {
+    const stats = await vscode.workspace.fs.stat(uri);
+    if (stats.size > MAX_UNTRACKED_FILE_BYTES) {
+      return [
+        `diff --git a/${relativePath} b/${relativePath}`,
+        'new file',
+        '--- /dev/null',
+        `+++ b/${relativePath}`,
+        '@@ -0,0 +1,1 @@',
+        `+[content omitted: ${relativePath} is ${stats.size} bytes]`,
+      ].join('\n');
+    }
+
+    const document = await vscode.workspace.openTextDocument(uri);
+    const content = document.getText();
+    const lines = content.split(/\r?\n/);
+    const visibleLines = lines.slice(0, MAX_UNTRACKED_FILE_LINES);
+
+    const patchLines = [
+      `diff --git a/${relativePath} b/${relativePath}`,
+      'new file',
+      '--- /dev/null',
+      `+++ b/${relativePath}`,
+      `@@ -0,0 +1,${visibleLines.length} @@`,
+      ...visibleLines.map((line) => `+${line}`),
+    ];
+
+    if (lines.length > MAX_UNTRACKED_FILE_LINES) {
+      patchLines.push(`+[content truncated: ${lines.length - MAX_UNTRACKED_FILE_LINES} more lines]`);
+    }
+
+    return patchLines.join('\n');
+  } catch (error) {
+    logInfo(`Skipping unreadable untracked file: ${relativePath} (${getErrorMessage(error)})`);
+    return null;
+  }
+}
+
+function buildLargeDiffSummary(diff: string, changes: Change[]): string {
+  if (changes.length === 0) {
+    return `${diff.substring(0, MAX_PARTIAL_DIFF_CHARS)}\n... (truncated)`;
+  }
+
+  const dirCounts = new Map<string, number>();
+
+  for (const change of changes) {
+    const relativePath = vscode.workspace.asRelativePath(change.uri, false).replace(/\\/g, '/');
+    const directory = path.posix.dirname(relativePath);
+    const bucket = directory === '.' ? '(root)' : directory;
+    dirCounts.set(bucket, (dirCounts.get(bucket) || 0) + 1);
+  }
+
+  const topDirs = [...dirCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, MAX_SUMMARY_DIRS)
+    .map(([dir, count]) => `- ${dir}: ${count} files`)
+    .join('\n');
+
+  return [
+    `The diff is too large (${diff.length} characters). Here is a summary of the changes:`,
+    '',
+    `Total changed files: ${changes.length}`,
+    '',
+    'Changes by directory:',
+    topDirs,
+    '',
+    `Partial diff (first ${MAX_PARTIAL_DIFF_CHARS} characters):`,
+    `${diff.substring(0, MAX_PARTIAL_DIFF_CHARS)}\n... (truncated)`,
+  ].join('\n');
+}
+
+function collectStageablePaths(state: RepositoryState): string[] {
+  const paths = new Set<string>();
+
+  for (const change of state.workingTreeChanges) {
+    paths.add(change.uri.fsPath);
+  }
+
+  for (const change of state.untrackedChanges) {
+    paths.add(change.uri.fsPath);
+  }
+
+  return [...paths];
+}
+
+function normalizeCommitMessage(rawMessage: string): string {
+  let message = rawMessage.trim();
+
+  // Some models wrap plain text in markdown fences.
+  message = message.replace(/^```[a-zA-Z0-9_-]*\s*/u, '').replace(/\s*```$/u, '').trim();
+
+  const lines = message.split(/\r?\n/);
+  while (lines.length > 0 && lines[0].trim() === '') {
+    lines.shift();
+  }
+  while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+    lines.pop();
+  }
+
+  return lines.join('\n').trim();
+}
+
+function looksLikeConventionalCommit(message: string): boolean {
+  const firstLine = message.split(/\r?\n/, 1)[0] || '';
+  return /^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\([^)]+\))?!?:\s+.+$/.test(firstLine);
+}
+
+async function checkChangelog(context: vscode.ExtensionContext): Promise<void> {
+  const currentVersion = String(context.extension.packageJSON.version);
   const lastVersion = context.globalState.get<string>('wtfCommit.lastVersion');
 
-  if (currentVersion !== lastVersion) {
-    const action = await vscode.window.showInformationMessage(
-      `WTF Commit has been updated to v${currentVersion}!`,
-      'View Changelog'
-    );
-
-    if (action === 'View Changelog') {
-      const changelogPath = vscode.Uri.file(
-        vscode.Uri.joinPath(context.extensionUri, 'CHANGELOG.md').fsPath
-      );
-      vscode.commands.executeCommand('markdown.showPreview', changelogPath);
-    }
-
-    await context.globalState.update('wtfCommit.lastVersion', currentVersion);
+  if (currentVersion === lastVersion) {
+    return;
   }
+
+  const action = await vscode.window.showInformationMessage(
+    `WTF Commit has been updated to v${currentVersion}!`,
+    'View Changelog'
+  );
+
+  if (action === 'View Changelog') {
+    const changelogUri = vscode.Uri.joinPath(context.extensionUri, 'CHANGELOG.md');
+    void vscode.commands.executeCommand('markdown.showPreview', changelogUri);
+  }
+
+  await context.globalState.update('wtfCommit.lastVersion', currentVersion);
 }
 
-export function deactivate() {}
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return String(error);
+}
+
+function logInfo(message: string): void {
+  outputChannel?.appendLine(`[INFO] ${message}`);
+}
+
+function logError(message: string, error: unknown): void {
+  outputChannel?.appendLine(`[ERROR] ${message}: ${getErrorMessage(error)}`);
+}

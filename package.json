@@ -17,7 +17,10 @@
     "SCM Providers",
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:wtf-commit.generate",
+    "onCommand:wtf-commit.setApiKey"
+  ],
   "main": "./out/extension.js",
   "extensionDependencies": [
     "vscode.git"
@@ -28,6 +31,11 @@
         "command": "wtf-commit.generate",
         "title": "WTF Commit: Generate",
         "icon": "$(sparkle)"
+      },
+      {
+        "command": "wtf-commit.setApiKey",
+        "title": "WTF Commit: Set API Key",
+        "icon": "$(key)"
       }
     ],
     "menus": {
