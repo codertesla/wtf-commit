@@ -5,6 +5,25 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.2.2] - 2026-02-10
+### Added
+- **Cancelable Generation**: The commit-generation progress notification now supports cancellation.
+- **Diagnostic Logging**: Added a dedicated `WTF Commit` output channel to help troubleshoot runtime/API issues.
+
+### Changed
+- **Command Registration**: Added `WTF Commit: Set API Key` to command contributions and activation events.
+- **Untracked Diff Optimization**: Added limits for large untracked files and long file content when building pseudo-diff.
+
+### Fixed
+- **Request Reliability**: Added timeout handling and clearer error categories for authentication, rate limit, timeout, network, and invalid API responses.
+- **Message Normalization**: Automatically strips accidental markdown fences and surrounding blank lines in generated commit messages.
+
+## [0.2.1] - 2026-02-09
+### Changed
+- Updated OpenRouter default model to `openrouter/free` while keeping the OpenAI-compatible base URL as `https://openrouter.ai/api/v1`.
+
 ## [0.2.0] - 2026-02-04
 ### Changed
 - **Default Model Update**: Updated the default OpenAI model to `gpt-5-nano`.
@@ -68,12 +87,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New presets: 简体中文, 繁体中文, Japanese, Classical Chinese (文言文).
   - Custom Language support: Select "Custom" and enter any target language (e.g., "French", "Emoji only").
 - Dynamic prompt injection: Removed hardcoded language logic for better flexibility.
-
-## [Unreleased]
-
-## [0.2.1] - 2026-02-09
-### Changed
-- Updated OpenRouter default model to `openrouter/free` while keeping the OpenAI-compatible base URL as `https://openrouter.ai/api/v1`.
 
 ## [0.0.8] - 2026-01-12
 ### Fixed
