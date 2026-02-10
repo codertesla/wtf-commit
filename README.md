@@ -11,6 +11,12 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
+## 🆕 Latest (v0.2.2)
+
+- Cancellable generation progress with clearer timeout/network/auth error feedback.
+- Dedicated `WTF Commit` output channel for diagnostics.
+- Better handling for large untracked files in pseudo-diff generation.
+
 ## 🚀 Features
 
 - **Multi-lingual Support**: Preset support for English, Chinese, Japanese, Classical Chinese, and **Custom** strings.
@@ -18,6 +24,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 - **Smart Diffing**: Prioritizes staged changes and falls back to working tree changes.
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
 - **Large Refactor Support**: Automatically handles massive file moves or renames by providing smart diff summaries, preventing API context length issues.
+- **Reliable Request Flow**: Built-in timeout + categorized API error handling for better resilience.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 - **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
 
@@ -84,6 +91,7 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 
 - **Source Control Icon**: Click the ✨ icon at the top of the Git panel.
 - **Command Palette**: Run `WTF Commit: Generate`.
+- **Command Palette**: Run `WTF Commit: Set API Key` to configure or rotate your API key.
 - **Chorded Keybinding**: You can bind a double-press like `Cmd+G` `Cmd+G`. See `💡 Pro Tips`.
 
 ## 💡 Pro Tips
