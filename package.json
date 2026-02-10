@@ -142,14 +142,13 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "pnpm run compile && pnpm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
-    "package": "vsce package",
-    "publish:ovsx": "ovsx publish wtf-commit-${npm_package_version}.vsix",
+    "package": "pnpm run compile && vsce package",
+    "publish:ovsx": "sh -c 'if [ -n \"$OVSX_PAT\" ]; then ovsx publish \"wtf-commit-${npm_package_version}.vsix\" --pat \"$OVSX_PAT\"; else ovsx publish \"wtf-commit-${npm_package_version}.vsix\"; fi'",
     "release": "pnpm run package && pnpm run publish:ovsx"
   },
   "devDependencies": {
