@@ -100,8 +100,8 @@ const GitStatus = {
 const PROVIDERS: Record<string, ProviderConfig> = {
   OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
-  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview' },
-  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7' },
+  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2.5' },
+  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.5-flash-lite' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 };

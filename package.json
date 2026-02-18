@@ -135,7 +135,7 @@
           "type": "string",
           "default": "",
           "description": "Model name. Leave empty to use the provider's default.",
-          "markdownDescription": "Model name. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-chat`\n- Moonshot: `kimi-k2-turbo-preview`\n- GLM: `glm-4.7`\n- Gemini: `gemini-2.5-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
+          "markdownDescription": "Model name. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-chat`\n- Moonshot: `kimi-k2.5`\n- GLM: `glm-5`\n- Gemini: `gemini-2.5-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
           "order": 5
         }
       }
