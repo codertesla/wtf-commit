@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-02-18
+### Changed
+- **API Optimization**: Increased default temperature to `1.0` and `max_tokens` to `1024` for better response quality and compatibility.
+
 ## [0.2.3] - 2026-02-18
 ### Changed
 - **Default Models Update**: Updated default model for Moonshot to `kimi-k2.5` and GLM to `glm-5`.

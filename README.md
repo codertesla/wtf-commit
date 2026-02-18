@@ -11,9 +11,10 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v0.2.3)
+## 🆕 Latest (v0.2.4)
 
-- Updated default model for **Moonshot** to `kimi-k2.5` and **GLM** to `glm-5`.
+- **API Optimization**: Increased default temperature to `1.0` and `max_tokens` to `1024`.
+- **Model Update**: Updated default models for Moonshot (`kimi-k2.5`) and GLM (`glm-5`) in v0.2.3.
 
 ## 🚀 Features
 
