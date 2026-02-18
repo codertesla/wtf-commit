@@ -424,8 +424,8 @@ async function callLLM(input: LlmCallInput): Promise<string> {
       { role: 'system', content: input.systemPrompt },
       { role: 'user', content: `Here is the git diff:\n\n${input.diff}` },
     ],
-    temperature: 0.7,
-    max_tokens: 256,
+    temperature: 1.0,
+    max_tokens: 1024,
   };
 
   const controller = new AbortController();
