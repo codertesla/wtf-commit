@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-02-18
+### Changed
+- **Default Models Update**: Updated default model for Moonshot to `kimi-k2.5` and GLM to `glm-5`.
+
 ## [0.2.2] - 2026-02-10
 ### Added
 - **Cancelable Generation**: The commit-generation progress notification now supports cancellation.
