@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
