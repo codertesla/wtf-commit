@@ -149,13 +149,34 @@ export function deactivate() {
 
 async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
   try {
-    const provider = await vscode.window.showQuickPick(PROVIDER_NAMES, {
+    const config = vscode.workspace.getConfiguration('wtfCommit');
+    const currentProvider = config.get<string>('provider');
+
+    const items: vscode.QuickPickItem[] = await Promise.all(
+      PROVIDER_NAMES.map(async (name) => {
+        const apiKey = await context.secrets.get(getSecretKeyName(name));
+        const isCurrent = name === currentProvider;
+        const hasKey = !!apiKey;
+
+        return {
+          label: name,
+          description: isCurrent ? 'current' : '',
+          detail: hasKey ? '$(key) API Key set' : '$(circle-slash) API Key not set',
+          picked: isCurrent,
+        };
+      })
+    );
+
+    const selectedItem = await vscode.window.showQuickPick(items, {
       placeHolder: 'Select Provider to set API Key for',
+      title: 'Wtf Commit: Provider Status',
     });
 
-    if (!provider) {
+    if (!selectedItem) {
       return;
     }
+
+    const provider = selectedItem.label as ProviderName;
 
     const apiKey = await vscode.window.showInputBox({
       title: `Set API Key for ${provider}`,
