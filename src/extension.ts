@@ -75,6 +75,7 @@ interface LlmResponse {
   choices?: Array<{
     message?: {
       content?: string;
+      reasoning_details?: Array<{ text: string }>;
     };
   }>;
 }
@@ -100,7 +101,8 @@ const GitStatus = {
 const PROVIDERS: Record<string, ProviderConfig> = {
   OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
-  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2.5' },
+  MiniMax: { baseUrl: 'https://api.minimaxi.com/v1', model: 'MiniMax-M2.5' },
+  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview' },
   GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.5-flash-lite' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
@@ -418,15 +420,20 @@ async function resolveRepository(): Promise<Repository | null> {
 }
 
 async function callLLM(input: LlmCallInput): Promise<string> {
-  const requestBody = {
+  const requestBody: any = {
     model: input.model,
     messages: [
       { role: 'system', content: input.systemPrompt },
       { role: 'user', content: `Here is the git diff:\n\n${input.diff}` },
     ],
     temperature: 1.0,
-    max_tokens: 1024,
+    max_tokens: 4096,
   };
+
+  const isMiniMax = input.endpoint.includes('minimaxi.com');
+  if (isMiniMax) {
+    requestBody.extra_body = { reasoning_split: true };
+  }
 
   const controller = new AbortController();
   let timedOut = false;
@@ -472,7 +479,14 @@ async function callLLM(input: LlmCallInput): Promise<string> {
       throw new RequestFailure('invalid_response', `Failed to parse API response: ${getErrorMessage(error)}`);
     }
 
-    const content = data.choices?.[0]?.message?.content;
+    const message = data.choices?.[0]?.message;
+    const content = message?.content;
+    const reasoning = message?.reasoning_details?.[0]?.text;
+
+    if (reasoning) {
+      logInfo(`MiniMax Reasoning: ${reasoning}`);
+    }
+
     if (!content || !content.trim()) {
       throw new RequestFailure('invalid_response', 'No content in API response.');
     }
