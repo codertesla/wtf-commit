@@ -5,7 +5,12 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.5] - 2026-02-19
+### Added
+- **New AI Provider**: Added **MiniMax** with support for separate reasoning split (`MiniMax-M2.5`). Reasoning/Thinking process is logged to the `WTF Commit` output channel.
+
+### Changed
+- **Kimi Model Update**: Updated default model for Moonshot (Kimi) to `kimi-k2-turbo-preview` for enhanced performance.
 
 ## [0.2.4] - 2026-02-18
 ### Changed

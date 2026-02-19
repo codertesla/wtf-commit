@@ -11,10 +11,10 @@
 
 WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更改（或工作区更改）生成简洁且有意义的 Git 提交信息。
 
-## 🆕 最新更新（v0.2.4）
+## 🆕 最新更新（v0.2.5）
 
-- **API 优化**: 调优默认温度值为 `1.0` 并增加 `max_tokens` 至 `1024`。
-- **模型更新**: 在 v0.2.3 中更新了 Moonshot (`kimi-k2.5`) 和 GLM (`glm-5`) 的默认模型。
+- **新增服务商**: 新增 **MiniMax** (`MiniMax-M2.5`) 及其特殊的思维链路分离支持。
+- **模型更新**: 将 **Kimi** 的默认模型更新为 `kimi-k2-turbo-preview`。
 
 ##  功能特性
 
@@ -75,7 +75,8 @@ WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更�
 |----------|---------------|-----------------|
 | **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
 | **DeepSeek** | `deepseek-chat` | `https://api.deepseek.com` |
-| **Moonshot** | `kimi-k2.5` | `https://api.moonshot.cn/v1` |
+| **MiniMax** | `MiniMax-M2.5` | `https://api.minimaxi.com/v1` |
+| **Moonshot** | `kimi-k2-turbo-preview` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Gemini** | `gemini-2.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |

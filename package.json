@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -114,6 +114,7 @@
           "enum": [
             "OpenAI",
             "DeepSeek",
+            "MiniMax",
             "Moonshot",
             "GLM",
             "Gemini",
@@ -128,14 +129,14 @@
           "type": "string",
           "default": "",
           "description": "API Base URL. Leave empty to use the provider's default.",
-          "markdownDescription": "API Base URL. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `https://api.openai.com/v1`\n- DeepSeek: `https://api.deepseek.com`\n- Moonshot: `https://api.moonshot.cn/v1`\n- GLM: `https://open.bigmodel.cn/api/paas/v4`\n- Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`\n- OpenRouter: `https://openrouter.ai/api/v1`\n\n> **Note:** Use the input box below to enter a custom Base URL if needed.",
+          "markdownDescription": "API Base URL. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `https://api.openai.com/v1`\n- DeepSeek: `https://api.deepseek.com`\n- MiniMax: `https://api.minimaxi.com/v1`\n- Moonshot: `https://api.moonshot.cn/v1`\n- GLM: `https://open.bigmodel.cn/api/paas/v4`\n- Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`\n- OpenRouter: `https://openrouter.ai/api/v1`\n\n> **Note:** Use the input box below to enter a custom Base URL if needed.",
           "order": 4
         },
         "wtfCommit.model": {
           "type": "string",
           "default": "",
           "description": "Model name. Leave empty to use the provider's default.",
-          "markdownDescription": "Model name. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-chat`\n- Moonshot: `kimi-k2.5`\n- GLM: `glm-5`\n- Gemini: `gemini-2.5-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
+          "markdownDescription": "Model name. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-chat`\n- MiniMax: `MiniMax-M2.5`\n- Moonshot: `kimi-k2-turbo-preview`\n- GLM: `glm-5`\n- Gemini: `gemini-2.5-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
           "order": 5
         }
       }

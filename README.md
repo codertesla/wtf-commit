@@ -11,10 +11,10 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v0.2.4)
+## 🆕 Latest (v0.2.5)
 
-- **API Optimization**: Increased default temperature to `1.0` and `max_tokens` to `1024`.
-- **Model Update**: Updated default models for Moonshot (`kimi-k2.5`) and GLM (`glm-5`) in v0.2.3.
+- **New AI Provider**: Added **MiniMax** (`MiniMax-M2.5`) with separate reasoning split support.
+- **Model Update**: Updated default model for **Kimi** to `kimi-k2-turbo-preview`.
 
 ## 🚀 Features
 
@@ -75,7 +75,8 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 |----------|---------------|-----------------|
 | **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
 | **DeepSeek** | `deepseek-chat` | `https://api.deepseek.com` |
-| **Moonshot** | `kimi-k2.5` | `https://api.moonshot.cn/v1` |
+| **MiniMax** | `MiniMax-M2.5` | `https://api.minimaxi.com/v1` |
+| **Moonshot** | `kimi-k2-turbo-preview` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Gemini** | `gemini-2.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
