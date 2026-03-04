@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -128,15 +128,111 @@
         "wtfCommit.baseUrl": {
           "type": "string",
           "default": "",
-          "description": "API Base URL. Leave empty to use the provider's default.",
-          "markdownDescription": "API Base URL. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `https://api.openai.com/v1`\n- DeepSeek: `https://api.deepseek.com`\n- MiniMax: `https://api.minimaxi.com/v1`\n- Moonshot: `https://api.moonshot.cn/v1`\n- GLM: `https://open.bigmodel.cn/api/paas/v4`\n- Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`\n- OpenRouter: `https://openrouter.ai/api/v1`\n\n> **Note:** Use the input box below to enter a custom Base URL if needed.",
+          "description": "Global API Base URL (Fallback). Leave empty to use the provider's default.",
+          "markdownDescription": "Global API Base URL (Fallback). Used if the provider-specific Base URL is not set. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `https://api.openai.com/v1`\n- DeepSeek: `https://api.deepseek.com`\n- MiniMax: `https://api.minimaxi.com/v1`\n- Moonshot: `https://api.moonshot.cn/v1`\n- GLM: `https://open.bigmodel.cn/api/paas/v4`\n- Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`\n- OpenRouter: `https://openrouter.ai/api/v1`\n\n> **Note:** Use the input box below to enter a custom Base URL if needed.",
           "order": 4
         },
         "wtfCommit.model": {
           "type": "string",
           "default": "",
-          "description": "Model name. Leave empty to use the provider's default.",
-          "markdownDescription": "Model name. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-chat`\n- MiniMax: `MiniMax-M2.5`\n- Moonshot: `kimi-k2-turbo-preview`\n- GLM: `glm-5`\n- Gemini: `gemini-2.5-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
+          "description": "Global Model name (Fallback). Leave empty to use the provider's default.",
+          "markdownDescription": "Global Model name (Fallback). Used if the provider-specific Model is not set. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-chat`\n- MiniMax: `MiniMax-M2.5`\n- Moonshot: `kimi-k2-turbo-preview`\n- GLM: `glm-5`\n- Gemini: `gemini-2.5-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
+          "order": 5
+        },
+        "wtfCommit.OpenAI.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Base URL specifically for **OpenAI**. Overrides the global `wtfCommit.baseUrl`.",
+          "order": 4
+        },
+        "wtfCommit.OpenAI.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Model specifically for **OpenAI**. Overrides the global `wtfCommit.model`.",
+          "order": 5
+        },
+        "wtfCommit.DeepSeek.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Base URL specifically for **DeepSeek**. Overrides the global `wtfCommit.baseUrl`.",
+          "order": 4
+        },
+        "wtfCommit.DeepSeek.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Model specifically for **DeepSeek**. Overrides the global `wtfCommit.model`.",
+          "order": 5
+        },
+        "wtfCommit.MiniMax.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Base URL specifically for **MiniMax**. Overrides the global `wtfCommit.baseUrl`.",
+          "order": 4
+        },
+        "wtfCommit.MiniMax.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Model specifically for **MiniMax**. Overrides the global `wtfCommit.model`.",
+          "order": 5
+        },
+        "wtfCommit.Moonshot.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Base URL specifically for **Moonshot**. Overrides the global `wtfCommit.baseUrl`.",
+          "order": 4
+        },
+        "wtfCommit.Moonshot.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Model specifically for **Moonshot**. Overrides the global `wtfCommit.model`.",
+          "order": 5
+        },
+        "wtfCommit.GLM.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Base URL specifically for **GLM**. Overrides the global `wtfCommit.baseUrl`.",
+          "order": 4
+        },
+        "wtfCommit.GLM.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Model specifically for **GLM**. Overrides the global `wtfCommit.model`.",
+          "order": 5
+        },
+        "wtfCommit.Gemini.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Base URL specifically for **Gemini**. Overrides the global `wtfCommit.baseUrl`.",
+          "order": 4
+        },
+        "wtfCommit.Gemini.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Model specifically for **Gemini**. Overrides the global `wtfCommit.model`.",
+          "order": 5
+        },
+        "wtfCommit.OpenRouter.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Base URL specifically for **OpenRouter**. Overrides the global `wtfCommit.baseUrl`.",
+          "order": 4
+        },
+        "wtfCommit.OpenRouter.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Model specifically for **OpenRouter**. Overrides the global `wtfCommit.model`.",
+          "order": 5
+        },
+        "wtfCommit.Custom.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Base URL specifically for **Custom**. Overrides the global `wtfCommit.baseUrl`.",
+          "order": 4
+        },
+        "wtfCommit.Custom.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom Model specifically for **Custom**. Overrides the global `wtfCommit.model`.",
           "order": 5
         }
       }
