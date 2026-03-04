@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] - 2026-03-04
+### Changed
+- **Default Model Update**: Updated default model for Gemini to `gemini-3.1-flash-lite-preview`.
+
 ## [0.2.7] - 2026-03-04
 ### Added
 - **Provider-specific Configuration**: Added independent `Base URL` and `Model` settings for each AI provider. Switching providers now correctly maintains their respective custom values without interference.
