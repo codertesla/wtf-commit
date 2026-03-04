@@ -11,15 +11,11 @@
     "url": "https://github.com/codertesla/wtf-commit"
   },
   "engines": {
-    "vscode": "^1.70.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "SCM Providers",
     "Other"
-  ],
-  "activationEvents": [
-    "onCommand:wtf-commit.generate",
-    "onCommand:wtf-commit.setApiKey"
   ],
   "main": "./out/extension.js",
   "extensionDependencies": [
