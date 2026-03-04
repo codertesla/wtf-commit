@@ -5,6 +5,15 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-03-04
+### Added
+- **Interactive Commit Flow**: Introduce an 'Edit in Input Box' action during the auto-commit confirmation dialog, letting users seamlessly review and tweak AI-generated messages before committing.
+- **Smart Diff Scaling**: Intelligently skips unhelpful `lock` files in diffs preventing token overrun on massive commits, and keeping the logic strictly focused on your source changes.
+- **Extended Reasoner Timeout**: Deep-thinking models (e.g., DeepSeek Reasoner, MiniMax) automatically receive double the timeout allocation (up to 90s) to prevent generation failures.
+
+### Changed
+- **Architecture Overhaul**: Internal codebase rewritten and split into modular domains (`git`, `llm`, `diff`, `config`) ensuring better long-term reliability and maintainability.
+
 ## [0.2.8] - 2026-03-04
 ### Changed
 - **Default Model Update**: Updated default model for Gemini to `gemini-3.1-flash-lite-preview`.

@@ -11,10 +11,10 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v0.2.7)
+## 🆕 Latest (v1.0.0)
 
-- **Provider-specific Configuration**: You can now set independent Base URL and Model overrides for each provider in settings. Switching between providers (e.g., from Gemini to OpenAI) will preserve their specific custom values.
-- **UI Enhancement**: Improved provider selection UI with status indicators for API keys.
+- **Interactive Commit Flow**: Introduce an "**Edit in Input Box**" action directly from the auto-commit confirmation dialog, letting you seamlessly review and tweak AI-generated messages.
+- **Smart Architecture & Diff Scaling**: New modular rewrite intelligently omits unhelpful lock files preventing token overrun on massive commits, and automatically extends timeouts on deep reasoning models.
 
 ## 🚀 Features
 
@@ -22,7 +22,8 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 - **Conventional Commits**: Automatically follows conventional commit standards (feat, fix, docs, etc.).
 - **Smart Diffing**: Prioritizes staged changes and falls back to working tree changes.
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
-- **Large Refactor Support**: Automatically handles massive file moves or renames by providing smart diff summaries, preventing API context length issues.
+- **Interactive Tuning**: Auto-commit flows support real-time message editing without blocking Git staging.
+- **Reliable Request Flow**: Built-in timeout + categorized API error handling, with extended reasoning for DeepSeek and MiniMax variants.
 - **Reliable Request Flow**: Built-in timeout + categorized API error handling for better resilience.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 - **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
