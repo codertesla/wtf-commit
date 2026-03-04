@@ -11,8 +11,9 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v0.2.6)
+## 🆕 Latest (v0.2.7)
 
+- **Provider-specific Configuration**: You can now set independent Base URL and Model overrides for each provider in settings. Switching between providers (e.g., from Gemini to OpenAI) will preserve their specific custom values.
 - **UI Enhancement**: Improved provider selection UI with status indicators for API keys.
 
 ## 🚀 Features
