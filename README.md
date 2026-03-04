@@ -11,7 +11,7 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.0.0)
+## 🆕 Latest (v1.0.1)
 
 - **Interactive Commit Flow**: Introduce an "**Edit in Input Box**" action directly from the auto-commit confirmation dialog, letting you seamlessly review and tweak AI-generated messages.
 - **Smart Architecture & Diff Scaling**: New modular rewrite intelligently omits unhelpful lock files preventing token overrun on massive commits, and automatically extends timeouts on deep reasoning models.
