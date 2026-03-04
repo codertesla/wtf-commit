@@ -104,7 +104,7 @@ const PROVIDERS: Record<string, ProviderConfig> = {
   MiniMax: { baseUrl: 'https://api.minimaxi.com/v1', model: 'MiniMax-M2.5' },
   Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview' },
   GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5' },
-  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.5-flash-lite' },
+  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-3.1-flash-lite-preview' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 };
 
