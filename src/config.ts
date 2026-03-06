@@ -18,8 +18,9 @@ export function readExtensionConfig(): ExtensionConfig {
   const language = languageSetting === 'Custom' ? customLanguage : languageSetting;
 
   // 1. Try to read provider-specific overrides
-  let providerBaseUrl = config.get<string>(`${provider}.baseUrl`)?.trim();
-  let providerModel = config.get<string>(`${provider}.model`)?.trim();
+  const overrides = config.get<Record<string, { baseUrl?: string; model?: string }>>('providerOverrides') || {};
+  let providerBaseUrl = overrides[provider]?.baseUrl?.trim() || config.get<string>(`${provider}.baseUrl`)?.trim();
+  let providerModel = overrides[provider]?.model?.trim() || config.get<string>(`${provider}.model`)?.trim();
 
   // 2. Try to read global overrides
   let globalBaseUrl = config.get<string>('baseUrl')?.trim();
