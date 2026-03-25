@@ -27,11 +27,25 @@ export function buildChatCompletionsEndpoint(baseUrl: string, provider: Provider
 }
 
 export async function callLLM(input: LlmCallInput): Promise<string> {
+  const isRepair = Boolean(input.repairMessage);
+  const systemPrompt = isRepair
+    ? [
+        input.systemPrompt,
+        'Rewrite the commit message so it strictly follows Conventional Commits.',
+        'Keep the original intent, but fix format issues.',
+        'Output only the final commit message text.',
+      ].join('\n\n')
+    : input.systemPrompt;
+
+  const userContent = isRepair
+    ? buildRepairPrompt(input.repairMessage || '', input.repairReason)
+    : buildGenerationPrompt(input.diff, input.intent);
+
   const requestBody: any = {
     model: input.model,
     messages: [
-      { role: 'system', content: input.systemPrompt },
-      { role: 'user', content: `Here is the git diff:\n\n${input.diff}` },
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userContent },
     ],
     temperature: 1.0,
     max_tokens: 4096,
@@ -125,6 +139,34 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
     clearTimeout(timeoutHandle);
     cancellationDisposable.dispose();
   }
+}
+
+function buildGenerationPrompt(diff: string, intent?: string): string {
+  const sections: string[] = [];
+
+  if (intent?.trim()) {
+    sections.push(`Primary intent from the SCM input box:\n${intent.trim()}`);
+  }
+
+  sections.push(`Here is the git diff:\n\n${diff}`);
+  return sections.join('\n\n');
+}
+
+function buildRepairPrompt(message: string, reason?: string): string {
+  const sections = [
+    'Fix the following commit message without changing its meaning:',
+    message.trim(),
+  ];
+
+  if (reason?.trim()) {
+    sections.push(`Validation issue:\n${reason.trim()}`);
+  } else {
+    sections.push(
+      'Validation issue:\nThe first line must match Conventional Commits: <type>(<scope>): <description>.'
+    );
+  }
+
+  return sections.join('\n\n');
 }
 
 async function safeReadResponseText(response: Response): Promise<string> {

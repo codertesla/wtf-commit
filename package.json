@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -151,7 +151,7 @@
     "lint": "eslint src",
     "test": "vscode-test",
     "package": "pnpm run compile && vsce package",
-    "publish:ovsx": "sh -c 'if [ -n \"$OVSX_PAT\" ]; then ovsx publish \"wtf-commit-${npm_package_version}.vsix\" --pat \"$OVSX_PAT\"; else ovsx publish \"wtf-commit-${npm_package_version}.vsix\"; fi'",
+    "publish:ovsx": "sh ./scripts/publish-ovsx.sh",
     "release": "pnpm run package && pnpm run publish:ovsx"
   },
   "devDependencies": {
