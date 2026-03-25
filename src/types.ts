@@ -66,6 +66,9 @@ export interface LlmCallInput {
   model: string;
   systemPrompt: string;
   diff: string;
+  intent?: string;
+  repairMessage?: string;
+  repairReason?: string;
   token: vscode.CancellationToken;
   timeoutMs: number;
 }
@@ -93,6 +96,7 @@ export const MAX_UNTRACKED_FILE_BYTES = 120 * 1024;
 export const MAX_UNTRACKED_FILE_LINES = 400;
 export const MAX_UNTRACKED_FILES = 30;
 export const MAX_SUMMARY_DIRS = 10;
+export const MAX_DIFF_FILE_CHARS = 3_500;
 
 export const GitStatus = {
   UNTRACKED: 7,

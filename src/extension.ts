@@ -134,30 +134,22 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       return;
     }
 
-    const commitMessage = await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: `Generating commit message (${config.provider})...`,
-        cancellable: true,
-      },
-      async (_progress, token) => {
-        return callLLM({
-          endpoint,
-          apiKey,
-          model: config.model,
-          systemPrompt: config.systemPrompt,
-          diff,
-          token,
-          timeoutMs: DEFAULT_TIMEOUT_MS,
-        });
-      }
-    );
+    const intent = repository.inputBox.value.trim();
+
+    const commitMessage = await generateCommitMessage({
+      endpoint,
+      apiKey,
+      model: config.model,
+      systemPrompt: config.systemPrompt,
+      diff,
+      intent,
+    });
 
     if (!commitMessage) {
       return;
     }
 
-    const normalizedCommitMessage = normalizeCommitMessage(commitMessage);
+    let normalizedCommitMessage = normalizeCommitMessage(commitMessage);
     if (!normalizedCommitMessage) {
       vscode.window.showErrorMessage('Generated commit message is empty. Please try again.');
       return;
@@ -167,7 +159,41 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     repository.inputBox.value = normalizedCommitMessage;
 
     if (!looksLikeConventionalCommit(normalizedCommitMessage)) {
-      vscode.window.showWarningMessage('Generated message may not follow Conventional Commits format.');
+      const action = await vscode.window.showWarningMessage(
+        'Generated message may not follow Conventional Commits format.',
+        'AI Repair',
+        'Keep Original'
+      );
+
+      if (action === 'AI Repair') {
+        const repairedMessage = await repairCommitMessage({
+          endpoint,
+          apiKey,
+          model: config.model,
+          systemPrompt: config.systemPrompt,
+          diff,
+          intent,
+          repairMessage: normalizedCommitMessage,
+          repairReason: 'The first line must match Conventional Commits: <type>(<scope>): <description>.',
+        });
+
+        if (!repairedMessage) {
+          return;
+        }
+
+        const normalizedRepairedMessage = normalizeCommitMessage(repairedMessage);
+        if (!normalizedRepairedMessage) {
+          vscode.window.showErrorMessage('AI repair returned an empty commit message. Please try again.');
+          return;
+        }
+
+        normalizedCommitMessage = normalizedRepairedMessage;
+        repository.inputBox.value = normalizedCommitMessage;
+
+        if (!looksLikeConventionalCommit(normalizedCommitMessage)) {
+          vscode.window.showWarningMessage('AI repair completed, but the message may still need manual adjustment.');
+        }
+      }
     }
 
     if (!config.autoCommit) {
@@ -175,7 +201,6 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       return;
     }
 
-    // Phase 3: Enhance UX & Interactivity for Auto-commit confirmation
     let shouldCommit = true;
     if (config.confirmBeforeCommit) {
       const response = await vscode.window.showInformationMessage(
@@ -191,7 +216,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
         await vscode.commands.executeCommand('workbench.view.scm');
         return;
       }
-      
+
       shouldCommit = response === 'Commit';
     }
 
@@ -236,6 +261,56 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     logError('Generate flow failed', error);
     vscode.window.showErrorMessage(`Failed: ${getErrorMessage(error)}`);
   }
+}
+
+async function generateCommitMessage(input: {
+  endpoint: string;
+  apiKey: string;
+  model: string;
+  systemPrompt: string;
+  diff: string;
+  intent?: string;
+}): Promise<string | undefined> {
+  return vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: 'Generating commit message...',
+        cancellable: true,
+      },
+      async (_progress, token) => {
+        return callLLM({
+          ...input,
+          token,
+          timeoutMs: DEFAULT_TIMEOUT_MS,
+        });
+      }
+    );
+}
+
+async function repairCommitMessage(input: {
+  endpoint: string;
+  apiKey: string;
+  model: string;
+  systemPrompt: string;
+  diff: string;
+  intent?: string;
+  repairMessage: string;
+  repairReason?: string;
+}): Promise<string | undefined> {
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: 'Repairing commit message...',
+      cancellable: true,
+    },
+    async (_progress, token) => {
+      return callLLM({
+        ...input,
+        token,
+        timeoutMs: DEFAULT_TIMEOUT_MS,
+      });
+    }
+  );
 }
 
 async function handleRequestFailure(error: RequestFailure): Promise<void> {

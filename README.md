@@ -11,22 +11,22 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.0.2)
+## 🆕 Latest (v1.0.3)
 
-- **Settings Overhaul**: Simplified the extension configuration page by consolidating AI provider overrides into a single `wtfCommit.providerOverrides` JSON configuration block, drastically reducing UI clutter.
-
-- **Interactive Commit Flow**: Introduce an "**Edit in Input Box**" action directly from the auto-commit confirmation dialog, letting you seamlessly review and tweak AI-generated messages.
-- **Smart Architecture & Diff Scaling**: New modular rewrite intelligently omits unhelpful lock files preventing token overrun on massive commits, and automatically extends timeouts on deep reasoning models.
+- **Zero-Config Intent Hint**: If you type a few words in the Source Control input box before generation, WTF Commit will use them as a lightweight hint to steer the commit message.
+- **AI Repair**: If the generated title does not look like a Conventional Commit, the extension now offers a one-click `AI Repair` action to rewrite it without breaking your flow.
+- **Cleaner Diff Context**: The model now ignores more lockfiles, assets, build outputs, and oversized noisy patches up front, improving quality while keeping the extension minimalist.
 
 ## 🚀 Features
 
 - **Multi-lingual Support**: Preset support for English, Chinese, Japanese, Classical Chinese, and **Custom** strings.
 - **Conventional Commits**: Automatically follows conventional commit standards (feat, fix, docs, etc.).
-- **Smart Diffing**: Prioritizes staged changes and falls back to working tree changes.
+- **Smart Diffing**: Prioritizes staged changes, falls back to working tree changes, and strips more low-value diff noise before generation.
+- **Intent-Aware Generation**: Reuses any text already typed into the SCM input box as a zero-config generation hint.
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
 - **Interactive Tuning**: Auto-commit flows support real-time message editing without blocking Git staging.
+- **Lightweight Recovery**: Offers an inline `AI Repair` action when the generated title format needs a quick fix.
 - **Reliable Request Flow**: Built-in timeout + categorized API error handling, with extended reasoning for DeepSeek and MiniMax variants.
-- **Reliable Request Flow**: Built-in timeout + categorized API error handling for better resilience.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 - **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
 
