@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-03-25
+### Changed
+- **Package Cleanup**: Excluded the entire `scripts/` directory from both the repository package and the published VSIX, and moved Open VSX publishing to an inline release command.
+
 ## [1.0.3] - 2026-03-25
 ### Added
 - **Zero-Config Intent Hint**: If you type a short hint in the Source Control input box before generation, WTF Commit now uses it as an intent cue so the resulting message stays focused on what you meant to commit.
