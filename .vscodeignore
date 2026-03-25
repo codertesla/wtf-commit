@@ -19,6 +19,8 @@ vsc-extension-quickstart.md
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+scripts/publish-ovsx.sh
+scripts/publish-openvsx.sh
 
 # Build dependencies
 node_modules/**

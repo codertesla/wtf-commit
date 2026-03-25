@@ -26,6 +26,8 @@ Thumbs.db
 # NPM config (developer-specific)
 .npmrc
 
+# Local publish helpers
+scripts/publish-ovsx.sh
 
 # UPDATEFLOW.md
 UPDATEFLOW.md
