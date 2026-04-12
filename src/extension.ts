@@ -259,6 +259,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
           }
         );
         showStatusMessage('$(cloud-upload) Commit and push completed.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
+        vscode.window.showInformationMessage('Push successful.');
       } catch (error) {
         await handlePushFailure(repository, error);
       }
