@@ -1,9 +1,12 @@
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import * as vscode from 'vscode';
 import { 
   PROVIDER_NAMES, 
   ProviderName, 
   RequestFailure, 
-  DEFAULT_TIMEOUT_MS 
+  DEFAULT_TIMEOUT_MS,
+  type Repository,
 } from './types';
 import { readExtensionConfig, getSecretKeyName } from './config';
 import { resolveRepository, collectStageablePaths } from './git';
@@ -12,11 +15,14 @@ import { buildChatCompletionsEndpoint, callLLM } from './llm/provider';
 import { 
   normalizeCommitMessage, 
   looksLikeConventionalCommit, 
+  getGitCommandError,
   getErrorMessage, 
   logInfo, 
   logError, 
   setOutputChannel 
 } from './prompt';
+
+const execFileAsync = promisify(execFile);
 
 export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel('WTF Commit');
@@ -239,17 +245,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
         await repository.push();
         vscode.window.showInformationMessage('Push successful.');
       } catch (error) {
-        logError('Push failed after commit', error);
-        
-        // Phase 3: Improved Error rescuing
-        const action = await vscode.window.showErrorMessage(
-          `Commit successful, but push failed: ${getErrorMessage(error)}`,
-          'Undo Commit'
-        );
-        if (action === 'Undo Commit') {
-           // Soft reset to undo the commit safely while keeping changes staged
-           await vscode.commands.executeCommand('git.undoCommit'); 
-        }
+        await handlePushFailure(repository, error);
       }
     }
   } catch (error) {
@@ -340,6 +336,68 @@ async function handleRequestFailure(error: RequestFailure): Promise<void> {
   }
 
   vscode.window.showErrorMessage(error.message);
+}
+
+async function handlePushFailure(repository: Repository, error: unknown): Promise<void> {
+  logError('Push failed after commit', error);
+
+  const gitError = getGitCommandError(error);
+  const command = gitError?.gitCommand;
+  const commandLabel = command ? `git ${command}` : 'Git repository refresh';
+  const detail = gitError?.stderr?.trim() || getErrorMessage(error);
+
+  if (command && command !== 'push') {
+    const pushVerified = await verifyUpstreamMatchesHead(repository.rootUri.fsPath);
+
+    if (pushVerified) {
+      logInfo(`Push verified after ${commandLabel} failed; HEAD matches upstream.`);
+      vscode.window.showWarningMessage(
+        `Push succeeded, but ${commandLabel} failed afterward: ${detail}`
+      );
+      return;
+    }
+
+    vscode.window.showWarningMessage(
+      `Push may have succeeded, but ${commandLabel} failed afterward: ${detail}`
+    );
+    return;
+  }
+
+  const action = await vscode.window.showErrorMessage(
+    `Commit successful, but push failed: ${detail}`,
+    'Undo Commit'
+  );
+  if (action === 'Undo Commit') {
+    await vscode.commands.executeCommand('git.undoCommit');
+  }
+}
+
+async function verifyUpstreamMatchesHead(repositoryPath: string): Promise<boolean> {
+  const head = await runGitCommand(repositoryPath, ['rev-parse', 'HEAD']);
+  if (!head) {
+    return false;
+  }
+
+  const upstream = await runGitCommand(repositoryPath, ['rev-parse', '@{upstream}']);
+  if (!upstream) {
+    return false;
+  }
+
+  return head === upstream;
+}
+
+async function runGitCommand(repositoryPath: string, args: string[]): Promise<string | undefined> {
+  try {
+    const { stdout } = await execFileAsync('git', args, {
+      cwd: repositoryPath,
+      encoding: 'utf8',
+      windowsHide: true,
+    });
+    return stdout.trim();
+  } catch (error) {
+    logError(`Failed to run git ${args.join(' ')} during push verification`, error);
+    return undefined;
+  }
 }
 
 async function checkChangelog(context: vscode.ExtensionContext): Promise<void> {

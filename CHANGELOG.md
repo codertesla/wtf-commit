@@ -5,6 +5,12 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-04-12
+### Fixed
+- **Auto Push False Failures**: Auto-push no longer reports a hard failure when the underlying `git push` succeeds but VS Code's follow-up repository refresh throws an error.
+- **Safer Push Recovery**: The `Undo Commit` action is now withheld for post-push refresh failures to avoid encouraging a local undo after the commit may already be on the remote.
+- **Clearer Git Diagnostics**: Git operation errors now surface the underlying command and `stderr` output instead of the generic `Failed to execute git` message when available.
+
 ## [1.0.4] - 2026-03-25
 ### Changed
 - **Package Cleanup**: Excluded the entire `scripts/` directory from both the repository package and the published VSIX, and moved Open VSX publishing to an inline release command.

@@ -11,11 +11,11 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.0.3)
+## 🆕 Latest (v1.0.5)
 
-- **Zero-Config Intent Hint**: If you type a few words in the Source Control input box before generation, WTF Commit will use them as a lightweight hint to steer the commit message.
-- **AI Repair**: If the generated title does not look like a Conventional Commit, the extension now offers a one-click `AI Repair` action to rewrite it without breaking your flow.
-- **Cleaner Diff Context**: The model now ignores more lockfiles, assets, build outputs, and oversized noisy patches up front, improving quality while keeping the extension minimalist.
+- **Auto-Push False Failure Fix**: WTF Commit now distinguishes a real `git push` failure from a follow-up Git refresh failure inside VS Code, preventing misleading red errors after a successful push.
+- **Safer Recovery**: When the push likely already reached the remote, the extension no longer suggests `Undo Commit`, reducing the risk of creating an unnecessary local/remote divergence.
+- **Clearer Git Errors**: Git notifications now surface the underlying command and stderr output when available, instead of collapsing everything into `Failed to execute git`.
 
 ## 🚀 Features
 
