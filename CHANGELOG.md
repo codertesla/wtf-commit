@@ -5,6 +5,12 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-04-12
+### Changed
+- **Notification Hierarchy Refresh**: Success and passive states now use status bar feedback with clearer codicon symbols, making commit creation, commit success, push progress, push success, cancellation, and empty-diff states easier to scan.
+- **Cleaner Commit Confirmation**: Auto-commit confirmation now uses a modal title plus detail area for the generated message, making long commit messages easier to review before execution.
+- **Faster Multi-Repo Picking**: Repository selection now shows the folder name first and the full path as supporting context, which improves scan speed in multi-root workspaces.
+
 ## [1.0.5] - 2026-04-12
 ### Fixed
 - **Auto Push False Failures**: Auto-push no longer reports a hard failure when the underlying `git push` succeeds but VS Code's follow-up repository refresh throws an error.
