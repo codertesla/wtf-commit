@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'node:path';
 import { GitExtension, Repository, RepositoryState, Change } from './types';
 
 export async function resolveRepository(): Promise<Repository | null> {
@@ -31,10 +32,14 @@ export async function resolveRepository(): Promise<Repository | null> {
 
   const selected = await vscode.window.showQuickPick(
     git.repositories.map((repository) => ({
-      label: repository.rootUri.fsPath,
+      label: path.basename(repository.rootUri.fsPath),
+      description: repository.rootUri.fsPath,
       repository,
     })),
-    { placeHolder: 'Select a Git repository' }
+    {
+      placeHolder: 'Select a Git repository',
+      title: 'WTF Commit: Repository Picker',
+    }
   );
 
   return selected?.repository || null;

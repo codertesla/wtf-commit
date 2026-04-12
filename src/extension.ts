@@ -23,6 +23,8 @@ import {
 } from './prompt';
 
 const execFileAsync = promisify(execFile);
+const STATUS_MESSAGE_TIMEOUT_MS = 5_000;
+const LONG_STATUS_MESSAGE_TIMEOUT_MS = 8_000;
 
 export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel('WTF Commit');
@@ -70,7 +72,7 @@ async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
 
     const selectedItem = await vscode.window.showQuickPick(items, {
       placeHolder: 'Select Provider to set API Key for',
-      title: 'Wtf Commit: Provider Status',
+      title: 'WTF Commit: Provider Status',
     });
 
     if (!selectedItem) {
@@ -96,6 +98,7 @@ async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
       .getConfiguration('wtfCommit')
       .update('provider', provider, vscode.ConfigurationTarget.Global);
 
+    showStatusMessage(`$(key) API key saved for ${provider}.`, STATUS_MESSAGE_TIMEOUT_MS);
     vscode.window.showInformationMessage(`API Key for ${provider} saved. Provider switched to ${provider}.`);
   } catch (error) {
     logError('Failed to set API key', error);
@@ -130,13 +133,13 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       repository.state.workingTreeChanges.length > 0 || repository.state.untrackedChanges.length > 0;
 
     if (!hasStagedChanges && !hasWorkingTreeChanges) {
-      vscode.window.showInformationMessage('No changes detected in working tree or staging area.');
+      showStatusMessage('$(circle-slash) No changes detected in working tree or staging area.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
       return;
     }
 
     const diff = await getOptimizedDiff(repository, hasStagedChanges, config.smartStage);
     if (!diff.trim()) {
-      vscode.window.showInformationMessage('No diff content found.');
+      showStatusMessage('$(circle-slash) No diff content found.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
       return;
     }
 
@@ -203,21 +206,25 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     }
 
     if (!config.autoCommit) {
-      vscode.window.showInformationMessage(`[${config.provider}] Commit message generated.`);
+      await vscode.commands.executeCommand('workbench.view.scm');
+      showStatusMessage(`$(sparkle) [${config.provider}] Commit message ready in Source Control.`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
       return;
     }
 
     let shouldCommit = true;
     if (config.confirmBeforeCommit) {
       const response = await vscode.window.showInformationMessage(
-        `[${config.provider}] Generated Commit Message:\n\n${normalizedCommitMessage}\n\nAuto-commit?`,
-        { modal: false },
+        `[${config.provider}] Ready to commit`,
+        {
+          modal: true,
+          detail: normalizedCommitMessage,
+        },
         'Commit',
-        'Edit in Input Box',
+        'Edit in Source Control',
         'Cancel'
       );
 
-      if (response === 'Edit in Input Box') {
+      if (response === 'Edit in Source Control') {
         // Focus the Source Control view so user can edit instantly
         await vscode.commands.executeCommand('workbench.view.scm');
         return;
@@ -227,7 +234,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     }
 
     if (!shouldCommit) {
-        return;
+      return;
     }
 
     if (!hasStagedChanges && hasWorkingTreeChanges) {
@@ -238,12 +245,20 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     }
 
     await repository.commit(normalizedCommitMessage);
-    vscode.window.showInformationMessage('Commit successful.');
+    showStatusMessage('$(check) Commit successful.', STATUS_MESSAGE_TIMEOUT_MS);
 
     if (config.autoPush) {
       try {
-        await repository.push();
-        vscode.window.showInformationMessage('Push successful.');
+        await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: 'Pushing changes...',
+          },
+          async () => {
+            await repository.push();
+          }
+        );
+        showStatusMessage('$(cloud-upload) Commit and push completed.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
       } catch (error) {
         await handlePushFailure(repository, error);
       }
@@ -313,7 +328,7 @@ async function handleRequestFailure(error: RequestFailure): Promise<void> {
   logError('LLM request failed', error);
 
   if (error.code === 'cancelled') {
-    vscode.window.showInformationMessage(error.message);
+    showStatusMessage('$(debug-pause) Commit generation cancelled.', STATUS_MESSAGE_TIMEOUT_MS);
     return;
   }
 
@@ -351,6 +366,7 @@ async function handlePushFailure(repository: Repository, error: unknown): Promis
 
     if (pushVerified) {
       logInfo(`Push verified after ${commandLabel} failed; HEAD matches upstream.`);
+      showStatusMessage('$(cloud-upload) Push completed with a follow-up refresh warning.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
       vscode.window.showWarningMessage(
         `Push succeeded, but ${commandLabel} failed afterward: ${detail}`
       );
@@ -370,6 +386,10 @@ async function handlePushFailure(repository: Repository, error: unknown): Promis
   if (action === 'Undo Commit') {
     await vscode.commands.executeCommand('git.undoCommit');
   }
+}
+
+function showStatusMessage(text: string, hideAfterMs = STATUS_MESSAGE_TIMEOUT_MS): void {
+  vscode.window.setStatusBarMessage(text, hideAfterMs);
 }
 
 async function verifyUpstreamMatchesHead(repositoryPath: string): Promise<boolean> {
