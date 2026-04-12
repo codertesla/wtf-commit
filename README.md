@@ -11,11 +11,11 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.0.6)
+## 🆕 Latest (v1.0.7)
 
-- **Sharper Success Signals**: Commit generation, commit success, push progress, and push completion now use more expressive status bar symbols for faster visual parsing.
-- **Clearer Commit Review**: Auto-commit confirmation now presents the generated commit message in a dedicated detail area, which keeps long messages readable.
-- **Smoother Multi-Repo Selection**: Repository picking now shows folder names first with the full path as context, helping multi-root users move faster.
+- **Push Success Notification Restored**: Auto-push now shows a clear VS Code information notification again after a successful push.
+- **Dual Success Feedback**: Push completion now combines the restored notification with the status bar cloud-upload signal for stronger visibility.
+- **Stable Auto-Push Flow**: The success path now carries progress feedback, status bar feedback, and a completion notification in one consistent sequence.
 
 ## 🚀 Features
 
