@@ -104,10 +104,10 @@ export const GitStatus = {
 
 export const PROVIDERS: Record<string, ProviderConfig> = {
   OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
-  DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
-  MiniMax: { baseUrl: 'https://api.minimaxi.com/v1', model: 'MiniMax-M2.5' },
-  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview' },
-  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5' },
+  DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
+  MiniMax: { baseUrl: 'https://api.minimaxi.com/v1', model: 'MiniMax-M2.7' },
+  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2.6' },
+  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5.1' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-3.1-flash-lite-preview' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 };
