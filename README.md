@@ -11,11 +11,11 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.0.7)
+## 🆕 Latest (v1.0.8)
 
-- **Push Success Notification Restored**: Auto-push now shows a clear VS Code information notification again after a successful push.
-- **Dual Success Feedback**: Push completion now combines the restored notification with the status bar cloud-upload signal for stronger visibility.
-- **Stable Auto-Push Flow**: The success path now carries progress feedback, status bar feedback, and a completion notification in one consistent sequence.
+- **Refined Marketplace Icon**: The extension now uses a simpler abstract commit-and-sparkle logo.
+- **Provider Defaults Updated**: DeepSeek now defaults to `deepseek-v4-flash`, MiniMax to `MiniMax-M2.7`, Kimi to `kimi-k2.6`, and GLM to `glm-5.1`.
+- **Cleaner Default Model Docs**: The built-in provider table has been refreshed to match the runtime defaults.
 
 ## 🚀 Features
 
@@ -77,10 +77,10 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 | Provider | Default Model | Default Base URL |
 |----------|---------------|-----------------|
 | **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
-| **DeepSeek** | `deepseek-chat` | `https://api.deepseek.com` |
-| **MiniMax** | `MiniMax-M2.5` | `https://api.minimaxi.com/v1` |
-| **Moonshot** | `kimi-k2-turbo-preview` | `https://api.moonshot.cn/v1` |
-| **GLM** | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
+| **MiniMax** | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| **Moonshot** | `kimi-k2.6` | `https://api.moonshot.cn/v1` |
+| **GLM** | `glm-5.1` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Gemini** | `gemini-3.1-flash-lite-preview` | `https://generativelanguage.googleapis.com/v1beta/openai` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
