@@ -11,11 +11,12 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.0.8)
+## 🆕 Latest (v1.0.9)
 
-- **Refined Marketplace Icon**: The extension now uses a simpler abstract commit-and-sparkle logo.
-- **Provider Defaults Updated**: DeepSeek now defaults to `deepseek-v4-flash`, MiniMax to `MiniMax-M2.7`, Kimi to `kimi-k2.6`, and GLM to `glm-5.1`.
-- **Cleaner Default Model Docs**: The built-in provider table has been refreshed to match the runtime defaults.
+- **Safer Staged Commits**: Generated messages now stay focused on staged changes when the index is not empty.
+- **More Robust Diff Context**: Untracked file handling now detects likely binary content and skips more generated artifacts.
+- **Runtime Compatibility Cleanup**: API requests no longer rely on global `fetch`, and the extension uses Node typings aligned with the supported VS Code host.
+- **Smaller Marketplace Icon**: The packaged PNG icon is now 256x256 and much lighter while remaining crisp.
 
 ## 🚀 Features
 
