@@ -5,6 +5,14 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-04-29
+### Changed
+- **Runtime Request Compatibility**: Replaced the global `fetch` call with a Node `http`/`https` request path and aligned Node types with the supported VS Code extension host range.
+- **Smarter Staged Diff Handling**: When staged changes exist, generated messages now stay focused on staged content instead of mixing in unrelated untracked files.
+- **Safer Untracked File Context**: Added binary detection and broader generated-file filtering before untracked file content is sent to the model.
+- **Provider Type Safety**: Tightened provider typings so built-in provider names are checked as explicit string literals.
+- **Smaller Marketplace Icon**: Resized the PNG icon from 1024x1024 to 256x256, reducing package size while keeping a crisp marketplace image.
+
 ## [1.0.8] - 2026-04-29
 ### Changed
 - **Refined Marketplace Icon**: Replaced the extension logo with a simpler abstract commit-and-sparkle mark for clearer marketplace recognition.

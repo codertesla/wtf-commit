@@ -1,5 +1,29 @@
+import * as http from 'node:http';
+import * as https from 'node:https';
 import { LlmCallInput, LlmResponse, RequestFailure, REASONING_TIMEOUT_MS, ProviderName } from '../types';
 import { logInfo, getErrorMessage } from '../prompt';
+
+interface ChatMessage {
+  role: 'system' | 'user';
+  content: string;
+}
+
+interface ChatCompletionRequest {
+  model: string;
+  messages: ChatMessage[];
+  temperature: number;
+  max_tokens: number;
+  extra_body?: {
+    reasoning_split?: boolean;
+  };
+}
+
+interface ApiResponse {
+  ok: boolean;
+  status: number;
+  text(): Promise<string>;
+  json(): Promise<unknown>;
+}
 
 export function buildChatCompletionsEndpoint(baseUrl: string, provider: ProviderName): string {
   const sanitized = baseUrl.trim().replace(/\/+$/, '');
@@ -41,7 +65,7 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
     ? buildRepairPrompt(input.repairMessage || '', input.repairReason)
     : buildGenerationPrompt(input.diff, input.intent);
 
-  const requestBody: any = {
+  const requestBody: ChatCompletionRequest = {
     model: input.model,
     messages: [
       { role: 'system', content: systemPrompt },
@@ -75,15 +99,7 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
   });
 
   try {
-    const response = await fetch(input.endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${input.apiKey}`,
-      },
-      body: JSON.stringify(requestBody),
-      signal: controller.signal,
-    });
+    const response = await postJson(input.endpoint, requestBody, input.apiKey, controller.signal);
 
     if (!response.ok) {
       const errorText = await safeReadResponseText(response);
@@ -169,7 +185,66 @@ function buildRepairPrompt(message: string, reason?: string): string {
   return sections.join('\n\n');
 }
 
-async function safeReadResponseText(response: Response): Promise<string> {
+async function postJson(
+  endpoint: string,
+  requestBody: ChatCompletionRequest,
+  apiKey: string,
+  signal: AbortSignal
+): Promise<ApiResponse> {
+  const body = JSON.stringify(requestBody);
+  const url = new URL(endpoint);
+  const transport = url.protocol === 'https:' ? https : http;
+
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new Error('Request aborted.'));
+      return;
+    }
+
+    const request = transport.request(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body),
+          Authorization: `Bearer ${apiKey}`,
+        },
+      },
+      (response) => {
+        const chunks: Buffer[] = [];
+
+        response.on('data', (chunk: Buffer | string) => {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        });
+
+        response.on('end', () => {
+          const responseText = Buffer.concat(chunks).toString('utf8');
+          resolve({
+            ok: Boolean(response.statusCode && response.statusCode >= 200 && response.statusCode < 300),
+            status: response.statusCode || 0,
+            text: async () => responseText,
+            json: async () => JSON.parse(responseText),
+          });
+        });
+      }
+    );
+
+    const abortRequest = () => {
+      request.destroy(new Error('Request aborted.'));
+    };
+
+    signal.addEventListener('abort', abortRequest, { once: true });
+    request.on('error', reject);
+    request.on('close', () => {
+      signal.removeEventListener('abort', abortRequest);
+    });
+
+    request.end(body);
+  });
+}
+
+async function safeReadResponseText(response: ApiResponse): Promise<string> {
   try {
     const text = await response.text();
     return text.slice(0, 500);

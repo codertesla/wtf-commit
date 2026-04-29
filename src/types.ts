@@ -82,7 +82,29 @@ export interface LlmResponse {
   }>;
 }
 
-export type ProviderName = keyof typeof PROVIDERS | 'Custom';
+export const BUILT_IN_PROVIDER_NAMES = [
+  'OpenAI',
+  'DeepSeek',
+  'MiniMax',
+  'Moonshot',
+  'GLM',
+  'Gemini',
+  'OpenRouter',
+] as const;
+
+export type BuiltInProviderName = typeof BUILT_IN_PROVIDER_NAMES[number];
+
+export const PROVIDERS = {
+  OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
+  DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
+  MiniMax: { baseUrl: 'https://api.minimaxi.com/v1', model: 'MiniMax-M2.7' },
+  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2.6' },
+  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5.1' },
+  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-3.1-flash-lite-preview' },
+  OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
+} satisfies Record<BuiltInProviderName, ProviderConfig>;
+
+export type ProviderName = BuiltInProviderName | 'Custom';
 export type RequestFailureCode = 'auth' | 'rate_limit' | 'timeout' | 'network' | 'cancelled' | 'invalid_response' | 'api';
 
 export const SECRET_KEY_PREFIX = 'wtfCommit.key.';
@@ -102,17 +124,7 @@ export const GitStatus = {
   UNTRACKED: 7,
 };
 
-export const PROVIDERS: Record<string, ProviderConfig> = {
-  OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
-  DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
-  MiniMax: { baseUrl: 'https://api.minimaxi.com/v1', model: 'MiniMax-M2.7' },
-  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2.6' },
-  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5.1' },
-  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-3.1-flash-lite-preview' },
-  OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
-};
-
-export const PROVIDER_NAMES = [...Object.keys(PROVIDERS), 'Custom'] as ProviderName[];
+export const PROVIDER_NAMES = [...BUILT_IN_PROVIDER_NAMES, 'Custom'] as const satisfies readonly ProviderName[];
 
 export class RequestFailure extends Error {
   constructor(

@@ -30,7 +30,10 @@ export async function getOptimizedDiff(
     throw new Error('No staged changes found. Please stage your changes first.');
   }
 
-  const untrackedChanges = getUntrackedChanges(repository.state).slice(0, MAX_UNTRACKED_FILES);
+  const shouldIncludeUntrackedChanges = !hasStagedChanges && smartStage;
+  const untrackedChanges = shouldIncludeUntrackedChanges
+    ? getUntrackedChanges(repository.state).slice(0, MAX_UNTRACKED_FILES)
+    : [];
   if (untrackedChanges.length > 0) {
     const untrackedPatches = await Promise.all(untrackedChanges.map((change) => buildUntrackedPatch(change.uri)));
     const validPatches = untrackedPatches.filter((patch): patch is string => Boolean(patch));
@@ -49,7 +52,9 @@ export async function getOptimizedDiff(
     return diff;
   }
 
-  const changes = hasStagedChanges ? repository.state.indexChanges : repository.state.workingTreeChanges;
+  const changes = hasStagedChanges
+    ? repository.state.indexChanges
+    : [...repository.state.workingTreeChanges, ...untrackedChanges];
   return buildLargeDiffSummary(diff, changes);
 }
 
@@ -89,8 +94,19 @@ async function buildUntrackedPatch(uri: vscode.Uri): Promise<string | null> {
       ].join('\n');
     }
 
-    const document = await vscode.workspace.openTextDocument(uri);
-    const content = document.getText();
+    const bytes = await vscode.workspace.fs.readFile(uri);
+    if (isLikelyBinary(bytes)) {
+      return [
+        `diff --git a/${relativePath} b/${relativePath}`,
+        'new file',
+        '--- /dev/null',
+        `+++ b/${relativePath}`,
+        '@@ -0,0 +1,1 @@',
+        `+[content omitted: ${relativePath} appears to be binary]`,
+      ].join('\n');
+    }
+
+    const content = Buffer.from(bytes).toString('utf8');
     const lines = content.split(/\r?\n/);
     const visibleLines = lines.slice(0, MAX_UNTRACKED_FILE_LINES);
 
@@ -191,6 +207,7 @@ function extractDiffPath(section: string): string | null {
 function shouldFilterPath(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, '/').toLowerCase();
   const baseName = path.posix.basename(normalized);
+  const pathSegments = normalized.split('/').filter(Boolean);
 
   const filteredNames = new Set([
     'package-lock.json',
@@ -219,19 +236,35 @@ function shouldFilterPath(filePath: string): boolean {
     '.mp3',
     '.zip',
     '.gz',
+    '.7z',
     '.jar',
+    '.tar',
+    '.tgz',
     '.svg',
     '.map',
+    '.wasm',
   ]);
 
-  const filteredDirectories = [
-    '/dist/',
-    '/build/',
-    '/coverage/',
-    '/out/',
-    '/target/',
-    '/.next/',
-    '/node_modules/',
+  const filteredDirectoryNames = new Set([
+    'dist',
+    'build',
+    'coverage',
+    'out',
+    'target',
+    '.next',
+    'node_modules',
+    '.git',
+    '.vscode-test',
+    '.turbo',
+    '.cache',
+    'tmp',
+    'temp',
+    'vendor',
+    '__pycache__',
+  ]);
+
+  const filteredPathPrefixes = [
+    '.vscode-test/',
   ];
 
   if (filteredNames.has(baseName)) {
@@ -242,7 +275,29 @@ function shouldFilterPath(filePath: string): boolean {
     return true;
   }
 
-  return filteredDirectories.some((segment) => normalized.includes(segment));
+  return pathSegments.some((segment) => filteredDirectoryNames.has(segment))
+    || filteredPathPrefixes.some((prefix) => normalized.startsWith(prefix));
+}
+
+function isLikelyBinary(bytes: Uint8Array): boolean {
+  const sample = bytes.slice(0, Math.min(bytes.length, 8_000));
+  if (sample.length === 0) {
+    return false;
+  }
+
+  let suspiciousBytes = 0;
+  for (const byte of sample) {
+    if (byte === 0) {
+      return true;
+    }
+
+    const isAllowedControlChar = byte === 7 || byte === 8 || byte === 9 || byte === 10 || byte === 12 || byte === 13 || byte === 27;
+    if (byte < 32 && !isAllowedControlChar) {
+      suspiciousBytes += 1;
+    }
+  }
+
+  return suspiciousBytes / sample.length > 0.1;
 }
 
 function buildOmittedSection(filePath: string, reason: string): string {
