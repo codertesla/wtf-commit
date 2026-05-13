@@ -11,12 +11,12 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.0.9)
+## 🆕 Latest (v1.2.0)
 
-- **Safer Staged Commits**: Generated messages now stay focused on staged changes when the index is not empty.
-- **More Robust Diff Context**: Untracked file handling now detects likely binary content and skips more generated artifacts.
-- **Runtime Compatibility Cleanup**: API requests no longer rely on global `fetch`, and the extension uses Node typings aligned with the supported VS Code host.
-- **Smaller Marketplace Icon**: The packaged PNG icon is now 256x256 and much lighter while remaining crisp.
+- **Streaming Output**: LLM responses now stream in real-time, showing generation progress as it happens. Perceived latency is significantly reduced.
+- **Configurable Temperature**: New `wtfCommit.temperature` setting (default `0.7`) for controlling generation creativity.
+- **Unit Test Suite**: 36 unit tests added with a fast `test:unit` script for local validation.
+- **Stricter TypeScript**: Enabled `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedParameters`.
 
 ## 🚀 Features
 
@@ -28,6 +28,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 - **Interactive Tuning**: Auto-commit flows support real-time message editing without blocking Git staging.
 - **Lightweight Recovery**: Offers an inline `AI Repair` action when the generated title format needs a quick fix.
 - **Reliable Request Flow**: Built-in timeout + categorized API error handling, with extended reasoning for DeepSeek and MiniMax variants.
+- **Streaming Generation**: Real-time streaming output so you can see the commit message as it's being generated.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 - **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
 

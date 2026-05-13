@@ -13,6 +13,7 @@ interface ChatCompletionRequest {
   messages: ChatMessage[];
   temperature: number;
   max_tokens: number;
+  stream?: boolean;
   extra_body?: {
     reasoning_split?: boolean;
   };
@@ -23,6 +24,16 @@ interface ApiResponse {
   status: number;
   text(): Promise<string>;
   json(): Promise<unknown>;
+}
+
+interface StreamDelta {
+  choices?: Array<{
+    delta?: {
+      content?: string;
+      reasoning_content?: string;
+    };
+    finish_reason?: string | null;
+  }>;
 }
 
 export function buildChatCompletionsEndpoint(baseUrl: string, provider: ProviderName): string {
@@ -65,18 +76,20 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
     ? buildRepairPrompt(input.repairMessage || '', input.repairReason)
     : buildGenerationPrompt(input.diff, input.intent);
 
+  const useStreaming = Boolean(input.onStream);
+
   const requestBody: ChatCompletionRequest = {
     model: input.model,
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userContent },
     ],
-    temperature: 1.0,
+    temperature: input.temperature,
     max_tokens: 4096,
+    stream: useStreaming || undefined,
   };
 
   const isMiniMax = input.endpoint.includes('minimaxi.com');
-  const isDeepSeek = input.endpoint.includes('deepseek.com');
   const isReasoner = isMiniMax || input.model.toLowerCase().includes('reasoner') || input.model.toLowerCase().includes('think');
 
   if (isMiniMax) {
@@ -85,8 +98,7 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
 
   const controller = new AbortController();
   let timedOut = false;
-  
-  // Apply a longer timeout for reasoning models automatically
+
   const effectiveTimeout = isReasoner ? REASONING_TIMEOUT_MS : input.timeoutMs;
 
   const timeoutHandle = setTimeout(() => {
@@ -99,21 +111,15 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
   });
 
   try {
+    if (useStreaming) {
+      return await streamResponse(input, requestBody, controller.signal, timedOut, effectiveTimeout);
+    }
+
     const response = await postJson(input.endpoint, requestBody, input.apiKey, controller.signal);
 
     if (!response.ok) {
       const errorText = await safeReadResponseText(response);
-      if (response.status === 401 || response.status === 403) {
-        throw new RequestFailure('auth', `Authentication failed (${response.status})`, response.status);
-      }
-      if (response.status === 429) {
-        throw new RequestFailure('rate_limit', 'Rate limit reached. Please retry later.', response.status);
-      }
-      throw new RequestFailure(
-        'api',
-        `API request failed (${response.status}): ${errorText || 'No error details returned.'}`,
-        response.status
-      );
+      handleHttpError(response.status, errorText);
     }
 
     let data: LlmResponse;
@@ -135,7 +141,6 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
       throw new RequestFailure('invalid_response', 'No content in API response.');
     }
 
-    // Strip internal think tags some models might return directly in content
     return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
   } catch (error) {
     if (error instanceof RequestFailure) {
@@ -155,6 +160,132 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
     clearTimeout(timeoutHandle);
     cancellationDisposable.dispose();
   }
+}
+
+async function streamResponse(
+  input: LlmCallInput,
+  requestBody: ChatCompletionRequest,
+  signal: AbortSignal,
+  _timedOut: boolean,
+  _effectiveTimeout: number
+): Promise<string> {
+  const url = new URL(input.endpoint);
+  const transport = url.protocol === 'https:' ? https : http;
+  const body = JSON.stringify(requestBody);
+
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new Error('Request aborted.'));
+      return;
+    }
+
+    const request = transport.request(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body),
+          Authorization: `Bearer ${input.apiKey}`,
+          Accept: 'text/event-stream',
+        },
+      },
+      (response) => {
+        if (response.statusCode && (response.statusCode < 200 || response.statusCode >= 300)) {
+          const chunks: Buffer[] = [];
+          response.on('data', (chunk: Buffer | string) => {
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          });
+          response.on('end', () => {
+            const errorText = Buffer.concat(chunks).toString('utf8').slice(0, 500);
+            try {
+              handleHttpError(response.statusCode || 0, errorText);
+            } catch (error) {
+              reject(error);
+            }
+          });
+          return;
+        }
+
+        let fullContent = '';
+        let buffer = '';
+
+        response.on('data', (chunk: Buffer | string) => {
+          buffer += Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk;
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || !trimmed.startsWith('data: ')) {
+              continue;
+            }
+
+            const data = trimmed.slice(6);
+            if (data === '[DONE]') {
+              continue;
+            }
+
+            try {
+              const parsed = JSON.parse(data) as StreamDelta;
+              const delta = parsed.choices?.[0]?.delta;
+              const content = delta?.content || '';
+              const reasoning = delta?.reasoning_content;
+
+              if (reasoning) {
+                logInfo(`Reasoning chunk: ${reasoning}`);
+              }
+
+              if (content) {
+                fullContent += content;
+                input.onStream?.(content);
+              }
+            } catch {
+              // Skip malformed SSE lines
+            }
+          }
+        });
+
+        response.on('end', () => {
+          const cleaned = fullContent.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+          if (!cleaned) {
+            reject(new RequestFailure('invalid_response', 'No content in streaming response.'));
+            return;
+          }
+          resolve(cleaned);
+        });
+
+        response.on('error', reject);
+      }
+    );
+
+    const abortRequest = () => {
+      request.destroy(new Error('Request aborted.'));
+    };
+
+    signal.addEventListener('abort', abortRequest, { once: true });
+    request.on('error', reject);
+    request.on('close', () => {
+      signal.removeEventListener('abort', abortRequest);
+    });
+
+    request.end(body);
+  });
+}
+
+function handleHttpError(status: number, errorText: string): never {
+  if (status === 401 || status === 403) {
+    throw new RequestFailure('auth', `Authentication failed (${status})`, status);
+  }
+  if (status === 429) {
+    throw new RequestFailure('rate_limit', 'Rate limit reached. Please retry later.', status);
+  }
+  throw new RequestFailure(
+    'api',
+    `API request failed (${status}): ${errorText || 'No error details returned.'}`,
+    status
+  );
 }
 
 function buildGenerationPrompt(diff: string, intent?: string): string {

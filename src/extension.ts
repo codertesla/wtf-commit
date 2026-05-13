@@ -152,6 +152,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       systemPrompt: config.systemPrompt,
       diff,
       intent,
+      temperature: config.temperature,
     });
 
     if (!commitMessage) {
@@ -184,6 +185,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
           intent,
           repairMessage: normalizedCommitMessage,
           repairReason: 'The first line must match Conventional Commits: <type>(<scope>): <description>.',
+          temperature: config.temperature,
         });
 
         if (!repairedMessage) {
@@ -282,6 +284,7 @@ async function generateCommitMessage(input: {
   systemPrompt: string;
   diff: string;
   intent?: string;
+  temperature: number;
 }): Promise<string | undefined> {
   return vscode.window.withProgress(
       {
@@ -289,11 +292,14 @@ async function generateCommitMessage(input: {
         title: 'Generating commit message...',
         cancellable: true,
       },
-      async (_progress, token) => {
+      async (progress, token) => {
         return callLLM({
           ...input,
           token,
           timeoutMs: DEFAULT_TIMEOUT_MS,
+          onStream: (chunk) => {
+            progress.report({ message: chunk.slice(0, 60) });
+          },
         });
       }
     );
@@ -308,6 +314,7 @@ async function repairCommitMessage(input: {
   intent?: string;
   repairMessage: string;
   repairReason?: string;
+  temperature: number;
 }): Promise<string | undefined> {
   return vscode.window.withProgress(
     {
@@ -315,11 +322,14 @@ async function repairCommitMessage(input: {
       title: 'Repairing commit message...',
       cancellable: true,
     },
-    async (_progress, token) => {
+    async (progress, token) => {
       return callLLM({
         ...input,
         token,
         timeoutMs: DEFAULT_TIMEOUT_MS,
+        onStream: (chunk) => {
+          progress.report({ message: chunk.slice(0, 60) });
+        },
       });
     }
   );

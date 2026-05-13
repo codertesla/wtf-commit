@@ -5,6 +5,16 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-05-13
+### Added
+- **Streaming Output**: LLM responses now stream in real-time via SSE, showing generation progress as it happens. Significantly reduces perceived latency, especially with reasoning models.
+- **Configurable Temperature**: New `wtfCommit.temperature` setting (default `0.7`) gives users control over generation creativity. Previously hardcoded at `1.0`.
+- **Unit Test Suite**: Added 36 unit tests covering commit message normalization, Conventional Commits validation, URL endpoint building, and diff path filtering. New `test:unit` script for fast local testing.
+
+### Changed
+- **Stricter TypeScript Checks**: Enabled `noImplicitReturns`, `noFallthroughCasesInSwitch`, and `noUnusedParameters` for better code safety.
+- **Codebase Cleanup**: Removed dead empty files (`src/llm.ts`, `src/llm/index.ts`) and stale build artifacts.
+
 ## [1.1.0] - 2026-05-13
 ### Changed
 - **Gemini Model GA Update**: Updated default Gemini model from `gemini-3.1-flash-lite-preview` to `gemini-3.1-flash-lite` following the model's General Availability release.
