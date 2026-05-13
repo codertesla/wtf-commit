@@ -100,7 +100,7 @@ export const PROVIDERS = {
   MiniMax: { baseUrl: 'https://api.minimaxi.com/v1', model: 'MiniMax-M2.7' },
   Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2.6' },
   GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5.1' },
-  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-3.1-flash-lite-preview' },
+  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-3.1-flash-lite' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 } satisfies Record<BuiltInProviderName, ProviderConfig>;
 

@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-05-13
+### Changed
+- **Gemini Model GA Update**: Updated default Gemini model from `gemini-3.1-flash-lite-preview` to `gemini-3.1-flash-lite` following the model's General Availability release.
+
 ## [1.0.9] - 2026-04-29
 ### Changed
 - **Runtime Request Compatibility**: Replaced the global `fetch` call with a Node `http`/`https` request path and aligned Node types with the supported VS Code extension host range.

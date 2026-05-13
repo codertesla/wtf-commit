@@ -82,7 +82,7 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 | **MiniMax** | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
 | **Moonshot** | `kimi-k2.6` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-5.1` | `https://open.bigmodel.cn/api/paas/v4` |
-| **Gemini** | `gemini-3.1-flash-lite-preview` | `https://generativelanguage.googleapis.com/v1beta/openai` |
+| **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
 
