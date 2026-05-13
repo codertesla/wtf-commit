@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -135,11 +135,19 @@
           "markdownDescription": "Global Model name (Fallback). Used if the provider-specific Model is not set. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-v4-flash`\n- MiniMax: `MiniMax-M2.7`\n- Moonshot: `kimi-k2.6`\n- GLM: `glm-5.1`\n- Gemini: `gemini-3.1-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
           "order": 5
         },
+        "wtfCommit.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Temperature for AI generation. Lower values produce more deterministic results.",
+          "order": 6
+        },
         "wtfCommit.providerOverrides": {
           "type": "object",
           "default": {},
           "markdownDescription": "Custom Base URL and Model specifically for each AI provider. Overrides the global settings.\n\n**Example in `settings.json`:**\n```json\n{\n  \"DeepSeek\": {\n    \"baseUrl\": \"https://api.deepseek.com/beta\",\n    \"model\": \"deepseek-coder\"\n  },\n  \"Custom\": {\n    \"baseUrl\": \"https://my-custom-endpoint.com/v1\",\n    \"model\": \"my-custom-model\"\n  }\n}\n```",
-          "order": 6
+          "order": 7
         }
       }
     }
@@ -150,6 +158,7 @@
     "pretest": "pnpm run compile && pnpm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
+    "test:unit": "pnpm run compile && mocha 'out/test/**/*.test.js'",
     "package": "pnpm run compile && vsce package",
     "publish:ovsx": "PAT=${OVSX_PAT:-}; if [ -z \"$PAT\" ] && [ \"$(uname -s)\" = \"Darwin\" ] && command -v security >/dev/null 2>&1; then PAT=$(security find-generic-password -a \"$USER\" -s \"wtf-commit.ovsx\" -w 2>/dev/null || true); fi; if [ -z \"$PAT\" ]; then echo \"Open VSX token not found.\" >&2; echo \"Set OVSX_PAT or save it in macOS Keychain with service 'wtf-commit.ovsx'.\" >&2; exit 1; fi; pnpm exec ovsx publish \"wtf-commit-${npm_package_version}.vsix\" --pat \"$PAT\"",
     "release": "pnpm run package && pnpm run publish:ovsx"
@@ -162,6 +171,7 @@
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.7.1",
     "eslint": "^9.39.2",
+    "mocha": "^11.7.5",
     "ovsx": "^0.10.8",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0"

@@ -57,6 +57,7 @@ export function readExtensionConfig(): ExtensionConfig {
     systemPrompt,
     baseUrl,
     model,
+    temperature: config.get<number>('temperature') ?? 0.7,
   };
 }
 

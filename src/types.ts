@@ -58,6 +58,7 @@ export interface ExtensionConfig {
   systemPrompt: string;
   baseUrl: string;
   model: string;
+  temperature: number;
 }
 
 export interface LlmCallInput {
@@ -71,6 +72,8 @@ export interface LlmCallInput {
   repairReason?: string;
   token: vscode.CancellationToken;
   timeoutMs: number;
+  temperature: number;
+  onStream?: (chunk: string) => void;
 }
 
 export interface LlmResponse {
