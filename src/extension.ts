@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 import * as vscode from 'vscode';
 import { 
   PROVIDER_NAMES, 
-  ProviderName, 
+  type ProviderName, 
   RequestFailure, 
   DEFAULT_TIMEOUT_MS,
   type Repository,
@@ -33,8 +33,21 @@ export function activate(context: vscode.ExtensionContext) {
 
   logInfo('Extension activated');
 
+  // Status bar button for quick access
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  statusBarItem.command = 'wtf-commit.generate';
+  statusBarItem.text = '$(sparkle) WTF';
+  statusBarItem.tooltip = 'WTF Commit: Generate commit message';
+  statusBarItem.show();
+  context.subscriptions.push(statusBarItem);
+
   checkChangelog(context).catch((error) => {
     logError('Failed to check changelog', error);
+  });
+
+  // First-use guidance: prompt to set API key if none configured
+  checkFirstUseGuidance(context).catch((error) => {
+    logError('Failed to check first-use guidance', error);
   });
 
   const setApiKeyDisposable = vscode.commands.registerCommand('wtf-commit.setApiKey', async () => {
@@ -451,4 +464,35 @@ async function checkChangelog(context: vscode.ExtensionContext): Promise<void> {
   }
 
   await context.globalState.update('wtfCommit.lastVersion', currentVersion);
+}
+
+async function checkFirstUseGuidance(context: vscode.ExtensionContext): Promise<void> {
+  const dismissed = context.globalState.get<boolean>('wtfCommit.guidanceDismissed');
+  if (dismissed) {
+    return;
+  }
+
+  // Check if any provider has an API key configured
+  const hasAnyKey = await Promise.all(
+    PROVIDER_NAMES.map((name) => context.secrets.get(getSecretKeyName(name)))
+  ).then((keys) => keys.some(Boolean));
+
+  if (hasAnyKey) {
+    // User already has at least one key — no guidance needed
+    await context.globalState.update('wtfCommit.guidanceDismissed', true);
+    return;
+  }
+
+  const action = await vscode.window.showInformationMessage(
+    'Welcome to WTF Commit! Set up an API key to start generating commit messages with AI.',
+    'Set API Key',
+    'Dismiss'
+  );
+
+  if (action === 'Set API Key') {
+    void vscode.commands.executeCommand('wtf-commit.setApiKey');
+  }
+
+  // Don't show again regardless of choice
+  await context.globalState.update('wtfCommit.guidanceDismissed', true);
 }

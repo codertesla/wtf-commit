@@ -1,6 +1,6 @@
 import * as http from 'node:http';
 import * as https from 'node:https';
-import { LlmCallInput, LlmResponse, RequestFailure, REASONING_TIMEOUT_MS, ProviderName } from '../types';
+import { type LlmCallInput, type LlmResponse, RequestFailure, REASONING_TIMEOUT_MS, type ProviderName } from '../types';
 import { logInfo, logError, getErrorMessage } from '../prompt';
 
 const MAX_RETRIES = 2;

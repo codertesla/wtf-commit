@@ -1,21 +1,22 @@
-.vscode/**
-.vscode-test/**
+# Source & config (not needed at runtime)
 src/**
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
+**/*.ts
+**/*.map
 **/tsconfig.json
 **/eslint.config.mjs
-**/*.map
-**/*.ts
 **/.vscode-test.*
 
-# Environment files (contains sensitive data)
+# VS Code development
+.vscode/**
+.vscode-test/**
+
+# Environment files
 .env
 .env.local
+.env.example
 
 # Development files
-.vsix
+*.vsix
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -27,6 +28,14 @@ pnpm-lock.yaml
 package-lock.json
 yarn.lock
 
-# Documentation & Process
+# Documentation & process (not needed in VSIX)
 UPDATEFLOW.md
+.DS_Store
+.git/**
+.gitignore
+
+# Test output
 out/test/**
+
+# Asset drafts
+assets/icon-drafts/**
