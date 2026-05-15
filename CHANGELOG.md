@@ -5,6 +5,14 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-05-15
+### Fixed
+- **Package Cleanup**: Removed stale temporary files accidentally included in the v1.3.1 VSIX.
+
+## [1.3.1] - 2025-05-15
+### Changed
+- **New Icon**: Replaced the dark-background icon with a clean sparkle icon on transparent background for better visibility across all VS Code themes.
+
 ## [1.3.0] - 2025-05-15
 ### Added
 - **Status Bar Button**: A persistent `$(sparkle) WTF` button in the status bar for one-click commit message generation — no need to remember the shortcut.
