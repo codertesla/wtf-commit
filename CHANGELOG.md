@@ -5,6 +5,17 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-05-15
+### Changed
+- **Temperature Default**: Changed default temperature from `0.7` to `1.0`, aligning with recommendations from Gemini, DeepSeek, and other modern model providers.
+- **Removed MiniMax Provider**: MiniMax has been removed from the built-in provider list. Users who need MiniMax can still use the Custom provider with their own Base URL and model.
+- **Automatic Retry**: Network errors and transient API failures (5xx, timeouts) now retry up to 2 times with exponential backoff, reducing false failures on flaky connections.
+- **Modular Filter Layer**: Extracted path filtering and binary detection into a dedicated `filters.ts` module for better testability and reuse.
+- **Improved Config Errors**: Missing Base URL or Model for Custom provider now shows actionable guidance pointing to the correct settings path.
+
+### Added
+- **Binary Detection Tests**: 5 new unit tests for the `isLikelyBinary` utility (total: 41 tests).
+
 ## [1.2.0] - 2025-05-13
 ### Added
 - **Streaming Output**: LLM responses now stream in real-time via SSE, showing generation progress as it happens. Significantly reduces perceived latency, especially with reasoning models.

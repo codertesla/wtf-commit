@@ -1,7 +1,10 @@
 import * as http from 'node:http';
 import * as https from 'node:https';
 import { LlmCallInput, LlmResponse, RequestFailure, REASONING_TIMEOUT_MS, ProviderName } from '../types';
-import { logInfo, getErrorMessage } from '../prompt';
+import { logInfo, logError, getErrorMessage } from '../prompt';
+
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 1_500;
 
 interface ChatMessage {
   role: 'system' | 'user';
@@ -14,9 +17,6 @@ interface ChatCompletionRequest {
   temperature: number;
   max_tokens: number;
   stream?: boolean;
-  extra_body?: {
-    reasoning_split?: boolean;
-  };
 }
 
 interface ApiResponse {
@@ -62,6 +62,42 @@ export function buildChatCompletionsEndpoint(baseUrl: string, provider: Provider
 }
 
 export async function callLLM(input: LlmCallInput): Promise<string> {
+  let lastError: RequestFailure | undefined;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      if (input.token.isCancellationRequested) {
+        throw new RequestFailure('cancelled', 'Commit message generation cancelled.');
+      }
+      logInfo(`Retrying LLM request (attempt ${attempt + 1}/${MAX_RETRIES + 1})...`);
+      await sleep(RETRY_DELAY_MS * attempt);
+    }
+
+    try {
+      return await callLLMOnce(input);
+    } catch (error) {
+      if (!(error instanceof RequestFailure)) {
+        throw error;
+      }
+
+      // Don't retry on non-transient errors
+      if (error.code === 'auth' || error.code === 'cancelled' || error.code === 'invalid_response' || error.code === 'rate_limit') {
+        throw error;
+      }
+
+      lastError = error;
+      logError(`LLM request attempt ${attempt + 1} failed`, error);
+    }
+  }
+
+  throw lastError || new RequestFailure('network', 'All retry attempts failed.');
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function callLLMOnce(input: LlmCallInput): Promise<string> {
   const isRepair = Boolean(input.repairMessage);
   const systemPrompt = isRepair
     ? [
@@ -89,12 +125,7 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
     stream: useStreaming || undefined,
   };
 
-  const isMiniMax = input.endpoint.includes('minimaxi.com');
-  const isReasoner = isMiniMax || input.model.toLowerCase().includes('reasoner') || input.model.toLowerCase().includes('think');
-
-  if (isMiniMax) {
-    requestBody.extra_body = { reasoning_split: true };
-  }
+  const isReasoner = input.model.toLowerCase().includes('reasoner') || input.model.toLowerCase().includes('think');
 
   const controller = new AbortController();
   let timedOut = false;
