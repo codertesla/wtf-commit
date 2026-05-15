@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import {
-  Repository,
-  RepositoryState,
-  Change,
+  type Repository,
+  type RepositoryState,
+  type Change,
   GitStatus,
   MAX_DIFF_CHARS,
   MAX_DIFF_FILE_CHARS,

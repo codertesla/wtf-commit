@@ -11,12 +11,13 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.2.1)
+## 🆕 Latest (v1.3.0)
 
-- **Temperature Default → 1.0**: Aligns with recommendations from Gemini, DeepSeek, and other modern providers.
-- **Removed MiniMax**: Removed from built-in providers. Use Custom provider if needed.
-- **Automatic Retry**: Transient failures (network, 5xx, timeout) now retry up to 2 times with backoff.
-- **Better Error Messages**: Missing config for Custom provider now shows actionable guidance.
+- **Status Bar Button**: Persistent `✨ WTF` button in the status bar — one click to generate.
+- **First-Use Guidance**: Welcome notification guides new users to set up an API key on first install.
+- **Keybinding Always Available**: `Cmd+Alt+G` / `Ctrl+Alt+G` now works from anywhere, including the Source Control panel.
+- **Stronger Linting**: Type-aware ESLint with `consistent-type-imports`, `no-explicit-any`, `prefer-const`, and more.
+- **Node 18 Types**: Upgraded `@types/node` to match the VS Code extension host runtime.
 
 ## 🚀 Features
 

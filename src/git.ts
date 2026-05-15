@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'node:path';
-import { GitExtension, Repository, RepositoryState, Change } from './types';
+import { type GitExtension, type Repository, type RepositoryState } from './types';
 
 export async function resolveRepository(): Promise<Repository | null> {
   const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git');

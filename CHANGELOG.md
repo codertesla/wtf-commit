@@ -5,6 +5,17 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-05-15
+### Added
+- **Status Bar Button**: A persistent `$(sparkle) WTF` button in the status bar for one-click commit message generation — no need to remember the shortcut.
+- **First-Use Guidance**: New users are greeted with a welcome notification prompting them to set up an API key, instead of discovering the requirement only after triggering generation.
+
+### Changed
+- **Keybinding Always Available**: Removed the `editorTextFocus` restriction from `Cmd+Alt+G` / `Ctrl+Alt+G`. The shortcut now works from anywhere — including the Source Control panel.
+- **Node Types Upgraded**: `@types/node` upgraded from `16.x` to `18.x`, matching the VS Code extension host runtime.
+- **Stronger ESLint Rules**: Added `no-explicit-any`, `no-unused-vars`, `consistent-type-imports`, `prefer-const`, `no-console`, and `no-duplicate-imports` rules with type-aware linting.
+- **Cleaner VSIX Package**: `.vscodeignore` now explicitly excludes `.env.example`, `.DS_Store`, `.git/`, and `assets/icon-drafts/`.
+
 ## [1.2.1] - 2025-05-15
 ### Changed
 - **Temperature Default**: Changed default temperature from `0.7` to `1.0`, aligning with recommendations from Gemini, DeepSeek, and other modern model providers.

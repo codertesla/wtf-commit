@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import {
-  ExtensionConfig,
-  ProviderName,
+  type ExtensionConfig,
+  type ProviderName,
   PROVIDER_NAMES,
   PROVIDERS,
   DEFAULT_PROVIDER,
@@ -19,12 +19,12 @@ export function readExtensionConfig(): ExtensionConfig {
 
   // 1. Try to read provider-specific overrides
   const overrides = config.get<Record<string, { baseUrl?: string; model?: string }>>('providerOverrides') || {};
-  let providerBaseUrl = overrides[provider]?.baseUrl?.trim() || config.get<string>(`${provider}.baseUrl`)?.trim();
-  let providerModel = overrides[provider]?.model?.trim() || config.get<string>(`${provider}.model`)?.trim();
+  const providerBaseUrl = overrides[provider]?.baseUrl?.trim() || config.get<string>(`${provider}.baseUrl`)?.trim();
+  const providerModel = overrides[provider]?.model?.trim() || config.get<string>(`${provider}.model`)?.trim();
 
   // 2. Try to read global overrides
-  let globalBaseUrl = config.get<string>('baseUrl')?.trim();
-  let globalModel = config.get<string>('model')?.trim();
+  const globalBaseUrl = config.get<string>('baseUrl')?.trim();
+  const globalModel = config.get<string>('model')?.trim();
 
   let baseUrl = providerBaseUrl || globalBaseUrl || '';
   let model = providerModel || globalModel || '';
