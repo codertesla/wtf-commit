@@ -38,10 +38,10 @@ export function readExtensionConfig(): ExtensionConfig {
   }
 
   if (!baseUrl) {
-    throw new Error(`Base URL is missing for ${provider}. Please check your settings.`);
+    throw new Error(`Base URL is missing for ${provider}. Please configure it in Settings → WTF Commit → Base URL (or use Provider Overrides).`);
   }
   if (!model) {
-    throw new Error(`Model is missing for ${provider}. Please check your settings.`);
+    throw new Error(`Model is missing for ${provider}. Please configure it in Settings → WTF Commit → Model (or use Provider Overrides).`);
   }
 
   let systemPrompt = config.get<string>('prompt') || DEFAULT_SYSTEM_PROMPT;
@@ -57,7 +57,7 @@ export function readExtensionConfig(): ExtensionConfig {
     systemPrompt,
     baseUrl,
     model,
-    temperature: config.get<number>('temperature') ?? 0.7,
+    temperature: config.get<number>('temperature') ?? 1.0,
   };
 }
 

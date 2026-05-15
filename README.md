@@ -11,12 +11,12 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.2.0)
+## 🆕 Latest (v1.2.1)
 
-- **Streaming Output**: LLM responses now stream in real-time, showing generation progress as it happens. Perceived latency is significantly reduced.
-- **Configurable Temperature**: New `wtfCommit.temperature` setting (default `0.7`) for controlling generation creativity.
-- **Unit Test Suite**: 36 unit tests added with a fast `test:unit` script for local validation.
-- **Stricter TypeScript**: Enabled `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedParameters`.
+- **Temperature Default → 1.0**: Aligns with recommendations from Gemini, DeepSeek, and other modern providers.
+- **Removed MiniMax**: Removed from built-in providers. Use Custom provider if needed.
+- **Automatic Retry**: Transient failures (network, 5xx, timeout) now retry up to 2 times with backoff.
+- **Better Error Messages**: Missing config for Custom provider now shows actionable guidance.
 
 ## 🚀 Features
 
@@ -27,7 +27,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
 - **Interactive Tuning**: Auto-commit flows support real-time message editing without blocking Git staging.
 - **Lightweight Recovery**: Offers an inline `AI Repair` action when the generated title format needs a quick fix.
-- **Reliable Request Flow**: Built-in timeout + categorized API error handling, with extended reasoning for DeepSeek and MiniMax variants.
+- **Reliable Request Flow**: Built-in timeout + automatic retry with categorized API error handling, with extended reasoning for DeepSeek and other thinking models.
 - **Streaming Generation**: Real-time streaming output so you can see the commit message as it's being generated.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 - **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
@@ -80,7 +80,6 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 |----------|---------------|-----------------|
 | **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
-| **MiniMax** | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
 | **Moonshot** | `kimi-k2.6` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-5.1` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |

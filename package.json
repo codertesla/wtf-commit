@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -110,7 +110,6 @@
           "enum": [
             "OpenAI",
             "DeepSeek",
-            "MiniMax",
             "Moonshot",
             "GLM",
             "Gemini",
@@ -125,19 +124,19 @@
           "type": "string",
           "default": "",
           "description": "Global API Base URL (Fallback). Leave empty to use the provider's default.",
-          "markdownDescription": "Global API Base URL (Fallback). Used if the provider-specific Base URL is not set. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `https://api.openai.com/v1`\n- DeepSeek: `https://api.deepseek.com`\n- MiniMax: `https://api.minimaxi.com/v1`\n- Moonshot: `https://api.moonshot.cn/v1`\n- GLM: `https://open.bigmodel.cn/api/paas/v4`\n- Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`\n- OpenRouter: `https://openrouter.ai/api/v1`\n\n> **Note:** Use the input box below to enter a custom Base URL if needed.",
+          "markdownDescription": "Global API Base URL (Fallback). Used if the provider-specific Base URL is not set. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `https://api.openai.com/v1`\n- DeepSeek: `https://api.deepseek.com`\n- Moonshot: `https://api.moonshot.cn/v1`\n- GLM: `https://open.bigmodel.cn/api/paas/v4`\n- Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`\n- OpenRouter: `https://openrouter.ai/api/v1`\n\n> **Note:** Use the input box below to enter a custom Base URL if needed.",
           "order": 4
         },
         "wtfCommit.model": {
           "type": "string",
           "default": "",
           "description": "Global Model name (Fallback). Leave empty to use the provider's default.",
-          "markdownDescription": "Global Model name (Fallback). Used if the provider-specific Model is not set. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-v4-flash`\n- MiniMax: `MiniMax-M2.7`\n- Moonshot: `kimi-k2.6`\n- GLM: `glm-5.1`\n- Gemini: `gemini-3.1-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
+          "markdownDescription": "Global Model name (Fallback). Used if the provider-specific Model is not set. Leave empty to use the provider's default.\n\n**Defaults:**\n- OpenAI: `gpt-5-nano`\n- DeepSeek: `deepseek-v4-flash`\n- Moonshot: `kimi-k2.6`\n- GLM: `glm-5.1`\n- Gemini: `gemini-3.1-flash-lite`\n- OpenRouter: `openrouter/free`\n\n> **Note:** Use the input box below to enter a custom Model name if needed.",
           "order": 5
         },
         "wtfCommit.temperature": {
           "type": "number",
-          "default": 0.7,
+          "default": 1.0,
           "minimum": 0,
           "maximum": 2,
           "description": "Temperature for AI generation. Lower values produce more deterministic results.",
