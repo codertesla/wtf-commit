@@ -11,21 +11,22 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.3.1)
+## 🆕 Latest (v1.3.3)
 
-- **New Icon**: Clean sparkle icon on transparent background, replacing the old dark-background design for better visibility across all themes.
+- **Safer mixed-change handling**: When staged and unstaged changes both exist, WTF Commit now confirms that generation will use staged changes only.
+- **Clearer recovery**: Streaming cancellation/timeout feedback is more accurate, Auto Push misconfiguration is explained, and failed AI Repair keeps the original message ready for editing.
 
 ## 🚀 Features
 
 - **Multi-lingual Support**: Preset support for English, Chinese, Japanese, Classical Chinese, and **Custom** strings.
 - **Conventional Commits**: Automatically follows conventional commit standards (feat, fix, docs, etc.).
-- **Smart Diffing**: Prioritizes staged changes, falls back to working tree changes, and strips more low-value diff noise before generation.
+- **Smart Diffing**: Prioritizes staged changes, confirms mixed staged/unstaged states, falls back to working tree changes, and strips more low-value diff noise before generation.
 - **Intent-Aware Generation**: Reuses any text already typed into the SCM input box as a zero-config generation hint.
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
 - **Interactive Tuning**: Auto-commit flows support real-time message editing without blocking Git staging.
 - **Lightweight Recovery**: Offers an inline `AI Repair` action when the generated title format needs a quick fix.
 - **Reliable Request Flow**: Built-in timeout + automatic retry with categorized API error handling, with extended reasoning for DeepSeek and other thinking models.
-- **Streaming Generation**: Real-time streaming output so you can see the commit message as it's being generated.
+- **Streaming Generation**: Real-time streaming preview in the progress notification while the commit message is generated.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 - **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
 

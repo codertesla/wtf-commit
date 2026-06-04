@@ -5,6 +5,13 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2026-06-04
+### Changed
+- **Safer Mixed Change Flow**: When staged and unstaged changes both exist, generation now confirms that only staged changes will be used before calling the model.
+- **Clearer Auto Push Feedback**: If Auto Push is enabled without Auto Commit, the extension now explains the dependency instead of silently ignoring the push setting.
+- **More Accurate Streaming Errors**: Streaming generation now reports cancellation and timeout cases with the correct error category instead of a generic network failure.
+- **Repair Failure Recovery**: If AI Repair fails, the original generated message stays in the Source Control input box for manual editing.
+
 ## [1.3.2] - 2025-05-15
 ### Fixed
 - **Package Cleanup**: Removed stale temporary files accidentally included in the v1.3.1 VSIX.
