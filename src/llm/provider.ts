@@ -143,7 +143,13 @@ async function callLLMOnce(input: LlmCallInput): Promise<string> {
 
   try {
     if (useStreaming) {
-      return await streamResponse(input, requestBody, controller.signal, timedOut, effectiveTimeout);
+      return await streamResponse(
+        input,
+        requestBody,
+        controller.signal,
+        () => timedOut,
+        effectiveTimeout
+      );
     }
 
     const response = await postJson(input.endpoint, requestBody, input.apiKey, controller.signal);
@@ -197,16 +203,30 @@ async function streamResponse(
   input: LlmCallInput,
   requestBody: ChatCompletionRequest,
   signal: AbortSignal,
-  _timedOut: boolean,
-  _effectiveTimeout: number
+  isTimedOut: () => boolean,
+  effectiveTimeout: number
 ): Promise<string> {
   const url = new URL(input.endpoint);
   const transport = url.protocol === 'https:' ? https : http;
   const body = JSON.stringify(requestBody);
 
   return new Promise((resolve, reject) => {
+    const rejectForAbort = () => {
+      if (input.token.isCancellationRequested) {
+        reject(new RequestFailure('cancelled', 'Commit message generation cancelled.'));
+        return;
+      }
+
+      if (isTimedOut()) {
+        reject(new RequestFailure('timeout', `Request timed out after ${Math.round(effectiveTimeout / 1000)} seconds.`));
+        return;
+      }
+
+      reject(new RequestFailure('network', 'Network request aborted.'));
+    };
+
     if (signal.aborted) {
-      reject(new Error('Request aborted.'));
+      rejectForAbort();
       return;
     }
 
@@ -293,6 +313,7 @@ async function streamResponse(
 
     const abortRequest = () => {
       request.destroy(new Error('Request aborted.'));
+      rejectForAbort();
     };
 
     signal.addEventListener('abort', abortRequest, { once: true });

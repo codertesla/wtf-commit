@@ -150,6 +150,13 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       return;
     }
 
+    if (hasStagedChanges && hasWorkingTreeChanges) {
+      const shouldContinue = await confirmStagedOnlyGeneration();
+      if (!shouldContinue) {
+        return;
+      }
+    }
+
     const diff = await getOptimizedDiff(repository, hasStagedChanges, config.smartStage);
     if (!diff.trim()) {
       showStatusMessage('$(circle-slash) No diff content found.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
@@ -189,17 +196,29 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       );
 
       if (action === 'AI Repair') {
-        const repairedMessage = await repairCommitMessage({
-          endpoint,
-          apiKey,
-          model: config.model,
-          systemPrompt: config.systemPrompt,
-          diff,
-          intent,
-          repairMessage: normalizedCommitMessage,
-          repairReason: 'The first line must match Conventional Commits: <type>(<scope>): <description>.',
-          temperature: config.temperature,
-        });
+        let repairedMessage: string | undefined;
+        try {
+          repairedMessage = await repairCommitMessage({
+            endpoint,
+            apiKey,
+            model: config.model,
+            systemPrompt: config.systemPrompt,
+            diff,
+            intent,
+            repairMessage: normalizedCommitMessage,
+            repairReason: 'The first line must match Conventional Commits: <type>(<scope>): <description>.',
+            temperature: config.temperature,
+          });
+        } catch (error) {
+          if (error instanceof RequestFailure) {
+            await handleRequestFailure(error);
+            await vscode.commands.executeCommand('workbench.view.scm');
+            showStatusMessage('$(warning) AI repair failed. Original message kept in Source Control.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
+            return;
+          }
+
+          throw error;
+        }
 
         if (!repairedMessage) {
           return;
@@ -222,6 +241,11 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
 
     if (!config.autoCommit) {
       await vscode.commands.executeCommand('workbench.view.scm');
+      if (config.autoPush) {
+        showStatusMessage('$(warning) Auto Push requires Auto Commit. Message ready in Source Control.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
+        return;
+      }
+
       showStatusMessage(`$(sparkle) [${config.provider}] Commit message ready in Source Control.`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
       return;
     }
@@ -288,6 +312,22 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     logError('Generate flow failed', error);
     vscode.window.showErrorMessage(`Failed: ${getErrorMessage(error)}`);
   }
+}
+
+async function confirmStagedOnlyGeneration(): Promise<boolean> {
+  const action = await vscode.window.showWarningMessage(
+    'Staged and unstaged changes were both detected. WTF Commit will generate from staged changes only.',
+    'Use Staged Changes',
+    'Open Source Control',
+    'Cancel'
+  );
+
+  if (action === 'Open Source Control') {
+    await vscode.commands.executeCommand('workbench.view.scm');
+    return false;
+  }
+
+  return action === 'Use Staged Changes';
 }
 
 async function generateCommitMessage(input: {
