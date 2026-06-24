@@ -12,7 +12,7 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.4.1)
+## 🆕 Latest (v1.4.2)
 
 - **Native Gemini 3.5 Flash**: Uses Google's Interactions API with native SSE streaming and `minimal` thinking for faster commit-message generation.
 - **Safer commits and AI context**: Redacts common credentials, excludes sensitive files, and verifies the staged snapshot before Auto Commit.

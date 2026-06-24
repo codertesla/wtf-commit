@@ -5,6 +5,11 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-06-24
+### Changed
+- **Package Privacy Guard**: Expanded VSIX exclusions for environment files, credentials, private keys, development metadata, and other non-runtime files.
+- **Package Allowlist Audit**: Packaging now fails if any file outside the approved runtime and documentation allowlist would enter the VSIX.
+
 ## [1.4.1] - 2026-06-24
 ### Changed
 - **Marketplace Badges**: Replaced the low-signal GitHub Stars badge with VS Code compatibility and Gemini 3.5 Flash support badges.
