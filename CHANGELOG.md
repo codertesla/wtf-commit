@@ -5,6 +5,11 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-06-24
+### Changed
+- **Marketplace Badges**: Replaced the low-signal GitHub Stars badge with VS Code compatibility and Gemini 3.5 Flash support badges.
+- **Release Workflow**: Added source commit and remote push steps so repository code stays aligned with each Open VSX release.
+
 ## [1.4.0] - 2026-06-24
 ### Changed
 - **Native Gemini Integration**: Replaced the OpenAI-compatible Gemini endpoint with Google's native Interactions REST API, including native authentication, request/response mapping, SSE streaming, and `minimal` thinking for lower latency.
