@@ -5,16 +5,18 @@ English | [简体中文](README_zh.md)
 [![Open VSX Version](https://img.shields.io/open-vsx/v/codertesla/wtf-commit)](https://open-vsx.org/extension/codertesla/wtf-commit)
 [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/codertesla/wtf-commit)](https://open-vsx.org/extension/codertesla/wtf-commit)
 [![License](https://img.shields.io/github/license/codertesla/wtf-commit)](https://github.com/codertesla/wtf-commit)
-[![GitHub Stars](https://img.shields.io/github/stars/codertesla/wtf-commit?style=social)](https://github.com/codertesla/wtf-commit)
+[![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.75.0-007ACC?logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/updates/v1_75)
+[![Gemini 3.5 Flash](https://img.shields.io/badge/Gemini-3.5%20Flash-8E75B2?logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash)
 
 Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) | [Website](https://codertesla.github.io/wtf-commit/)
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.3.3)
+## 🆕 Latest (v1.4.0)
 
-- **Safer mixed-change handling**: When staged and unstaged changes both exist, WTF Commit now confirms that generation will use staged changes only.
-- **Clearer recovery**: Streaming cancellation/timeout feedback is more accurate, Auto Push misconfiguration is explained, and failed AI Repair keeps the original message ready for editing.
+- **Native Gemini 3.5 Flash**: Uses Google's Interactions API with native SSE streaming and `minimal` thinking for faster commit-message generation.
+- **Safer commits and AI context**: Redacts common credentials, excludes sensitive files, and verifies the staged snapshot before Auto Commit.
+- **More reliable generation**: Isolates provider configuration, bounds retries with one overall timeout, balances large-diff context across files, and limits output to 512 tokens.
 
 ## 🚀 Features
 
@@ -52,7 +54,7 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit` to customize the
 | **Auto Commit** | Automatically commit after generating the message. |
 | **Auto Push** | Automatically push after commit (requires Auto Commit). |
 | **Confirm Before Commit** | Show a confirmation dialog before auto-committing. |
-| **Smart Stage** | Automatically stage all changes if nothing is staged (Default: `true`). |
+| **Smart Stage** | With Auto Commit, stage current changes before generation so later edits cannot enter the commit (Default: `true`). |
 | **Prompt** | Customize the AI's persona and generation rules. |
 
 ### 2. Custom Model & Endpoints
@@ -80,11 +82,13 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
 | **Moonshot** | `kimi-k2.6` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-5.1` | `https://open.bigmodel.cn/api/paas/v4` |
-| **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` |
+| **Gemini** | `gemini-3.5-flash` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
 
 > OpenRouter default now targets the free route model: `openrouter/free`.
+
+> Gemini uses Google's native Interactions REST API (`/v1beta/interactions`), authenticates with the `x-goog-api-key` header, and uses the `minimal` thinking level to reduce latency for commit-message generation.
 
 > [!IMPORTANT]
 > **Claude Support**: Native Claude format is not supported yet. Please use a proxy service that provides an OpenAI-compatible endpoint.

@@ -5,6 +5,17 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-06-24
+### Changed
+- **Native Gemini Integration**: Replaced the OpenAI-compatible Gemini endpoint with Google's native Interactions REST API, including native authentication, request/response mapping, SSE streaming, and `minimal` thinking for lower latency.
+- **Gemini Default Update**: Updated the default Gemini model to `gemini-3.5-flash` and the base URL to `https://generativelanguage.googleapis.com/v1beta`.
+- **Safer AI Context**: Sensitive credential files are excluded from model context, and common tokens, secret assignments, and private keys are redacted from diffs.
+- **Consistent Auto Commits**: Smart Stage now stages before generation and verifies the staged snapshot immediately before committing, preventing later edits from entering an unrelated commit.
+- **Provider Configuration Isolation**: Built-in providers no longer inherit the Custom provider's global endpoint or model settings, avoiding incompatible protocol combinations.
+- **Bounded Retry Flow**: Requests only retry transient failures and now share one overall timeout instead of resetting the timeout for every attempt.
+- **More Representative Large Diffs**: Large change sets allocate context across files instead of only sending the beginning of the combined diff.
+- **Smaller Generation Budget**: Commit message output is capped at 512 tokens to reduce unnecessary latency and cost.
+
 ## [1.3.3] - 2026-06-04
 ### Changed
 - **Safer Mixed Change Flow**: When staged and unstaged changes both exist, generation now confirms that only staged changes will be used before calling the model.

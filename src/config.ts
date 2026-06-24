@@ -3,11 +3,11 @@ import {
   type ExtensionConfig,
   type ProviderName,
   PROVIDER_NAMES,
-  PROVIDERS,
   DEFAULT_PROVIDER,
   DEFAULT_SYSTEM_PROMPT,
   SECRET_KEY_PREFIX,
 } from './types';
+import { resolveProviderConfig } from './provider-config';
 
 export function readExtensionConfig(): ExtensionConfig {
   const config = vscode.workspace.getConfiguration('wtfCommit');
@@ -22,27 +22,18 @@ export function readExtensionConfig(): ExtensionConfig {
   const providerBaseUrl = overrides[provider]?.baseUrl?.trim() || config.get<string>(`${provider}.baseUrl`)?.trim();
   const providerModel = overrides[provider]?.model?.trim() || config.get<string>(`${provider}.model`)?.trim();
 
-  // 2. Try to read global overrides
+  // 2. Global values are only safe for Custom. Built-in providers may use
+  // different wire protocols, so sharing an endpoint/model can break them.
   const globalBaseUrl = config.get<string>('baseUrl')?.trim();
   const globalModel = config.get<string>('model')?.trim();
 
-  let baseUrl = providerBaseUrl || globalBaseUrl || '';
-  let model = providerModel || globalModel || '';
-
-  // 3. Fallback to defaults if not set and not Custom provider
-  if (!baseUrl && provider !== 'Custom') {
-    baseUrl = PROVIDERS[provider]?.baseUrl || '';
-  }
-  if (!model && provider !== 'Custom') {
-    model = PROVIDERS[provider]?.model || '';
-  }
-
-  if (!baseUrl) {
-    throw new Error(`Base URL is missing for ${provider}. Please configure it in Settings → WTF Commit → Base URL (or use Provider Overrides).`);
-  }
-  if (!model) {
-    throw new Error(`Model is missing for ${provider}. Please configure it in Settings → WTF Commit → Model (or use Provider Overrides).`);
-  }
+  const { baseUrl, model } = resolveProviderConfig({
+    provider,
+    providerBaseUrl,
+    providerModel,
+    customBaseUrl: globalBaseUrl,
+    customModel: globalModel,
+  });
 
   let systemPrompt = config.get<string>('prompt') || DEFAULT_SYSTEM_PROMPT;
   systemPrompt += `\n\nIMPORTANT: Please write the commit message in ${language}.`;

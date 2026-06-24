@@ -13,7 +13,7 @@ import {
   MAX_UNTRACKED_FILES,
   MAX_SUMMARY_DIRS
 } from './types';
-import { shouldFilterPath, isLikelyBinary } from './filters';
+import { shouldFilterPath, isLikelyBinary, redactSensitiveContent } from './filters';
 import { logInfo, getErrorMessage } from './prompt';
 
 export async function getOptimizedDiff(
@@ -47,7 +47,7 @@ export async function getOptimizedDiff(
     return '';
   }
 
-  diff = optimizeDiffForLlm(diff);
+  diff = redactSensitiveContent(optimizeDiffForLlm(diff));
 
   if (diff.length < MAX_DIFF_CHARS) {
     return diff;
@@ -136,9 +136,10 @@ function buildLargeDiffSummary(diff: string, changes: Change[]): string {
     return `${diff.substring(0, MAX_PARTIAL_DIFF_CHARS)}\n... (truncated)`;
   }
 
+  const uniqueChanges = [...new Map(changes.map((change) => [change.uri.fsPath, change])).values()];
   const dirCounts = new Map<string, number>();
 
-  for (const change of changes) {
+  for (const change of uniqueChanges) {
     const relativePath = vscode.workspace.asRelativePath(change.uri, false).replace(/\\/g, '/');
     const directory = path.posix.dirname(relativePath);
     const bucket = directory === '.' ? '(root)' : directory;
@@ -151,16 +152,22 @@ function buildLargeDiffSummary(diff: string, changes: Change[]): string {
     .map(([dir, count]) => `- ${dir}: ${count} files`)
     .join('\n');
 
+  const sections = splitDiffSections(diff);
+  const perFileBudget = Math.max(1, Math.floor(MAX_PARTIAL_DIFF_CHARS / Math.max(sections.length, 1)));
+  const balancedPartialDiff = sections
+    .map((section) => section.substring(0, perFileBudget))
+    .join('\n');
+
   return [
     `The diff is too large (${diff.length} characters). Here is a summary of the changes:`,
     '',
-    `Total changed files: ${changes.length}`,
+    `Total changed files: ${uniqueChanges.length}`,
     '',
     'Changes by directory:',
     topDirs,
     '',
-    `Partial diff (first ${MAX_PARTIAL_DIFF_CHARS} characters):`,
-    `${diff.substring(0, MAX_PARTIAL_DIFF_CHARS)}\n... (truncated)`,
+    `Balanced partial diff (${perFileBudget} characters per file):`,
+    `${balancedPartialDiff}\n... (truncated)`,
   ].join('\n');
 }
 

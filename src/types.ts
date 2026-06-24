@@ -62,6 +62,7 @@ export interface ExtensionConfig {
 }
 
 export interface LlmCallInput {
+  provider: ProviderName;
   endpoint: string;
   apiKey: string;
   model: string;
@@ -85,6 +86,16 @@ export interface LlmResponse {
   }>;
 }
 
+export interface GeminiInteractionResponse {
+  steps?: Array<{
+    type?: string;
+    content?: Array<{
+      type?: string;
+      text?: string;
+    }>;
+  }>;
+}
+
 export const BUILT_IN_PROVIDER_NAMES = [
   'OpenAI',
   'DeepSeek',
@@ -101,7 +112,7 @@ export const PROVIDERS = {
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
   Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2.6' },
   GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5.1' },
-  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-3.1-flash-lite' },
+  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.5-flash' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 } satisfies Record<BuiltInProviderName, ProviderConfig>;
 

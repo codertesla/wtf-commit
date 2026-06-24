@@ -1,10 +1,11 @@
 import * as http from 'node:http';
 import * as https from 'node:https';
-import { type LlmCallInput, type LlmResponse, RequestFailure, REASONING_TIMEOUT_MS, type ProviderName } from '../types';
+import { type GeminiInteractionResponse, type LlmCallInput, type LlmResponse, RequestFailure, REASONING_TIMEOUT_MS, type ProviderName } from '../types';
 import { logInfo, logError, getErrorMessage } from '../prompt';
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1_500;
+const MAX_OUTPUT_TOKENS = 512;
 
 interface ChatMessage {
   role: 'system' | 'user';
@@ -16,6 +17,18 @@ interface ChatCompletionRequest {
   messages: ChatMessage[];
   temperature: number;
   max_tokens: number;
+  stream?: boolean;
+}
+
+interface GeminiInteractionRequest {
+  model: string;
+  input: string;
+  system_instruction: string;
+  generation_config: {
+    thinking_level: 'minimal';
+    temperature: number;
+    max_output_tokens: number;
+  };
   stream?: boolean;
 }
 
@@ -36,14 +49,23 @@ interface StreamDelta {
   }>;
 }
 
-export function buildChatCompletionsEndpoint(baseUrl: string, provider: ProviderName): string {
+interface GeminiStreamEvent {
+  event_type?: string;
+  delta?: {
+    type?: string;
+    text?: string;
+  };
+}
+
+export function buildProviderEndpoint(baseUrl: string, provider: ProviderName): string {
   const sanitized = baseUrl.trim().replace(/\/+$/, '');
   if (!sanitized) {
     throw new Error('Base URL is empty.');
   }
 
-  const endpoint =
-    provider === 'Custom' && sanitized.endsWith('/chat/completions')
+  const endpoint = provider === 'Gemini'
+    ? buildGeminiEndpoint(sanitized)
+    : provider === 'Custom' && sanitized.endsWith('/chat/completions')
       ? sanitized
       : `${sanitized}/chat/completions`;
 
@@ -61,27 +83,47 @@ export function buildChatCompletionsEndpoint(baseUrl: string, provider: Provider
   return parsed.toString();
 }
 
+function buildGeminiEndpoint(baseUrl: string): string {
+  if (baseUrl.endsWith('/interactions')) {
+    return baseUrl;
+  }
+
+  // Migrate the previous built-in OpenAI-compatible Gemini base URL gracefully.
+  const nativeBaseUrl = baseUrl.endsWith('/openai') ? baseUrl.slice(0, -'/openai'.length) : baseUrl;
+  return `${nativeBaseUrl}/interactions`;
+}
+
 export async function callLLM(input: LlmCallInput): Promise<string> {
   let lastError: RequestFailure | undefined;
+  const totalTimeoutMs = getEffectiveTimeout(input);
+  const deadline = Date.now() + totalTimeoutMs;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     if (attempt > 0) {
       if (input.token.isCancellationRequested) {
         throw new RequestFailure('cancelled', 'Commit message generation cancelled.');
       }
+      const remainingMs = deadline - Date.now();
+      const retryDelayMs = RETRY_DELAY_MS * attempt;
+      if (remainingMs <= retryDelayMs) {
+        throw new RequestFailure('timeout', `Request timed out after ${Math.round(totalTimeoutMs / 1000)} seconds.`);
+      }
       logInfo(`Retrying LLM request (attempt ${attempt + 1}/${MAX_RETRIES + 1})...`);
-      await sleep(RETRY_DELAY_MS * attempt);
+      await sleep(retryDelayMs, input.token);
     }
 
     try {
-      return await callLLMOnce(input);
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) {
+        throw new RequestFailure('timeout', `Request timed out after ${Math.round(totalTimeoutMs / 1000)} seconds.`);
+      }
+      return await callLLMOnce(input, remainingMs);
     } catch (error) {
       if (!(error instanceof RequestFailure)) {
         throw error;
       }
 
-      // Don't retry on non-transient errors
-      if (error.code === 'auth' || error.code === 'cancelled' || error.code === 'invalid_response' || error.code === 'rate_limit') {
+      if (!shouldRetry(error)) {
         throw error;
       }
 
@@ -93,11 +135,40 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
   throw lastError || new RequestFailure('network', 'All retry attempts failed.');
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function getEffectiveTimeout(input: LlmCallInput): number {
+  const model = input.model.toLowerCase();
+  return model.includes('reasoner') || model.includes('think')
+    ? REASONING_TIMEOUT_MS
+    : input.timeoutMs;
 }
 
-async function callLLMOnce(input: LlmCallInput): Promise<string> {
+function shouldRetry(error: RequestFailure): boolean {
+  if (error.code === 'network' || error.code === 'timeout' || error.code === 'rate_limit') {
+    return true;
+  }
+  return error.code === 'api' && Boolean(
+    error.status === 408 || (error.status && error.status >= 500 && error.status <= 599)
+  );
+}
+
+function sleep(ms: number, token: LlmCallInput['token']): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (token.isCancellationRequested) {
+      reject(new RequestFailure('cancelled', 'Commit message generation cancelled.'));
+      return;
+    }
+    const cancellationDisposable = token.onCancellationRequested(() => {
+      clearTimeout(timeoutHandle);
+      reject(new RequestFailure('cancelled', 'Commit message generation cancelled.'));
+    });
+    const timeoutHandle = setTimeout(() => {
+      cancellationDisposable.dispose();
+      resolve();
+    }, ms);
+  });
+}
+
+async function callLLMOnce(input: LlmCallInput, effectiveTimeout: number): Promise<string> {
   const isRepair = Boolean(input.repairMessage);
   const systemPrompt = isRepair
     ? [
@@ -114,23 +185,10 @@ async function callLLMOnce(input: LlmCallInput): Promise<string> {
 
   const useStreaming = Boolean(input.onStream);
 
-  const requestBody: ChatCompletionRequest = {
-    model: input.model,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userContent },
-    ],
-    temperature: input.temperature,
-    max_tokens: 4096,
-    stream: useStreaming || undefined,
-  };
-
-  const isReasoner = input.model.toLowerCase().includes('reasoner') || input.model.toLowerCase().includes('think');
+  const requestBody = buildRequestBody(input, systemPrompt, userContent, useStreaming);
 
   const controller = new AbortController();
   let timedOut = false;
-
-  const effectiveTimeout = isReasoner ? REASONING_TIMEOUT_MS : input.timeoutMs;
 
   const timeoutHandle = setTimeout(() => {
     timedOut = true;
@@ -152,23 +210,21 @@ async function callLLMOnce(input: LlmCallInput): Promise<string> {
       );
     }
 
-    const response = await postJson(input.endpoint, requestBody, input.apiKey, controller.signal);
+    const response = await postJson(input.endpoint, requestBody, input.apiKey, input.provider, controller.signal);
 
     if (!response.ok) {
       const errorText = await safeReadResponseText(response);
       handleHttpError(response.status, errorText);
     }
 
-    let data: LlmResponse;
+    let data: unknown;
     try {
-      data = (await response.json()) as LlmResponse;
+      data = await response.json();
     } catch (error) {
       throw new RequestFailure('invalid_response', `Failed to parse API response: ${getErrorMessage(error)}`);
     }
 
-    const message = data.choices?.[0]?.message;
-    const content = message?.content;
-    const reasoning = message?.reasoning_details?.[0]?.text;
+    const { content, reasoning } = extractResponseContent(data, input.provider);
 
     if (reasoning) {
       logInfo(`Reasoning Trace: ${reasoning}`);
@@ -199,14 +255,72 @@ async function callLLMOnce(input: LlmCallInput): Promise<string> {
   }
 }
 
+function buildRequestBody(
+  input: LlmCallInput,
+  systemPrompt: string,
+  userContent: string,
+  useStreaming: boolean
+): ChatCompletionRequest | GeminiInteractionRequest {
+  if (input.provider === 'Gemini') {
+    return {
+      model: input.model,
+      input: userContent,
+      system_instruction: systemPrompt,
+      generation_config: {
+        thinking_level: 'minimal',
+        temperature: input.temperature,
+        max_output_tokens: MAX_OUTPUT_TOKENS,
+      },
+      stream: useStreaming || undefined,
+    };
+  }
+
+  return {
+    model: input.model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userContent },
+    ],
+    temperature: input.temperature,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    stream: useStreaming || undefined,
+  };
+}
+
+export function extractResponseContent(
+  data: unknown,
+  provider: ProviderName
+): { content?: string; reasoning?: string } {
+  if (provider === 'Gemini') {
+    const response = data as GeminiInteractionResponse;
+    const content = response.steps
+      ?.filter((step) => step.type === 'model_output')
+      .flatMap((step) => step.content || [])
+      .filter((part) => part.type === 'text')
+      .map((part) => part.text || '')
+      .join('');
+    return { content };
+  }
+
+  const response = data as LlmResponse;
+  const message = response.choices?.[0]?.message;
+  return {
+    content: message?.content,
+    reasoning: message?.reasoning_details?.[0]?.text,
+  };
+}
+
 async function streamResponse(
   input: LlmCallInput,
-  requestBody: ChatCompletionRequest,
+  requestBody: ChatCompletionRequest | GeminiInteractionRequest,
   signal: AbortSignal,
   isTimedOut: () => boolean,
   effectiveTimeout: number
 ): Promise<string> {
   const url = new URL(input.endpoint);
+  if (input.provider === 'Gemini') {
+    url.searchParams.set('alt', 'sse');
+  }
   const transport = url.protocol === 'https:' ? https : http;
   const body = JSON.stringify(requestBody);
 
@@ -237,7 +351,7 @@ async function streamResponse(
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(body),
-          Authorization: `Bearer ${input.apiKey}`,
+          ...buildAuthHeaders(input.apiKey, input.provider),
           Accept: 'text/event-stream',
         },
       },
@@ -269,20 +383,18 @@ async function streamResponse(
 
           for (const line of lines) {
             const trimmed = line.trim();
-            if (!trimmed || !trimmed.startsWith('data: ')) {
+            if (!trimmed || !trimmed.startsWith('data:')) {
               continue;
             }
 
-            const data = trimmed.slice(6);
+            const data = trimmed.slice(5).trimStart();
             if (data === '[DONE]') {
               continue;
             }
 
             try {
-              const parsed = JSON.parse(data) as StreamDelta;
-              const delta = parsed.choices?.[0]?.delta;
-              const content = delta?.content || '';
-              const reasoning = delta?.reasoning_content;
+              const parsed = JSON.parse(data) as StreamDelta | GeminiStreamEvent;
+              const { content, reasoning } = extractStreamContent(parsed, input.provider);
 
               if (reasoning) {
                 logInfo(`Reasoning chunk: ${reasoning}`);
@@ -324,6 +436,26 @@ async function streamResponse(
 
     request.end(body);
   });
+}
+
+function extractStreamContent(
+  event: StreamDelta | GeminiStreamEvent,
+  provider: ProviderName
+): { content: string; reasoning?: string } {
+  if (provider === 'Gemini') {
+    const geminiEvent = event as GeminiStreamEvent;
+    return {
+      content: geminiEvent.event_type === 'step.delta' && geminiEvent.delta?.type === 'text'
+        ? geminiEvent.delta.text || ''
+        : '',
+    };
+  }
+
+  const delta = (event as StreamDelta).choices?.[0]?.delta;
+  return {
+    content: delta?.content || '',
+    reasoning: delta?.reasoning_content,
+  };
 }
 
 function handleHttpError(status: number, errorText: string): never {
@@ -370,8 +502,9 @@ function buildRepairPrompt(message: string, reason?: string): string {
 
 async function postJson(
   endpoint: string,
-  requestBody: ChatCompletionRequest,
+  requestBody: ChatCompletionRequest | GeminiInteractionRequest,
   apiKey: string,
+  provider: ProviderName,
   signal: AbortSignal
 ): Promise<ApiResponse> {
   const body = JSON.stringify(requestBody);
@@ -391,7 +524,7 @@ async function postJson(
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(body),
-          Authorization: `Bearer ${apiKey}`,
+          ...buildAuthHeaders(apiKey, provider),
         },
       },
       (response) => {
@@ -425,6 +558,12 @@ async function postJson(
 
     request.end(body);
   });
+}
+
+function buildAuthHeaders(apiKey: string, provider: ProviderName): Record<string, string> {
+  return provider === 'Gemini'
+    ? { 'x-goog-api-key': apiKey }
+    : { Authorization: `Bearer ${apiKey}` };
 }
 
 async function safeReadResponseText(response: ApiResponse): Promise<string> {
