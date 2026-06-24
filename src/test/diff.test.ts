@@ -1,6 +1,6 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
-import { shouldFilterPath, isLikelyBinary } from '../filters';
+import { shouldFilterPath, isLikelyBinary, redactSensitiveContent } from '../filters';
 
 describe('shouldFilterPath', () => {
   it('should filter lock files', () => {
@@ -9,6 +9,14 @@ describe('shouldFilterPath', () => {
     assert.strictEqual(shouldFilterPath('pnpm-lock.yaml'), true);
     assert.strictEqual(shouldFilterPath('Cargo.lock'), true);
     assert.strictEqual(shouldFilterPath('go.sum'), true);
+  });
+
+  it('should filter credential files while allowing env templates', () => {
+    assert.strictEqual(shouldFilterPath('.env'), true);
+    assert.strictEqual(shouldFilterPath('.env.local'), true);
+    assert.strictEqual(shouldFilterPath('config/credentials.json'), true);
+    assert.strictEqual(shouldFilterPath('certs/service.pem'), true);
+    assert.strictEqual(shouldFilterPath('.env.example'), false);
   });
 
   it('should filter binary/media extensions', () => {
@@ -54,6 +62,39 @@ describe('shouldFilterPath', () => {
     assert.strictEqual(shouldFilterPath('Package-Lock.json'), true);
     assert.strictEqual(shouldFilterPath('DIST/bundle.js'), true);
     assert.strictEqual(shouldFilterPath('image.PNG'), true);
+  });
+});
+
+describe('redactSensitiveContent', () => {
+  it('should redact common tokens and secret assignments', () => {
+    const input = [
+      '+API_KEY="super-secret-value"',
+      '+"password": "hunter2"',
+      '+token = ghp_abcdefghijklmnopqrstuvwxyz1234567890',
+      '+Authorization: Bearer abcdefghijklmnopqrstuvwxyz123456',
+      '+const harmless = "visible";',
+    ].join('\n');
+
+    const result = redactSensitiveContent(input);
+    assert.ok(!result.includes('super-secret-value'));
+    assert.ok(!result.includes('hunter2'));
+    assert.ok(!result.includes('ghp_abcdefghijklmnopqrstuvwxyz1234567890'));
+    assert.ok(!result.includes('abcdefghijklmnopqrstuvwxyz123456'));
+    assert.ok(result.includes('const harmless = "visible";'));
+  });
+
+  it('should replace an entire private key block', () => {
+    const input = [
+      '+-----BEGIN PRIVATE KEY-----',
+      '+sensitive-key-material',
+      '+-----END PRIVATE KEY-----',
+      '+safe content',
+    ].join('\n');
+
+    assert.strictEqual(
+      redactSensitiveContent(input),
+      '+[REDACTED PRIVATE KEY]\n+safe content'
+    );
   });
 });
 

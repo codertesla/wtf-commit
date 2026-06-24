@@ -11,7 +11,7 @@ import {
 import { readExtensionConfig, getSecretKeyName } from './config';
 import { resolveRepository, collectStageablePaths } from './git';
 import { getOptimizedDiff } from './diff';
-import { buildChatCompletionsEndpoint, callLLM } from './llm/provider';
+import { buildProviderEndpoint, callLLM } from './llm/provider';
 import { 
   normalizeCommitMessage, 
   looksLikeConventionalCommit, 
@@ -135,13 +135,13 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       return;
     }
 
-    const endpoint = buildChatCompletionsEndpoint(config.baseUrl, config.provider);
+    const endpoint = buildProviderEndpoint(config.baseUrl, config.provider);
     const repository = await resolveRepository();
     if (!repository) {
       return;
     }
 
-    const hasStagedChanges = repository.state.indexChanges.length > 0;
+    let hasStagedChanges = repository.state.indexChanges.length > 0;
     const hasWorkingTreeChanges =
       repository.state.workingTreeChanges.length > 0 || repository.state.untrackedChanges.length > 0;
 
@@ -157,6 +157,19 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       }
     }
 
+    if (!hasStagedChanges && hasWorkingTreeChanges && config.autoCommit && config.smartStage) {
+      const stagePaths = collectStageablePaths(repository.state);
+      if (stagePaths.length === 0) {
+        throw new Error('No stageable changes found. Please refresh Source Control and try again.');
+      }
+      await repository.add(stagePaths);
+      hasStagedChanges = true;
+    }
+
+    const stagedSnapshot = config.autoCommit && hasStagedChanges
+      ? await repository.diff(true)
+      : undefined;
+
     const diff = await getOptimizedDiff(repository, hasStagedChanges, config.smartStage);
     if (!diff.trim()) {
       showStatusMessage('$(circle-slash) No diff content found.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
@@ -166,6 +179,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     const intent = repository.inputBox.value.trim();
 
     const commitMessage = await generateCommitMessage({
+      provider: config.provider,
       endpoint,
       apiKey,
       model: config.model,
@@ -199,6 +213,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
         let repairedMessage: string | undefined;
         try {
           repairedMessage = await repairCommitMessage({
+            provider: config.provider,
             endpoint,
             apiKey,
             model: config.model,
@@ -276,11 +291,17 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       return;
     }
 
-    if (!hasStagedChanges && hasWorkingTreeChanges) {
-      const stagePaths = collectStageablePaths(repository.state);
-      if (stagePaths.length > 0) {
-        await repository.add(stagePaths);
-      }
+    if (!stagedSnapshot) {
+      throw new Error('No staged snapshot is available for Auto Commit.');
+    }
+
+    const currentStagedDiff = await repository.diff(true);
+    if (currentStagedDiff !== stagedSnapshot) {
+      await vscode.commands.executeCommand('workbench.view.scm');
+      vscode.window.showWarningMessage(
+        'Staged changes changed while the commit message was being generated. Review the changes and generate again.'
+      );
+      return;
     }
 
     await repository.commit(normalizedCommitMessage);
@@ -331,6 +352,7 @@ async function confirmStagedOnlyGeneration(): Promise<boolean> {
 }
 
 async function generateCommitMessage(input: {
+  provider: ProviderName;
   endpoint: string;
   apiKey: string;
   model: string;
@@ -359,6 +381,7 @@ async function generateCommitMessage(input: {
 }
 
 async function repairCommitMessage(input: {
+  provider: ProviderName;
   endpoint: string;
   apiKey: string;
   model: string;
