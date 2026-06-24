@@ -11,9 +11,14 @@ src/**
 .vscode-test/**
 
 # Environment files
-.env
-.env.local
-.env.example
+**/.env
+**/.env.*
+**/.npmrc
+**/.pypirc
+**/.netrc
+**/credentials*
+**/secrets*
+**/*.{pem,key,p12,pfx,jks,keystore}
 
 # Development files
 *.vsix
@@ -21,6 +26,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 scripts/**
+pnpm-workspace.yaml
 
 # Build dependencies
 node_modules/**
@@ -39,3 +45,9 @@ out/test/**
 
 # Asset drafts
 assets/icon-drafts/**
+.github/**
+.idea/**
+.codex/**
+coverage/**
+tmp/**
+temp/**

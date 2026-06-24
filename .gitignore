@@ -27,4 +27,5 @@ Thumbs.db
 .npmrc
 
 # Local scripts
-scripts/
+scripts/*
+!scripts/audit-package-list.mjs

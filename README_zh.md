@@ -12,7 +12,7 @@
 
 WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更改（或工作区更改）生成简洁且有意义的 Git 提交信息。
 
-## 🆕 最新更新（v1.4.1）
+## 🆕 最新更新（v1.4.2）
 
 - **原生接入 Gemini 3.5 Flash**：使用 Google Interactions API 和原生 SSE 流式输出，并以 `minimal` 思考等级提升提交信息生成速度。
 - **更安全的提交与 AI 上下文**：过滤敏感文件、脱敏常见凭据，并在 Auto Commit 前校验暂存区快照。
