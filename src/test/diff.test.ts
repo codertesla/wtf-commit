@@ -63,6 +63,21 @@ describe('shouldFilterPath', () => {
     assert.strictEqual(shouldFilterPath('DIST/bundle.js'), true);
     assert.strictEqual(shouldFilterPath('image.PNG'), true);
   });
+
+  it('should respect extra ignore patterns (bare directory name)', () => {
+    assert.strictEqual(shouldFilterPath('generated/foo.ts', ['generated']), true);
+    assert.strictEqual(shouldFilterPath('src/foo.ts', ['generated']), false);
+  });
+
+  it('should respect extra ignore patterns (suffix/glob)', () => {
+    assert.strictEqual(shouldFilterPath('tests/click.snap', ['*.snap']), true);
+    assert.strictEqual(shouldFilterPath('component.css.gen.ts', ['.gen.ts']), true);
+    assert.strictEqual(shouldFilterPath('component.ts', ['.gen.ts']), false);
+  });
+
+  it('should ignore empty and whitespace-only extra patterns', () => {
+    assert.strictEqual(shouldFilterPath('src/index.ts', ['', '  ']), false);
+  });
 });
 
 describe('redactSensitiveContent', () => {

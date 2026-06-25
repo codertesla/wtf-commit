@@ -4,10 +4,14 @@ import * as path from 'path';
  * Determines whether a file path should be filtered out from diff context
  * sent to the LLM. Filters lock files, binary assets, build outputs, etc.
  */
-export function shouldFilterPath(filePath: string): boolean {
+export function shouldFilterPath(filePath: string, extraIgnorePatterns: ReadonlyArray<string> = []): boolean {
   const normalized = filePath.replace(/\\/g, '/').toLowerCase();
   const baseName = path.posix.basename(normalized);
   const pathSegments = normalized.split('/').filter(Boolean);
+
+  if (matchesExtraPattern(baseName, pathSegments, extraIgnorePatterns)) {
+    return true;
+  }
 
   const filteredNames = new Set([
     'package-lock.json',
@@ -98,6 +102,34 @@ export function shouldFilterPath(filePath: string): boolean {
 
   return pathSegments.some((segment) => filteredDirectoryNames.has(segment))
     || filteredPathPrefixes.some((prefix) => normalized.startsWith(prefix));
+}
+
+function matchesExtraPattern(
+  baseName: string,
+  pathSegments: string[],
+  patterns: ReadonlyArray<string>
+): boolean {
+  for (const rawPattern of patterns) {
+    const pattern = rawPattern.trim().toLowerCase();
+    if (!pattern) {
+      continue;
+    }
+
+    // Suffix / glob-like patterns (e.g. "*.snap", ".gen.ts") match the filename tail.
+    if (pattern.startsWith('.') || pattern.startsWith('*')) {
+      const suffix = pattern.startsWith('*') ? pattern.slice(1) : pattern;
+      if (suffix && (baseName === suffix || baseName.endsWith(suffix))) {
+        return true;
+      }
+      continue;
+    }
+
+    // Bare names match either a path segment (directory/file) or the basename.
+    if (pathSegments.includes(pattern) || baseName === pattern) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function isSafeEnvTemplate(baseName: string): boolean {

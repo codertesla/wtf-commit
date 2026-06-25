@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "1.4.2",
+  "version": "1.8.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -32,6 +32,11 @@
         "command": "wtf-commit.setApiKey",
         "title": "WTF Commit: Set API Key",
         "icon": "$(key)"
+      },
+      {
+        "command": "wtf-commit.showOutput",
+        "title": "WTF Commit: Show Output",
+        "icon": "$(output)"
       }
     ],
     "menus": {
@@ -75,6 +80,30 @@
           "type": "boolean",
           "default": true,
           "description": "Show a confirmation dialog before auto-committing.",
+          "order": 0
+        },
+        "wtfCommit.confirmAutoPush": {
+          "type": "boolean",
+          "default": true,
+          "description": "When Auto Commit and Auto Push are both enabled, show an extra confirmation before pushing to the remote. Provides a safety net for one-keystroke auto-push flows.",
+          "order": 0
+        },
+        "wtfCommit.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the WTF Commit button in the status bar.",
+          "order": 0
+        },
+        "wtfCommit.changelogPopup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a notification with a View Changelog action after the extension is updated.",
+          "order": 0
+        },
+        "wtfCommit.warnOnTruncatedDiff": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a warning when the diff is too large and only a summarized/partial diff is sent to the AI.",
           "order": 0
         },
         "wtfCommit.prompt": {
@@ -146,6 +175,29 @@
           "default": {},
           "markdownDescription": "Custom Base URL and Model specifically for each AI provider. Overrides the global settings.\n\n**Example in `settings.json`:**\n```json\n{\n  \"DeepSeek\": {\n    \"baseUrl\": \"https://api.deepseek.com/beta\",\n    \"model\": \"deepseek-coder\"\n  },\n  \"Custom\": {\n    \"baseUrl\": \"https://my-custom-endpoint.com/v1\",\n    \"model\": \"my-custom-model\"\n  }\n}\n```",
           "order": 7
+        },
+        "wtfCommit.ignorePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Extra file or directory name patterns to exclude from the diff sent to the AI. Each entry is matched against a path segment (for a bare name like `generated`) or as a filename suffix (for an entry starting with `.` or `*`, e.g. `*.snap`, `.gen.ts`). Matches are case-insensitive. Built-in filters (lock files, build outputs, binaries, etc.) always apply.",
+          "order": 8
+        },
+        "wtfCommit.maxDiffChars": {
+          "type": "number",
+          "default": 20000,
+          "minimum": 1000,
+          "description": "Maximum total characters of the diff sent to the AI. Larger diffs are summarized or truncated.",
+          "order": 9
+        },
+        "wtfCommit.maxUntrackedFiles": {
+          "type": "number",
+          "default": 30,
+          "minimum": 0,
+          "description": "Maximum number of untracked (new) files included in the diff. Set to 0 to disable untracked-file inclusion.",
+          "order": 10
         }
       }
     }

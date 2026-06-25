@@ -4,7 +4,8 @@ import { type GeminiInteractionResponse, type LlmCallInput, type LlmResponse, Re
 import { logInfo, logError, getErrorMessage } from '../prompt';
 
 const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 1_500;
+const BASE_RETRY_DELAY_MS = 500;
+const MAX_RETRY_DELAY_MS = 8_000;
 const MAX_OUTPUT_TOKENS = 512;
 
 interface ChatMessage {
@@ -35,6 +36,7 @@ interface GeminiInteractionRequest {
 interface ApiResponse {
   ok: boolean;
   status: number;
+  retryAfterMs?: number;
   text(): Promise<string>;
   json(): Promise<unknown>;
 }
@@ -104,11 +106,11 @@ export async function callLLM(input: LlmCallInput): Promise<string> {
         throw new RequestFailure('cancelled', 'Commit message generation cancelled.');
       }
       const remainingMs = deadline - Date.now();
-      const retryDelayMs = RETRY_DELAY_MS * attempt;
+      const retryDelayMs = computeRetryDelay(attempt, lastError?.retryAfterMs);
       if (remainingMs <= retryDelayMs) {
         throw new RequestFailure('timeout', `Request timed out after ${Math.round(totalTimeoutMs / 1000)} seconds.`);
       }
-      logInfo(`Retrying LLM request (attempt ${attempt + 1}/${MAX_RETRIES + 1})...`);
+      logInfo(`Retrying LLM request (attempt ${attempt + 1}/${MAX_RETRIES + 1}) after ${retryDelayMs}ms...`);
       await sleep(retryDelayMs, input.token);
     }
 
@@ -149,6 +151,17 @@ function shouldRetry(error: RequestFailure): boolean {
   return error.code === 'api' && Boolean(
     error.status === 408 || (error.status && error.status >= 500 && error.status <= 599)
   );
+}
+
+function computeRetryDelay(attempt: number, retryAfterMs?: number): number {
+  if (retryAfterMs !== undefined && retryAfterMs > 0) {
+    return Math.min(retryAfterMs, MAX_RETRY_DELAY_MS);
+  }
+  const exponential = BASE_RETRY_DELAY_MS * Math.pow(2, attempt - 1);
+  const capped = Math.min(exponential, MAX_RETRY_DELAY_MS);
+  // Equal jitter: half fixed + half random, recommended for avoiding thundering herds.
+  const half = Math.floor(capped / 2);
+  return half + Math.floor(Math.random() * (half + 1));
 }
 
 function sleep(ms: number, token: LlmCallInput['token']): Promise<void> {
@@ -214,7 +227,7 @@ async function callLLMOnce(input: LlmCallInput, effectiveTimeout: number): Promi
 
     if (!response.ok) {
       const errorText = await safeReadResponseText(response);
-      handleHttpError(response.status, errorText);
+      handleHttpError(response.status, errorText, response.retryAfterMs);
     }
 
     let data: unknown;
@@ -304,9 +317,13 @@ export function extractResponseContent(
 
   const response = data as LlmResponse;
   const message = response.choices?.[0]?.message;
+  const reasoning = message?.reasoning_details
+    ?.map((detail) => detail?.text || '')
+    .filter(Boolean)
+    .join('\n');
   return {
     content: message?.content,
-    reasoning: message?.reasoning_details?.[0]?.text,
+    reasoning,
   };
 }
 
@@ -364,7 +381,7 @@ async function streamResponse(
           response.on('end', () => {
             const errorText = Buffer.concat(chunks).toString('utf8').slice(0, 500);
             try {
-              handleHttpError(response.statusCode || 0, errorText);
+              handleHttpError(response.statusCode || 0, errorText, parseRetryAfter(response.headers['retry-after']));
             } catch (error) {
               reject(error);
             }
@@ -458,18 +475,43 @@ function extractStreamContent(
   };
 }
 
-function handleHttpError(status: number, errorText: string): never {
+function handleHttpError(status: number, errorText: string, retryAfterMs?: number): never {
   if (status === 401 || status === 403) {
     throw new RequestFailure('auth', `Authentication failed (${status})`, status);
   }
   if (status === 429) {
-    throw new RequestFailure('rate_limit', 'Rate limit reached. Please retry later.', status);
+    const hint = retryAfterMs !== undefined ? ` Please retry in ${Math.ceil(retryAfterMs / 1000)} seconds.` : '';
+    throw new RequestFailure('rate_limit', `Rate limit reached.${hint} Please retry later.`, status, retryAfterMs);
+  }
+  if (status === 503 && retryAfterMs !== undefined) {
+    throw new RequestFailure('api', `Service unavailable (${status}). Please retry later.`, status, retryAfterMs);
   }
   throw new RequestFailure(
     'api',
     `API request failed (${status}): ${errorText || 'No error details returned.'}`,
-    status
+    status,
+    retryAfterMs
   );
+}
+
+function parseRetryAfter(value: string | string[] | undefined): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) {
+    return undefined;
+  }
+  const seconds = Number(raw);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.min(Math.round(seconds * 1000), 60_000);
+  }
+  const dateMs = Date.parse(raw);
+  if (Number.isFinite(dateMs)) {
+    const delta = dateMs - Date.now();
+    return delta > 0 ? Math.min(delta, 60_000) : 0;
+  }
+  return undefined;
 }
 
 function buildGenerationPrompt(diff: string, intent?: string): string {
@@ -539,6 +581,7 @@ async function postJson(
           resolve({
             ok: Boolean(response.statusCode && response.statusCode >= 200 && response.statusCode < 300),
             status: response.statusCode || 0,
+            retryAfterMs: parseRetryAfter(response.headers['retry-after']),
             text: async () => responseText,
             json: async () => JSON.parse(responseText),
           });

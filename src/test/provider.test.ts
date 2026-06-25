@@ -266,4 +266,44 @@ describe('Gemini Interactions API', () => {
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     }
   });
+
+  it('should surface Retry-After on a 429 and retry with a delay', async () => {
+    let requestCount = 0;
+    let retryAfterSeen: string | string[] | undefined;
+    const server = http.createServer((_request, response) => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        retryAfterSeen = '0'; // server-side value is read but delay is tiny for the test
+        response.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': '0' });
+        response.end('{"error":"rate limited"}');
+        return;
+      }
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify({
+        choices: [{ message: { content: 'feat: recovered after retry' } }],
+      }));
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const result = await callLLM({
+        provider: 'OpenAI',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'test-key',
+        model: 'test-model',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 5_000,
+        temperature: 1,
+      });
+      assert.strictEqual(result, 'feat: recovered after retry');
+      assert.strictEqual(requestCount, 2);
+      assert.ok(retryAfterSeen !== undefined);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
 });

@@ -1,6 +1,6 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
-import { normalizeCommitMessage, looksLikeConventionalCommit } from '../prompt';
+import { normalizeCommitMessage, looksLikeConventionalCommit, findConventionalCommitIssues } from '../prompt';
 
 describe('normalizeCommitMessage', () => {
   it('should trim whitespace', () => {
@@ -39,6 +39,26 @@ describe('normalizeCommitMessage', () => {
 
   it('should return empty string for whitespace-only input', () => {
     assert.strictEqual(normalizeCommitMessage('   \n\n   '), '');
+  });
+
+  it('should strip bold/italic wrapping around the message', () => {
+    assert.strictEqual(normalizeCommitMessage('**feat: add login**'), 'feat: add login');
+    assert.strictEqual(normalizeCommitMessage('_feat: add login_'), 'feat: add login');
+  });
+
+  it('should strip a blockquote prefix', () => {
+    assert.strictEqual(normalizeCommitMessage('> feat: add login'), 'feat: add login');
+  });
+
+  it('should strip inline code wrapping around the message', () => {
+    assert.strictEqual(normalizeCommitMessage('`feat: add login`'), 'feat: add login');
+  });
+
+  it('should remove interior fence-only lines', () => {
+    assert.strictEqual(
+      normalizeCommitMessage('```\nfeat: add login\n```\nmore'),
+      'feat: add login\nmore'
+    );
   });
 });
 
@@ -87,5 +107,47 @@ describe('looksLikeConventionalCommit', () => {
       looksLikeConventionalCommit('feat: add login\n\nThis is not conventional'),
       true
     );
+  });
+
+  it('should match the revert type', () => {
+    assert.strictEqual(looksLikeConventionalCommit('revert: add login page'), true);
+  });
+});
+
+describe('findConventionalCommitIssues', () => {
+  it('should return no issues for a well-formed message', () => {
+    assert.deepStrictEqual(findConventionalCommitIssues('feat(auth): add login page'), []);
+  });
+
+  it('should report a format issue when the type is missing', () => {
+    const issues = findConventionalCommitIssues('add login page');
+    assert.strictEqual(issues.length, 1);
+    assert.strictEqual(issues[0].field, 'format');
+    assert.ok(issues[0].repairReason.length > 0);
+  });
+
+  it('should report a subject_length issue when the first line is too long', () => {
+    const longSubject = `feat: ${'x'.repeat(80)}`;
+    const issues = findConventionalCommitIssues(longSubject);
+    assert.ok(issues.some((issue) => issue.field === 'subject_length'));
+  });
+
+  it('should report both format and length issues together', () => {
+    const longBad = `add ${'x'.repeat(80)}`;
+    const issues = findConventionalCommitIssues(longBad);
+    const fields = issues.map((issue) => issue.field);
+    assert.ok(fields.includes('format'));
+    assert.ok(fields.includes('subject_length'));
+  });
+
+  it('should accept revert: prefix without a format issue', () => {
+    const issues = findConventionalCommitIssues('revert: add login page');
+    assert.deepStrictEqual(issues, []);
+  });
+
+  it('should flag a revert line that exceeds the length limit', () => {
+    const longRevert = `revert: ${'x'.repeat(80)}`;
+    const issues = findConventionalCommitIssues(longRevert);
+    assert.ok(issues.some((issue) => issue.field === 'subject_length'));
   });
 });

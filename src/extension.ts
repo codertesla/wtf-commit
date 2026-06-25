@@ -12,14 +12,16 @@ import { readExtensionConfig, getSecretKeyName } from './config';
 import { resolveRepository, collectStageablePaths } from './git';
 import { getOptimizedDiff } from './diff';
 import { buildProviderEndpoint, callLLM } from './llm/provider';
-import { 
-  normalizeCommitMessage, 
-  looksLikeConventionalCommit, 
+import { classifyPushFailure, formatPushFailureMessage } from './push-failure';
+import { createStreamingSink, maskApiKey } from './ui';
+import {
+  normalizeCommitMessage,
+  findConventionalCommitIssues,
   getGitCommandError,
-  getErrorMessage, 
-  logInfo, 
-  logError, 
-  setOutputChannel 
+  getErrorMessage,
+  logInfo,
+  logError,
+  setOutputChannel
 } from './prompt';
 
 const execFileAsync = promisify(execFile);
@@ -38,12 +40,32 @@ export function activate(context: vscode.ExtensionContext) {
   statusBarItem.command = 'wtf-commit.generate';
   statusBarItem.text = '$(sparkle) WTF';
   statusBarItem.tooltip = 'WTF Commit: Generate commit message';
-  statusBarItem.show();
   context.subscriptions.push(statusBarItem);
 
-  checkChangelog(context).catch((error) => {
-    logError('Failed to check changelog', error);
-  });
+  const updateStatusBarVisibility = (): void => {
+    const show = vscode.workspace
+      .getConfiguration('wtfCommit')
+      .get<boolean>('showStatusBarItem', true);
+    if (show) {
+      statusBarItem.show();
+    } else {
+      statusBarItem.hide();
+    }
+  };
+  updateStatusBarVisibility();
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('wtfCommit.showStatusBarItem')) {
+        updateStatusBarVisibility();
+      }
+    })
+  );
+
+  if (vscode.workspace.getConfiguration('wtfCommit').get<boolean>('changelogPopup', true)) {
+    checkChangelog(context).catch((error) => {
+      logError('Failed to check changelog', error);
+    });
+  }
 
   // First-use guidance: prompt to set API key if none configured
   checkFirstUseGuidance(context).catch((error) => {
@@ -58,7 +80,11 @@ export function activate(context: vscode.ExtensionContext) {
     await runGenerate(context);
   });
 
-  context.subscriptions.push(setApiKeyDisposable, generateDisposable);
+  const showOutputDisposable = vscode.commands.registerCommand('wtf-commit.showOutput', () => {
+    outputChannel.show();
+  });
+
+  context.subscriptions.push(setApiKeyDisposable, generateDisposable, showOutputDisposable);
 }
 
 export function deactivate() {}
@@ -77,7 +103,9 @@ async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
         return {
           label: name,
           description: isCurrent ? 'current' : '',
-          detail: hasKey ? '$(key) API Key set' : '$(circle-slash) API Key not set',
+          detail: hasKey
+            ? `$(key) API Key set${apiKey ? ` (${maskApiKey(apiKey)})` : ''}`
+            : '$(circle-slash) API Key not set',
           picked: isCurrent,
         };
       })
@@ -107,12 +135,29 @@ async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
     }
 
     await context.secrets.store(getSecretKeyName(provider), trimmedApiKey);
-    await vscode.workspace
-      .getConfiguration('wtfCommit')
-      .update('provider', provider, vscode.ConfigurationTarget.Global);
+
+    const isCurrentProvider = provider === currentProvider;
+    let switchedProvider = isCurrentProvider;
+    if (!isCurrentProvider) {
+      const switchAction = await vscode.window.showInformationMessage(
+        `API Key for ${provider} saved. Switch the active provider to ${provider}?`,
+        'Switch Provider',
+        'Keep Current'
+      );
+      if (switchAction === 'Switch Provider') {
+        await vscode.workspace
+          .getConfiguration('wtfCommit')
+          .update('provider', provider, vscode.ConfigurationTarget.Global);
+        switchedProvider = true;
+      }
+    }
 
     showStatusMessage(`$(key) API key saved for ${provider}.`, STATUS_MESSAGE_TIMEOUT_MS);
-    vscode.window.showInformationMessage(`API Key for ${provider} saved. Provider switched to ${provider}.`);
+    vscode.window.showInformationMessage(
+      switchedProvider
+        ? `API Key for ${provider} saved. Active provider is now ${provider}.`
+        : `API Key for ${provider} saved. Active provider unchanged (${currentProvider}).`
+    );
   } catch (error) {
     logError('Failed to set API key', error);
     vscode.window.showErrorMessage(`Failed to save API key: ${getErrorMessage(error)}`);
@@ -151,7 +196,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     }
 
     if (hasStagedChanges && hasWorkingTreeChanges) {
-      const shouldContinue = await confirmStagedOnlyGeneration();
+      const shouldContinue = await confirmStagedOnlyGeneration(context);
       if (!shouldContinue) {
         return;
       }
@@ -170,24 +215,50 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       ? await repository.diff(true)
       : undefined;
 
-    const diff = await getOptimizedDiff(repository, hasStagedChanges, config.smartStage);
-    if (!diff.trim()) {
+    const diffResult = await getOptimizedDiff(
+      repository,
+      hasStagedChanges,
+      config.smartStage,
+      config.ignorePaths,
+      { maxDiffChars: config.maxDiffChars, maxUntrackedFiles: config.maxUntrackedFiles }
+    );
+    if (!diffResult.diff.trim()) {
       showStatusMessage('$(circle-slash) No diff content found.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
       return;
     }
 
+    if (diffResult.truncated && config.warnOnTruncatedDiff) {
+      logInfo(`Diff truncated before sending to AI (length exceeded ${config.maxDiffChars} chars).`);
+      vscode.window.showWarningMessage(
+        'The diff is large; only a summarized/partial diff was sent to the AI. The commit message may be less precise.'
+      );
+    }
+    if (diffResult.untrackedFilesOmitted > 0 && config.warnOnTruncatedDiff) {
+      vscode.window.showWarningMessage(
+        `${diffResult.untrackedFilesOmitted} untracked file(s) were omitted (limit: ${diffResult.untrackedFileCap}). Raise "Wtf Commit: Max Untracked Files" to include more.`
+      );
+    }
+
+    const diff = diffResult.diff;
     const intent = repository.inputBox.value.trim();
 
-    const commitMessage = await generateCommitMessage({
-      provider: config.provider,
-      endpoint,
-      apiKey,
-      model: config.model,
-      systemPrompt: config.systemPrompt,
-      diff,
-      intent,
-      temperature: config.temperature,
-    });
+    // Clear the input box so the streaming preview starts from a clean slate.
+    // The intent was already captured above, so clearing it is safe.
+    repository.inputBox.value = '';
+
+    const commitMessage = await generateCommitMessage(
+      {
+        provider: config.provider,
+        endpoint,
+        apiKey,
+        model: config.model,
+        systemPrompt: config.systemPrompt,
+        diff,
+        intent,
+        temperature: config.temperature,
+      },
+      repository.inputBox
+    );
 
     if (!commitMessage) {
       return;
@@ -202,28 +273,34 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     // Always populate the input box with generated result
     repository.inputBox.value = normalizedCommitMessage;
 
-    if (!looksLikeConventionalCommit(normalizedCommitMessage)) {
+    const issues = findConventionalCommitIssues(normalizedCommitMessage);
+    if (issues.length > 0) {
+      const issueSummary = issues.map((issue) => issue.message).join(' ');
       const action = await vscode.window.showWarningMessage(
-        'Generated message may not follow Conventional Commits format.',
+        `Generated message needs adjustment: ${issueSummary}`,
         'AI Repair',
         'Keep Original'
       );
 
       if (action === 'AI Repair') {
+        const repairReason = issues.map((issue) => issue.repairReason).join('\n');
         let repairedMessage: string | undefined;
         try {
-          repairedMessage = await repairCommitMessage({
-            provider: config.provider,
-            endpoint,
-            apiKey,
-            model: config.model,
-            systemPrompt: config.systemPrompt,
-            diff,
-            intent,
-            repairMessage: normalizedCommitMessage,
-            repairReason: 'The first line must match Conventional Commits: <type>(<scope>): <description>.',
-            temperature: config.temperature,
-          });
+          repairedMessage = await repairCommitMessage(
+            {
+              provider: config.provider,
+              endpoint,
+              apiKey,
+              model: config.model,
+              systemPrompt: config.systemPrompt,
+              diff,
+              intent,
+              repairMessage: normalizedCommitMessage,
+              repairReason,
+              temperature: config.temperature,
+            },
+            repository.inputBox
+          );
         } catch (error) {
           if (error instanceof RequestFailure) {
             await handleRequestFailure(error);
@@ -248,8 +325,11 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
         normalizedCommitMessage = normalizedRepairedMessage;
         repository.inputBox.value = normalizedCommitMessage;
 
-        if (!looksLikeConventionalCommit(normalizedCommitMessage)) {
-          vscode.window.showWarningMessage('AI repair completed, but the message may still need manual adjustment.');
+        const remainingIssues = findConventionalCommitIssues(normalizedCommitMessage);
+        if (remainingIssues.length > 0) {
+          vscode.window.showWarningMessage(
+            `AI repair completed, but ${remainingIssues.length} issue(s) remain: ${remainingIssues.map((issue) => issue.message).join(' ')}`
+          );
         }
       }
     }
@@ -308,6 +388,22 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     showStatusMessage('$(check) Commit successful.', STATUS_MESSAGE_TIMEOUT_MS);
 
     if (config.autoPush) {
+      let proceedWithPush = true;
+      if (config.confirmAutoPush) {
+        const pushResponse = await vscode.window.showWarningMessage(
+          'Push the commit to the remote now?',
+          { modal: true, detail: normalizedCommitMessage },
+          'Push',
+          'Cancel'
+        );
+        proceedWithPush = pushResponse === 'Push';
+      }
+
+      if (!proceedWithPush) {
+        showStatusMessage('$(debug-pause) Auto Push skipped. Commit is local only.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
+        return;
+      }
+
       try {
         await vscode.window.withProgress(
           {
@@ -335,13 +431,23 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
   }
 }
 
-async function confirmStagedOnlyGeneration(): Promise<boolean> {
+async function confirmStagedOnlyGeneration(context: vscode.ExtensionContext): Promise<boolean> {
+  if (context.globalState.get<boolean>('wtfCommit.mixedStageReminderDismissed')) {
+    return true;
+  }
+
   const action = await vscode.window.showWarningMessage(
     'Staged and unstaged changes were both detected. WTF Commit will generate from staged changes only.',
     'Use Staged Changes',
+    "Don't Remind Me",
     'Open Source Control',
     'Cancel'
   );
+
+  if (action === "Don't Remind Me") {
+    await context.globalState.update('wtfCommit.mixedStageReminderDismissed', true);
+    return true;
+  }
 
   if (action === 'Open Source Control') {
     await vscode.commands.executeCommand('workbench.view.scm');
@@ -351,16 +457,19 @@ async function confirmStagedOnlyGeneration(): Promise<boolean> {
   return action === 'Use Staged Changes';
 }
 
-async function generateCommitMessage(input: {
-  provider: ProviderName;
-  endpoint: string;
-  apiKey: string;
-  model: string;
-  systemPrompt: string;
-  diff: string;
-  intent?: string;
-  temperature: number;
-}): Promise<string | undefined> {
+async function generateCommitMessage(
+  input: {
+    provider: ProviderName;
+    endpoint: string;
+    apiKey: string;
+    model: string;
+    systemPrompt: string;
+    diff: string;
+    intent?: string;
+    temperature: number;
+  },
+  inputBox?: { value: string }
+): Promise<string | undefined> {
   return vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -368,30 +477,32 @@ async function generateCommitMessage(input: {
         cancellable: true,
       },
       async (progress, token) => {
+        const sink = createStreamingSink(progress, inputBox);
         return callLLM({
           ...input,
           token,
           timeoutMs: DEFAULT_TIMEOUT_MS,
-          onStream: (chunk) => {
-            progress.report({ message: chunk.slice(0, 60) });
-          },
-        });
+          onStream: (chunk) => sink.push(chunk),
+        }).finally(() => sink.flush());
       }
     );
 }
 
-async function repairCommitMessage(input: {
-  provider: ProviderName;
-  endpoint: string;
-  apiKey: string;
-  model: string;
-  systemPrompt: string;
-  diff: string;
-  intent?: string;
-  repairMessage: string;
-  repairReason?: string;
-  temperature: number;
-}): Promise<string | undefined> {
+async function repairCommitMessage(
+  input: {
+    provider: ProviderName;
+    endpoint: string;
+    apiKey: string;
+    model: string;
+    systemPrompt: string;
+    diff: string;
+    intent?: string;
+    repairMessage: string;
+    repairReason?: string;
+    temperature: number;
+  },
+  inputBox?: { value: string }
+): Promise<string | undefined> {
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -399,14 +510,13 @@ async function repairCommitMessage(input: {
       cancellable: true,
     },
     async (progress, token) => {
+      const sink = createStreamingSink(progress, inputBox);
       return callLLM({
         ...input,
         token,
         timeoutMs: DEFAULT_TIMEOUT_MS,
-        onStream: (chunk) => {
-          progress.report({ message: chunk.slice(0, 60) });
-        },
-      });
+        onStream: (chunk) => sink.push(chunk),
+      }).finally(() => sink.flush());
     }
   );
 }
@@ -445,31 +555,27 @@ async function handlePushFailure(repository: Repository, error: unknown): Promis
 
   const gitError = getGitCommandError(error);
   const command = gitError?.gitCommand;
-  const commandLabel = command ? `git ${command}` : 'Git repository refresh';
-  const detail = gitError?.stderr?.trim() || getErrorMessage(error);
-
+  let pushVerified = false;
   if (command && command !== 'push') {
-    const pushVerified = await verifyUpstreamMatchesHead(repository.rootUri.fsPath);
+    pushVerified = await verifyUpstreamMatchesHead(repository.rootUri.fsPath);
+  }
 
-    if (pushVerified) {
-      logInfo(`Push verified after ${commandLabel} failed; HEAD matches upstream.`);
-      showStatusMessage('$(cloud-upload) Push completed with a follow-up refresh warning.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
-      vscode.window.showWarningMessage(
-        `Push succeeded, but ${commandLabel} failed afterward: ${detail}`
-      );
-      return;
-    }
+  const classification = classifyPushFailure(error, pushVerified);
+  const message = formatPushFailureMessage(classification);
 
-    vscode.window.showWarningMessage(
-      `Push may have succeeded, but ${commandLabel} failed afterward: ${detail}`
-    );
+  if (classification.kind === 'push_succeeded_with_followup_warning') {
+    logInfo(`Push verified after ${classification.commandLabel} failed; HEAD matches upstream.`);
+    showStatusMessage('$(cloud-upload) Push completed with a follow-up refresh warning.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
+    vscode.window.showWarningMessage(message);
     return;
   }
 
-  const action = await vscode.window.showErrorMessage(
-    `Commit successful, but push failed: ${detail}`,
-    'Undo Commit'
-  );
+  if (classification.kind === 'push_may_have_succeeded') {
+    vscode.window.showWarningMessage(message);
+    return;
+  }
+
+  const action = await vscode.window.showErrorMessage(message, 'Undo Commit');
   if (action === 'Undo Commit') {
     await vscode.commands.executeCommand('git.undoCommit');
   }
@@ -549,13 +655,20 @@ async function checkFirstUseGuidance(context: vscode.ExtensionContext): Promise<
   const action = await vscode.window.showInformationMessage(
     'Welcome to WTF Commit! Set up an API key to start generating commit messages with AI.',
     'Set API Key',
-    'Dismiss'
+    'Remind Me Later',
+    "Don't Show Again"
   );
 
   if (action === 'Set API Key') {
     void vscode.commands.executeCommand('wtf-commit.setApiKey');
+    // Don't permanently dismiss on Set API Key — give the user another chance
+    // if they cancel the key setup. Only an explicit "Don't Show Again" dismisses.
+    return;
   }
 
-  // Don't show again regardless of choice
-  await context.globalState.update('wtfCommit.guidanceDismissed', true);
+  if (action === "Don't Show Again") {
+    await context.globalState.update('wtfCommit.guidanceDismissed', true);
+  }
+
+  // "Remind Me Later" and closing the notification both leave the flag unset.
 }

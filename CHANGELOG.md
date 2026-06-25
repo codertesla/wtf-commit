@@ -5,6 +5,34 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-06-25
+### Changed
+- **Internal Refactor & Test Coverage**: Extracted push-failure classification (`src/push-failure.ts`) and streaming/`maskApiKey` helpers (`src/ui.ts`) out of `extension.ts` so the core logic is unit-testable. Added `push-failure.test.ts` and `ui.test.ts`. The extension entry now loads cleanly with all imports resolved.
+
+## [1.7.0] - 2026-06-25
+### Changed
+- **Smarter Retry Backoff**: Retries now use exponential backoff with equal jitter (instead of fixed linear delays), and respect the server's `Retry-After` header on 429/503 responses to avoid re-hitting rate limits.
+- **Stricter Conventional-Commit Validation**: The validator now accepts the `revert:` type and checks the 72-character subject-line limit. When AI Repair is offered, it receives a specific reason (e.g. "first line is 90 characters") instead of a generic format message, and the post-repair warning lists exactly which issues remain.
+- **Stronger Message Normalization**: Strips bold/italic/inline-code wrapping and blockquote prefixes that some models add around the whole message, plus interior code-fence lines.
+- **Full Reasoning Trace**: All `reasoning_details` segments are now joined (previously only the first was kept), so DeepSeek/o-series thinking traces aren't truncated in the log.
+
+## [1.6.0] - 2026-06-25
+### Added
+- **Streaming Preview in SCM Input Box**: The commit message now streams live into the Source Control input box as the AI generates it, so you can watch the draft form and cancel early if it goes off track. The progress notification is throttled to avoid flicker.
+- **Non-Destructive Set API Key**: Setting an API key for a provider no longer forcibly switches your active provider. You're asked whether to switch, and the picker shows a masked key hint (e.g. `sk-1••••wxyz`) so you can tell keys apart.
+- **"Don't Remind Me" for Mixed-Stage Warning**: The recurring "staged and unstaged changes detected" prompt now offers a Don't Remind Me option (persisted).
+- **Friendlier First-Run Guidance**: The welcome prompt no longer permanently dismisses itself if you close it or click Set API Key — only an explicit "Don't Show Again" hides it for good, so a slip no longer buries the setup nudge forever.
+
+## [1.5.0] - 2026-06-25
+### Added
+- **Status Bar Toggle**: New `wtfCommit.showStatusBarItem` setting to hide the status bar button.
+- **Changelog Popup Toggle**: New `wtfCommit.changelogPopup` setting to disable the post-update changelog notification.
+- **Truncation Warnings**: New `wtfCommit.warnOnTruncatedDiff` setting; the extension now warns when a large diff is summarized or when untracked files are omitted due to limits.
+- **Auto-Push Safety Net**: New `wtfCommit.confirmAutoPush` setting that asks for an extra confirmation before pushing, so one-keystroke auto-push flows can't surprise you.
+- **Custom Diff Ignore List**: New `wtfCommit.ignorePaths` setting to exclude additional files/directories/extensions (e.g. `generated`, `*.snap`, `.gen.ts`) from the AI context.
+- **Configurable Diff Limits**: New `wtfCommit.maxDiffChars` and `wtfCommit.maxUntrackedFiles` settings to tune how much context is sent to the AI.
+- **Show Output Command**: New `WTF Commit: Show Output` command to open the extension log channel for troubleshooting.
+
 ## [1.4.2] - 2026-06-24
 ### Changed
 - **Package Privacy Guard**: Expanded VSIX exclusions for environment files, credentials, private keys, development metadata, and other non-runtime files.

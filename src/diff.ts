@@ -5,22 +5,42 @@ import {
   type RepositoryState,
   type Change,
   GitStatus,
-  MAX_DIFF_CHARS,
   MAX_DIFF_FILE_CHARS,
   MAX_PARTIAL_DIFF_CHARS,
   MAX_UNTRACKED_FILE_BYTES,
   MAX_UNTRACKED_FILE_LINES,
-  MAX_UNTRACKED_FILES,
-  MAX_SUMMARY_DIRS
+  MAX_SUMMARY_DIRS,
+  DEFAULT_MAX_UNTRACKED_FILES,
+  DEFAULT_MAX_DIFF_CHARS,
 } from './types';
 import { shouldFilterPath, isLikelyBinary, redactSensitiveContent } from './filters';
 import { logInfo, getErrorMessage } from './prompt';
 
+export interface DiffLimits {
+  maxDiffChars: number;
+  maxUntrackedFiles: number;
+}
+
+export interface OptimizedDiffResult {
+  diff: string;
+  truncated: boolean;
+  untrackedFileCount: number;
+  untrackedFileCap: number;
+  untrackedFilesOmitted: number;
+}
+
+export const DEFAULT_DIFF_LIMITS: DiffLimits = {
+  maxDiffChars: DEFAULT_MAX_DIFF_CHARS,
+  maxUntrackedFiles: DEFAULT_MAX_UNTRACKED_FILES,
+};
+
 export async function getOptimizedDiff(
   repository: Repository,
   hasStagedChanges: boolean,
-  smartStage: boolean
-): Promise<string> {
+  smartStage: boolean,
+  ignorePatterns: ReadonlyArray<string> = [],
+  limits: DiffLimits = DEFAULT_DIFF_LIMITS
+): Promise<OptimizedDiffResult> {
   let diff = '';
 
   if (hasStagedChanges) {
@@ -31,12 +51,17 @@ export async function getOptimizedDiff(
     throw new Error('No staged changes found. Please stage your changes first.');
   }
 
-  const shouldIncludeUntrackedChanges = !hasStagedChanges && smartStage;
-  const untrackedChanges = shouldIncludeUntrackedChanges
-    ? getUntrackedChanges(repository.state).slice(0, MAX_UNTRACKED_FILES)
+  const untrackedCap = Math.max(0, limits.maxUntrackedFiles);
+  const shouldIncludeUntrackedChanges = !hasStagedChanges && smartStage && untrackedCap > 0;
+  const allUntracked = shouldIncludeUntrackedChanges
+    ? getUntrackedChanges(repository.state)
     : [];
+  const untrackedChanges = allUntracked.slice(0, untrackedCap);
+  const untrackedFilesOmitted = Math.max(0, allUntracked.length - untrackedChanges.length);
   if (untrackedChanges.length > 0) {
-    const untrackedPatches = await Promise.all(untrackedChanges.map((change) => buildUntrackedPatch(change.uri)));
+    const untrackedPatches = await Promise.all(
+      untrackedChanges.map((change) => buildUntrackedPatch(change.uri, ignorePatterns))
+    );
     const validPatches = untrackedPatches.filter((patch): patch is string => Boolean(patch));
     if (validPatches.length > 0) {
       diff = `${diff}\n${validPatches.join('\n')}`;
@@ -44,19 +69,21 @@ export async function getOptimizedDiff(
   }
 
   if (!diff.trim()) {
-    return '';
+    return { diff: '', truncated: false, untrackedFileCount: 0, untrackedFileCap: untrackedCap, untrackedFilesOmitted };
   }
 
-  diff = redactSensitiveContent(optimizeDiffForLlm(diff));
+  diff = redactSensitiveContent(optimizeDiffForLlm(diff, ignorePatterns));
 
-  if (diff.length < MAX_DIFF_CHARS) {
-    return diff;
+  const maxDiffChars = Math.max(1000, limits.maxDiffChars);
+  if (diff.length < maxDiffChars) {
+    return { diff, truncated: false, untrackedFileCount: untrackedChanges.length, untrackedFileCap: untrackedCap, untrackedFilesOmitted };
   }
 
   const changes = hasStagedChanges
     ? repository.state.indexChanges
     : [...repository.state.workingTreeChanges, ...untrackedChanges];
-  return buildLargeDiffSummary(diff, changes);
+  const summary = buildLargeDiffSummary(diff, changes, maxDiffChars);
+  return { diff: summary, truncated: true, untrackedFileCount: untrackedChanges.length, untrackedFileCap: untrackedCap, untrackedFilesOmitted };
 }
 
 function getUntrackedChanges(state: RepositoryState): Change[] {
@@ -75,11 +102,11 @@ function getUntrackedChanges(state: RepositoryState): Change[] {
   return [...changesByPath.values()];
 }
 
-async function buildUntrackedPatch(uri: vscode.Uri): Promise<string | null> {
+async function buildUntrackedPatch(uri: vscode.Uri, ignorePatterns: ReadonlyArray<string>): Promise<string | null> {
   const relativePath = vscode.workspace.asRelativePath(uri, false).replace(/\\/g, '/');
 
   try {
-    if (shouldFilterPath(relativePath)) {
+    if (shouldFilterPath(relativePath, ignorePatterns)) {
       return null;
     }
 
@@ -131,9 +158,10 @@ async function buildUntrackedPatch(uri: vscode.Uri): Promise<string | null> {
   }
 }
 
-function buildLargeDiffSummary(diff: string, changes: Change[]): string {
+function buildLargeDiffSummary(diff: string, changes: Change[], maxDiffChars: number): string {
+  const partialBudget = Math.min(MAX_PARTIAL_DIFF_CHARS, Math.max(1000, Math.floor(maxDiffChars / 4)));
   if (changes.length === 0) {
-    return `${diff.substring(0, MAX_PARTIAL_DIFF_CHARS)}\n... (truncated)`;
+    return `${diff.substring(0, partialBudget)}\n... (truncated)`;
   }
 
   const uniqueChanges = [...new Map(changes.map((change) => [change.uri.fsPath, change])).values()];
@@ -153,7 +181,7 @@ function buildLargeDiffSummary(diff: string, changes: Change[]): string {
     .join('\n');
 
   const sections = splitDiffSections(diff);
-  const perFileBudget = Math.max(1, Math.floor(MAX_PARTIAL_DIFF_CHARS / Math.max(sections.length, 1)));
+  const perFileBudget = Math.max(1, Math.floor(partialBudget / Math.max(sections.length, 1)));
   const balancedPartialDiff = sections
     .map((section) => section.substring(0, perFileBudget))
     .join('\n');
@@ -171,9 +199,11 @@ function buildLargeDiffSummary(diff: string, changes: Change[]): string {
   ].join('\n');
 }
 
-function optimizeDiffForLlm(rawDiff: string): string {
+function optimizeDiffForLlm(rawDiff: string, ignorePatterns: ReadonlyArray<string> = []): string {
   const sections = splitDiffSections(rawDiff);
-  const optimizedSections = sections.map(optimizeDiffSection).filter((section) => section.trim().length > 0);
+  const optimizedSections = sections
+    .map((section) => optimizeDiffSection(section, ignorePatterns))
+    .filter((section) => section.trim().length > 0);
   return optimizedSections.join('\n');
 }
 
@@ -189,13 +219,13 @@ function splitDiffSections(rawDiff: string): string[] {
     .map((part) => (part.startsWith('diff --git ') ? part : `diff --git ${part}`));
 }
 
-function optimizeDiffSection(section: string): string {
+function optimizeDiffSection(section: string, ignorePatterns: ReadonlyArray<string> = []): string {
   const targetPath = extractDiffPath(section);
   if (!targetPath) {
     return section;
   }
 
-  if (shouldFilterPath(targetPath)) {
+  if (shouldFilterPath(targetPath, ignorePatterns)) {
     return buildOmittedSection(targetPath, 'non-code or generated file omitted');
   }
 

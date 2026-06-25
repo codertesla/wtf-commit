@@ -6,6 +6,8 @@ import {
   DEFAULT_PROVIDER,
   DEFAULT_SYSTEM_PROMPT,
   SECRET_KEY_PREFIX,
+  DEFAULT_MAX_DIFF_CHARS,
+  DEFAULT_MAX_UNTRACKED_FILES,
 } from './types';
 import { resolveProviderConfig } from './provider-config';
 
@@ -45,11 +47,40 @@ export function readExtensionConfig(): ExtensionConfig {
     autoPush: config.get<boolean>('autoPush') || false,
     smartStage: config.get<boolean>('smartStage') ?? true,
     confirmBeforeCommit: config.get<boolean>('confirmBeforeCommit') ?? true,
+    confirmAutoPush: config.get<boolean>('confirmAutoPush') ?? true,
+    showStatusBarItem: config.get<boolean>('showStatusBarItem') ?? true,
+    changelogPopup: config.get<boolean>('changelogPopup') ?? true,
+    warnOnTruncatedDiff: config.get<boolean>('warnOnTruncatedDiff') ?? true,
+    ignorePaths: readIgnorePaths(config),
     systemPrompt,
     baseUrl,
     model,
     temperature: config.get<number>('temperature') ?? 1.0,
+    maxDiffChars: clampInt(config.get<number>('maxDiffChars'), DEFAULT_MAX_DIFF_CHARS, 1000),
+    maxUntrackedFiles: Math.max(0, config.get<number>('maxUntrackedFiles') ?? DEFAULT_MAX_UNTRACKED_FILES),
   };
+}
+
+function readIgnorePaths(config: vscode.WorkspaceConfiguration): string[] {
+  const raw = config.get<string[]>('ignorePaths') || [];
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const entry of raw) {
+    const trimmed = entry.trim();
+    if (!trimmed || seen.has(trimmed.toLowerCase())) {
+      continue;
+    }
+    seen.add(trimmed.toLowerCase());
+    result.push(trimmed);
+  }
+  return result;
+}
+
+function clampInt(value: number | undefined, fallback: number, minimum: number): number {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return fallback;
+  }
+  return Math.max(minimum, Math.floor(value));
 }
 
 export function asProviderName(rawProvider: string | undefined): ProviderName {
