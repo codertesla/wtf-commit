@@ -55,10 +55,17 @@ export interface ExtensionConfig {
   autoPush: boolean;
   smartStage: boolean;
   confirmBeforeCommit: boolean;
+  confirmAutoPush: boolean;
+  showStatusBarItem: boolean;
+  changelogPopup: boolean;
+  warnOnTruncatedDiff: boolean;
+  ignorePaths: string[];
   systemPrompt: string;
   baseUrl: string;
   model: string;
   temperature: number;
+  maxDiffChars: number;
+  maxUntrackedFiles: number;
 }
 
 export interface LlmCallInput {
@@ -124,13 +131,21 @@ export const DEFAULT_SYSTEM_PROMPT = 'You are an expert software developer. Gene
 export const DEFAULT_PROVIDER: ProviderName = 'OpenAI';
 export const DEFAULT_TIMEOUT_MS = 45_000;
 export const REASONING_TIMEOUT_MS = 90_000; // Extended timeout for deep thinkers
-export const MAX_DIFF_CHARS = 20_000;
-export const MAX_PARTIAL_DIFF_CHARS = 5_000;
-export const MAX_UNTRACKED_FILE_BYTES = 120 * 1024;
-export const MAX_UNTRACKED_FILE_LINES = 400;
-export const MAX_UNTRACKED_FILES = 30;
-export const MAX_SUMMARY_DIRS = 10;
-export const MAX_DIFF_FILE_CHARS = 3_500;
+export const DEFAULT_MAX_DIFF_CHARS = 20_000;
+export const DEFAULT_MAX_PARTIAL_DIFF_CHARS = 5_000;
+export const DEFAULT_MAX_UNTRACKED_FILE_BYTES = 120 * 1024;
+export const DEFAULT_MAX_UNTRACKED_FILE_LINES = 400;
+export const DEFAULT_MAX_UNTRACKED_FILES = 30;
+export const DEFAULT_MAX_SUMMARY_DIRS = 10;
+export const DEFAULT_MAX_DIFF_FILE_CHARS = 3_500;
+
+export const MAX_DIFF_CHARS = DEFAULT_MAX_DIFF_CHARS;
+export const MAX_PARTIAL_DIFF_CHARS = DEFAULT_MAX_PARTIAL_DIFF_CHARS;
+export const MAX_UNTRACKED_FILE_BYTES = DEFAULT_MAX_UNTRACKED_FILE_BYTES;
+export const MAX_UNTRACKED_FILE_LINES = DEFAULT_MAX_UNTRACKED_FILE_LINES;
+export const MAX_UNTRACKED_FILES = DEFAULT_MAX_UNTRACKED_FILES;
+export const MAX_SUMMARY_DIRS = DEFAULT_MAX_SUMMARY_DIRS;
+export const MAX_DIFF_FILE_CHARS = DEFAULT_MAX_DIFF_FILE_CHARS;
 
 export const GitStatus = {
   UNTRACKED: 7,
@@ -139,11 +154,16 @@ export const GitStatus = {
 export const PROVIDER_NAMES = [...BUILT_IN_PROVIDER_NAMES, 'Custom'] as const satisfies readonly ProviderName[];
 
 export class RequestFailure extends Error {
+  public readonly retryAfterMs?: number;
   constructor(
     public readonly code: RequestFailureCode,
     message: string,
-    public readonly status?: number
+    public readonly status?: number,
+    retryAfterMs?: number
   ) {
     super(message);
+    if (retryAfterMs !== undefined && Number.isFinite(retryAfterMs) && retryAfterMs >= 0) {
+      this.retryAfterMs = retryAfterMs;
+    }
   }
 }

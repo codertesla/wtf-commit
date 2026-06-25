@@ -43,6 +43,9 @@ UPDATEFLOW.md
 # Test output
 out/test/**
 
+# pnpm local store (should never ship)
+.pnpm-store/**
+
 # Asset drafts
 assets/icon-drafts/**
 .github/**

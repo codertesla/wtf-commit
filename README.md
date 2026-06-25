@@ -12,11 +12,31 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.4.2)
+## 🆕 Latest (v1.8.0)
 
-- **Native Gemini 3.5 Flash**: Uses Google's Interactions API with native SSE streaming and `minimal` thinking for faster commit-message generation.
-- **Safer commits and AI context**: Redacts common credentials, excludes sensitive files, and verifies the staged snapshot before Auto Commit.
-- **More reliable generation**: Isolates provider configuration, bounds retries with one overall timeout, balances large-diff context across files, and limits output to 512 tokens.
+- **Refactor & tests**: Push-failure classification and the streaming/masking helpers were extracted from `extension.ts` into testable modules, with new unit tests covering them. No user-facing behavior change; the extension is now easier to maintain and verify.
+
+## 🆕 v1.7.0
+
+- **Smarter retries**: Exponential backoff with jitter replaces fixed delays, and the server's `Retry-After` header is honored on 429/503 — no more re-hammering a rate limit.
+- **Stricter commit validation**: The `revert:` type is now recognized and the 72-character subject limit is enforced. AI Repair gets a specific reason and the post-repair warning names exactly what's still off.
+- **Stronger normalization**: Strips bold/italic/inline-code/blockquote wrapping and interior code-fence lines that some models add.
+- **Full reasoning trace**: All `reasoning_details` segments are joined in the log, not just the first.
+
+## 🆕 v1.6.0
+
+- **Live streaming preview**: The commit message streams into the Source Control input box as the AI writes it — watch the draft form and cancel early if it drifts. The progress notification is throttled to stop flicker.
+- **Set API Key no longer hijacks your provider**: Setting a key for another provider now asks before switching, and shows a masked key hint so you can tell keys apart.
+- **"Don't Remind Me" for the mixed-stage warning**: Stop the recurring staged/unstaged prompt from nagging you.
+- **Friendlier first-run guidance**: Closing the welcome prompt no longer permanently hides it — only an explicit "Don't Show Again" does.
+
+## 🆕 v1.5.0
+
+- **More control, less noise**: Toggle the status bar button, disable the changelog popup, and get warned when a large diff is truncated before being sent to the AI.
+- **Safer auto-push**: An optional extra confirmation before pushing protects one-keystroke auto-commit + auto-push flows.
+- **Custom ignore list**: Exclude extra files/directories/extensions (e.g. `generated`, `*.snap`, `.gen.ts`) from AI context via `wtfCommit.ignorePaths`.
+- **Tunable context limits**: New `wtfCommit.maxDiffChars` and `wtfCommit.maxUntrackedFiles` settings.
+- **Show Output command**: Open the extension log channel for troubleshooting.
 
 ## 🚀 Features
 
