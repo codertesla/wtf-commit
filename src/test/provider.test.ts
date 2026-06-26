@@ -88,6 +88,13 @@ describe('buildProviderEndpoint', () => {
     );
   });
 
+  it('should handle MiMo provider', () => {
+    assert.strictEqual(
+      buildProviderEndpoint('https://api.xiaomimimo.com/v1', 'MiMo'),
+      'https://api.xiaomimimo.com/v1/chat/completions'
+    );
+  });
+
   it('should use the native Gemini Interactions endpoint', () => {
     assert.strictEqual(
       buildProviderEndpoint('https://generativelanguage.googleapis.com/v1beta', 'Gemini'),
