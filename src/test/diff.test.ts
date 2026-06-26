@@ -1,6 +1,13 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
 import { shouldFilterPath, isLikelyBinary, redactSensitiveContent } from '../filters';
+import {
+  compactDiffSection,
+  extractRepresentativeHunk,
+  finalizeDiffForLlm,
+  splitDiffSections,
+} from '../diff-optimize';
+import { DEFAULT_COMPACT_FILE_THRESHOLD } from '../types';
 
 describe('shouldFilterPath', () => {
   it('should filter lock files', () => {
@@ -142,5 +149,111 @@ describe('isLikelyBinary', () => {
     // Tab (9), LF (10), CR (13) are allowed
     const bytes = new Uint8Array([72, 101, 108, 108, 111, 9, 10, 13, 87, 111, 114, 108, 100]);
     assert.strictEqual(isLikelyBinary(bytes), false);
+  });
+});
+
+function buildSampleSection(filePath: string, changedLines: string[]): string {
+  return [
+    `diff --git a/${filePath} b/${filePath}`,
+    'index 1111111..2222222 100644',
+    `--- a/${filePath}`,
+    `+++ b/${filePath}`,
+    `@@ -1,${changedLines.length} +1,${changedLines.length} @@`,
+    ...changedLines,
+  ].join('\n');
+}
+
+describe('splitDiffSections', () => {
+  it('should split multi-file diffs', () => {
+    const diff = [
+      buildSampleSection('src/a.ts', ['-old', '+new']),
+      buildSampleSection('src/b.ts', ['-foo', '+bar']),
+    ].join('\n');
+
+    assert.strictEqual(splitDiffSections(diff).length, 2);
+  });
+});
+
+describe('extractRepresentativeHunk', () => {
+  it('should keep only the first hunk sample', () => {
+    const section = [
+      buildSampleSection('src/a.ts', ['-line1', '+line2', '-line3', '+line4']),
+      '@@ -10,2 +10,2 @@',
+      '-second hunk',
+      '+changed',
+    ].join('\n');
+
+    const result = extractRepresentativeHunk(section, 2);
+    assert.ok(result.includes('line2'));
+    assert.ok(!result.includes('second hunk'));
+    assert.ok(result.includes('[sample hunk only: src/a.ts]'));
+  });
+});
+
+describe('compactDiffSection', () => {
+  it('should compact staged new files to metadata plus preview', () => {
+    const plusLines = Array.from({ length: 40 }, (_, index) => `+line ${index + 1}`);
+    const section = [
+      'diff --git a/docs/guide.md b/docs/guide.md',
+      'new file mode 100644',
+      '--- /dev/null',
+      '+++ b/docs/guide.md',
+      '@@ -0,0 +1,40 @@',
+      ...plusLines,
+    ].join('\n');
+
+    const result = compactDiffSection(section, 25);
+    assert.ok(result.includes('[new file: docs/guide.md, 40 lines]'));
+    assert.ok(result.includes('+line 1'));
+    assert.ok(!result.includes('+line 40'));
+    assert.ok(result.includes('[preview omitted: 25 more lines]'));
+  });
+});
+
+describe('finalizeDiffForLlm', () => {
+  it('should compact when many files are changed', () => {
+    const sections = Array.from({ length: DEFAULT_COMPACT_FILE_THRESHOLD + 1 }, (_, index) => [
+      buildSampleSection(`src/file${index}.ts`, ['-old', `+new ${index}`]),
+      '@@ -50,2 +50,2 @@',
+      '-second hunk',
+      '+also changed',
+    ].join('\n'));
+    const rawDiff = sections.join('\n');
+
+    const result = finalizeDiffForLlm(
+      rawDiff,
+      [],
+      [],
+      { maxDiffChars: 50_000, maxUntrackedFiles: 30 }
+    );
+
+    assert.strictEqual(result.truncated, false);
+    assert.ok(result.diff.includes('[sample hunk only: src/file0.ts]'));
+    assert.ok(!result.diff.includes('second hunk'));
+    assert.ok(result.diff.length < rawDiff.length);
+  });
+
+  it('should summarize when diff exceeds maxDiffChars', () => {
+    const longLine = '+'.padEnd(500, 'x');
+    const rawDiff = buildSampleSection('src/big.ts', [longLine, longLine, longLine]);
+
+    const result = finalizeDiffForLlm(
+      rawDiff,
+      [{ relativePath: 'src/big.ts' }],
+      [],
+      { maxDiffChars: 500, maxUntrackedFiles: 30 }
+    );
+
+    assert.strictEqual(result.truncated, true);
+    assert.ok(result.diff.includes('compact summary'));
+    assert.ok(result.diff.includes('src/big.ts'));
+  });
+
+  it('should omit snap files via ignore patterns', () => {
+    const rawDiff = buildSampleSection('tests/a.snap', ['-old', '+new']);
+    const result = finalizeDiffForLlm(rawDiff, [], ['*.snap'], { maxDiffChars: 10_000, maxUntrackedFiles: 30 });
+
+    assert.ok(result.diff.includes('[omitted: non-code or generated file omitted]'));
+    assert.ok(!result.diff.includes('+new'));
   });
 });

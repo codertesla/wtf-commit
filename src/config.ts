@@ -8,6 +8,7 @@ import {
   SECRET_KEY_PREFIX,
   DEFAULT_MAX_DIFF_CHARS,
   DEFAULT_MAX_UNTRACKED_FILES,
+  DEFAULT_IGNORE_PATHS,
 } from './types';
 import { resolveProviderConfig } from './provider-config';
 import { asUiLanguage } from './i18n';
@@ -64,7 +65,8 @@ export function readExtensionConfig(): ExtensionConfig {
 }
 
 function readIgnorePaths(config: vscode.WorkspaceConfiguration): string[] {
-  const raw = config.get<string[]>('ignorePaths') || [];
+  const configured = config.get<string[]>('ignorePaths');
+  const raw = configured === undefined ? [...DEFAULT_IGNORE_PATHS] : configured;
   const seen = new Set<string>();
   const result: string[] = [];
   for (const entry of raw) {
