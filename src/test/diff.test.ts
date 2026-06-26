@@ -206,7 +206,7 @@ describe('compactDiffSection', () => {
     assert.ok(result.includes('[new file: docs/guide.md, 40 lines]'));
     assert.ok(result.includes('+line 1'));
     assert.ok(!result.includes('+line 40'));
-    assert.ok(result.includes('[preview omitted: 25 more lines]'));
+    assert.ok(result.includes('[preview omitted: 10 more lines]'));
   });
 });
 

@@ -115,7 +115,7 @@
         },
         "wtfCommit.prompt": {
           "type": "string",
-          "default": "Generate a concise Git commit message from the provided diff.\n\nRules:\n1. Use Conventional Commits: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters; use imperative mood\n4. Mention new files when relevant; output only the commit message",
+          "default": "Generate a concise Git commit message from the provided diff.\n\nRules:\n1. Use Conventional Commits: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters; use imperative mood\n4. If a new file is added, mention it in the description (especially docs or features); output only the commit message",
           "description": "System Prompt for AI (supports multi-line)",
           "editPresentation": "multilineText",
           "order": 30
