@@ -13,12 +13,10 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.10.0)
+## 🆕 Latest (v1.10.1)
 
-- **MiMo provider**: Added Xiaomi MiMo (`mimo-v2.5`) with OpenAI-compatible API.
-- **GLM default**: Switched to free `glm-4.7-flash` on [Zhipu](https://bigmodel.cn/pricing).
-- **Removed Moonshot/Kimi**: Dropped the built-in Moonshot provider — Kimi models are pricier than flash-tier options for commit messages. Use **Custom** with an OpenAI-compatible endpoint if you still need Kimi.
-- **Pricing guide**: README includes a model cost comparison table to help you pick a provider.
+- **Z.AI provider**: Added the international Z.AI endpoint (`api.z.ai`) with free default model `glm-4.7-flash`. Separate from the China **GLM** provider — API keys are not interchangeable.
+- **Pricing guide**: README now compares GLM (China) and Z.AI (international) side by side, including free `glm-4.7-flash` and paid `glm-4.7-flashx` tiers.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -91,6 +89,7 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
 | **MiMo** | `mimo-v2.5` | `https://api.xiaomimimo.com/v1` |
 | **GLM** | `glm-4.7-flash` | `https://open.bigmodel.cn/api/paas/v4` |
+| **Z.AI** | `glm-4.7-flash` | `https://api.z.ai/api/paas/v4` |
 | **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
@@ -104,24 +103,28 @@ Generating a commit message is a lightweight task — you don't need a frontier 
 | Provider | Model | Input | Output | ~Cost / generation† | Best for |
 |----------|-------|------:|-------:|--------------------:|----------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | Zero-cost trials; quality/latency vary |
-| **GLM** | `glm-4.7-flash` | $0 | $0 | ~$0 | **Default GLM** — [free](https://bigmodel.cn/pricing) on Zhipu (~20 t/s) |
+| **GLM** | `glm-4.7-flash` | $0 | $0 | ~$0 | **China** — [free](https://bigmodel.cn/pricing) on Zhipu BigModel |
+| **Z.AI** | `glm-4.7-flash` | $0 | $0 | ~$0 | **International** — [free](https://docs.z.ai/guides/overview/pricing) on Z.AI |
 | **OpenAI** | `gpt-5-nano` | $0.05 | $0.40 | ~$0.0003 | Lowest paid input price; small diffs |
+| **Z.AI** | `glm-4.7-flashx` | $0.07 | $0.40 | ~$0.0004 | Faster Z.AI tier |
 | **GLM** | `glm-4.7-flashx` | ¥0.5 (~$0.07) | ¥3 (~$0.42) | ~$0.0004 | Faster Zhipu tier (~30–40 t/s) |
-| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Top pick globally** — fast, cheap, great quality |
+| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Top paid pick** — fast, cheap, great quality |
 | **MiMo** | `mimo-v2.5` | $0.14 | $0.28 | ~$0.0007 | Same price tier as DeepSeek; OpenAI-compatible |
 | **Gemini** | `gemini-3.1-flash-lite` | $0.25 | $1.50 | ~$0.0015 | Generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
 
 † Rough estimate for **~5K input + 150 output tokens** (typical diff + commit message), no prompt cache. GLM CNY prices converted at ~¥7.2/$ for comparison. Actual cost depends on diff size and model verbosity.
 
+> **GLM vs Z.AI**: Same model family, different platforms — **GLM** uses the China endpoint (`open.bigmodel.cn`); **Z.AI** uses the international endpoint (`api.z.ai`). API keys are not interchangeable.
+
 **Our recommendation (speed + value):**
 
-1. **GLM-4.7-Flash** (`glm-4.7-flash`) — **free** on Zhipu; great default if you have a BigModel API key. Need faster decode? Switch to **`glm-4.7-flashx`** (¥0.5 / ¥3 per 1M tokens).
+1. **GLM-4.7-Flash** (`glm-4.7-flash`) — **free**. Use **GLM** if you have a [Zhipu BigModel](https://bigmodel.cn/pricing) key (China), or **Z.AI** if you have a [Z.AI](https://docs.z.ai/guides/overview/pricing) key (international). Need faster decode? Use **`glm-4.7-flashx`** on the same platform.
 2. **DeepSeek V4 Flash** (`deepseek-v4-flash`) — best paid balance globally. Disable thinking mode (`"thinking": {"type": "disabled"}`) to avoid extra reasoning tokens; WTF Commit already strips thinking tags from the final message.
 3. **MiMo V2.5** (`mimo-v2.5`) — same USD price band as DeepSeek; popular on OpenRouter.
 4. **Gemini 3.1 Flash Lite** (`gemini-3.1-flash-lite`) — slightly pricier on paper, but the free tier is generous for light use.
 5. **`openrouter/free`** — fine for experimenting; switch to a paid flash model for production.
 
-Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [MiMo](https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [Zhipu GLM](https://bigmodel.cn/pricing) · [OpenRouter](https://openrouter.ai/models)
+Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [MiMo](https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [Zhipu GLM](https://bigmodel.cn/pricing) · [Z.AI](https://docs.z.ai/guides/overview/pricing) · [OpenRouter](https://openrouter.ai/models)
 
 > OpenRouter default targets the free route model: `openrouter/free`.
 

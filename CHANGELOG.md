@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.1] - 2026-06-26
+### Added
+- **Z.AI Provider**: Added the international Z.AI endpoint (`https://api.z.ai/api/paas/v4`) with default model `glm-4.7-flash` (free per [Z.AI pricing](https://docs.z.ai/guides/overview/pricing)). Separate from the China **GLM** provider on `open.bigmodel.cn` — API keys are not interchangeable.
+
 ## [1.10.0] - 2026-06-26
 ### Added
 - **MiMo Provider**: Added Xiaomi MiMo (`mimo-v2.5`) with OpenAI-compatible endpoint `https://api.xiaomimimo.com/v1`.
