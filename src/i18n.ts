@@ -13,6 +13,9 @@ export type MessageKey =
   | 'commitSuccessful'
   | 'autoPushSkipped'
   | 'autoPushRequiresAutoCommit'
+  | 'autoPushNeedsAutoCommit'
+  | 'enableAutoCommit'
+  | 'dismiss'
   | 'messageReadyInScm'
   | 'cancelled'
   | 'apiKeyNotSet'
@@ -86,6 +89,10 @@ const en: Dictionary = {
   autoPushSkipped: 'Auto Push skipped. Commit is local only.',
   autoPushRequiresAutoCommit:
     'Auto Push requires Auto Commit. Message ready in Source Control.',
+  autoPushNeedsAutoCommit:
+    'Auto Push is enabled but Auto Commit is off, so pushes will never happen. Enable Auto Commit to make Auto Push effective?',
+  enableAutoCommit: 'Enable Auto Commit',
+  dismiss: 'Dismiss',
   messageReadyInScm: 'Commit message ready in Source Control.',
   cancelled: 'Commit generation cancelled.',
   apiKeyNotSet: 'API Key for {provider} is not set.',
@@ -161,6 +168,10 @@ const zh: Dictionary = {
   commitSuccessful: '提交成功。',
   autoPushSkipped: '已跳过 Auto Push，提交仅保留在本地。',
   autoPushRequiresAutoCommit: 'Auto Push 需要先开启 Auto Commit。提交信息已就绪于源代码管理。',
+  autoPushNeedsAutoCommit:
+    '已开启 Auto Push 但 Auto Commit 处于关闭状态，推送不会生效。是否开启 Auto Commit 让 Auto Push 生效？',
+  enableAutoCommit: '开启 Auto Commit',
+  dismiss: '忽略',
   messageReadyInScm: '提交信息已就绪于源代码管理。',
   cancelled: '已取消提交信息生成。',
   apiKeyNotSet: '尚未设置 {provider} 的 API Key。',

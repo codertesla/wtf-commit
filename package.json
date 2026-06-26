@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -58,67 +58,67 @@
     "configuration": {
       "title": "WTF Commit",
       "properties": {
-        "wtfCommit.autoCommit": {
-          "type": "boolean",
-          "default": false,
-          "description": "Automatically commit changes after generating the message.",
-          "order": 0
-        },
-        "wtfCommit.autoPush": {
-          "type": "boolean",
-          "default": false,
-          "description": "Automatically push changes after commit (requires autoCommit to be enabled).",
-          "order": 0
-        },
-        "wtfCommit.smartStage": {
-          "type": "boolean",
-          "default": true,
-          "description": "When Auto Commit is enabled and nothing is staged, stage current changes before generation so later edits cannot enter the commit.",
-          "order": 0
-        },
-        "wtfCommit.confirmBeforeCommit": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show a confirmation dialog before auto-committing.",
-          "order": 0
-        },
-        "wtfCommit.confirmAutoPush": {
-          "type": "boolean",
-          "default": true,
-          "description": "When Auto Commit and Auto Push are both enabled, show an extra confirmation before pushing to the remote. Provides a safety net for one-keystroke auto-push flows.",
+        "wtfCommit.uiLanguage": {
+          "type": "string",
+          "enum": ["en", "zh"],
+          "default": "en",
+          "markdownDescription": "**Interface Language** — Language for the extension's own UI (buttons, prompts, notifications). Independent of the commit-message language. `en` = English, `zh` = 简体中文.",
           "order": 0
         },
         "wtfCommit.showStatusBarItem": {
           "type": "boolean",
           "default": true,
           "description": "Show the WTF Commit button in the status bar.",
-          "order": 0
+          "order": 1
         },
         "wtfCommit.changelogPopup": {
           "type": "boolean",
           "default": true,
           "description": "Show a notification with a View Changelog action after the extension is updated.",
-          "order": 0
+          "order": 2
         },
-        "wtfCommit.uiLanguage": {
-          "type": "string",
-          "enum": ["en", "zh"],
-          "default": "en",
-          "markdownDescription": "Language for the extension's own UI (buttons, prompts, notifications). Independent of the commit-message language. `en` = English, `zh` = 简体中文.",
-          "order": 0
+        "wtfCommit.autoCommit": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "**Automation — Auto Commit**: After generating the message, commit automatically without you having to click. Off = message is placed in the Source Control input box for you to review and commit manually (recommended for most users).",
+          "order": 10
+        },
+        "wtfCommit.autoPush": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "**Automation — Auto Push**: After the auto-commit, push to the remote automatically. ⚠️ Has no effect unless **Auto Commit** is also enabled.",
+          "order": 11
+        },
+        "wtfCommit.smartStage": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "**Automation — Smart Stage**: When Auto Commit is on and nothing is staged, stage the current changes before generation so later edits cannot sneak into the commit. Only relevant when Auto Commit is enabled.",
+          "order": 12
+        },
+        "wtfCommit.confirmBeforeCommit": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "**Safety — Confirm Before Commit**: Show a confirmation dialog before the auto-commit happens. Only relevant when Auto Commit is enabled.",
+          "order": 20
+        },
+        "wtfCommit.confirmAutoPush": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "**Safety — Confirm Before Push**: Show an extra confirmation before pushing to the remote. A safety net for one-keystroke auto-push flows. Only relevant when both Auto Commit and Auto Push are enabled.",
+          "order": 21
         },
         "wtfCommit.warnOnTruncatedDiff": {
           "type": "boolean",
           "default": true,
           "description": "Show a warning when the diff is too large and only a summarized/partial diff is sent to the AI.",
-          "order": 0
+          "order": 22
         },
         "wtfCommit.prompt": {
           "type": "string",
           "default": "You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.\n\nRules:\n1. Use conventional commit format: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters. If necessary, add a blank line and a bulleted list for details.\n4. Use imperative mood (e.g., 'add' not 'added')\n5. Focus on WHAT changed and WHY, not HOW\n6. CRITICAL: If a new file is created (especially documentation or features), it MUST be mentioned in the description.\n7. If multiple changes exist, prioritize the most significant impact (e.g., \"add Chinese documentation\" is more significant than \"add link\").\n8. Only output the commit message, nothing else.",
           "description": "System Prompt for AI (supports multi-line)",
           "editPresentation": "multilineText",
-          "order": 1
+          "order": 30
         },
         "wtfCommit.language": {
           "type": "string",
@@ -132,13 +132,13 @@
           ],
           "default": "English",
           "description": "Language for the generated commit message",
-          "order": 2
+          "order": 31
         },
         "wtfCommit.customLanguage": {
           "type": "string",
           "default": "English",
           "description": "Enter your target language (only used when Language is set to 'Custom'). e.g. 'French', 'Emoji only', 'Cantonese'.",
-          "order": 3
+          "order": 32
         },
         "wtfCommit.provider": {
           "type": "string",
@@ -153,21 +153,21 @@
           ],
           "default": "OpenAI",
           "description": "Select an AI provider",
-          "order": 3
+          "order": 33
         },
         "wtfCommit.baseUrl": {
           "type": "string",
           "default": "",
           "description": "API Base URL for the Custom provider. Built-in providers use their defaults or Provider Overrides.",
           "markdownDescription": "API Base URL for the **Custom** provider. Built-in providers use their own defaults unless configured in **Provider Overrides**. This prevents endpoints for incompatible API protocols from being mixed.",
-          "order": 4
+          "order": 34
         },
         "wtfCommit.model": {
           "type": "string",
           "default": "",
           "description": "Model name for the Custom provider. Built-in providers use their defaults or Provider Overrides.",
           "markdownDescription": "Model name for the **Custom** provider. Built-in providers use their own defaults unless configured in **Provider Overrides**.",
-          "order": 5
+          "order": 35
         },
         "wtfCommit.temperature": {
           "type": "number",
@@ -175,13 +175,13 @@
           "minimum": 0,
           "maximum": 2,
           "description": "Temperature for AI generation. Lower values produce more deterministic results.",
-          "order": 6
+          "order": 36
         },
         "wtfCommit.providerOverrides": {
           "type": "object",
           "default": {},
           "markdownDescription": "Custom Base URL and Model specifically for each AI provider. Overrides the global settings.\n\n**Example in `settings.json`:**\n```json\n{\n  \"DeepSeek\": {\n    \"baseUrl\": \"https://api.deepseek.com/beta\",\n    \"model\": \"deepseek-coder\"\n  },\n  \"Custom\": {\n    \"baseUrl\": \"https://my-custom-endpoint.com/v1\",\n    \"model\": \"my-custom-model\"\n  }\n}\n```",
-          "order": 7
+          "order": 37
         },
         "wtfCommit.ignorePaths": {
           "type": "array",
@@ -190,21 +190,21 @@
           },
           "default": [],
           "markdownDescription": "Extra file or directory name patterns to exclude from the diff sent to the AI. Each entry is matched against a path segment (for a bare name like `generated`) or as a filename suffix (for an entry starting with `.` or `*`, e.g. `*.snap`, `.gen.ts`). Matches are case-insensitive. Built-in filters (lock files, build outputs, binaries, etc.) always apply.",
-          "order": 8
+          "order": 40
         },
         "wtfCommit.maxDiffChars": {
           "type": "number",
           "default": 20000,
           "minimum": 1000,
           "description": "Maximum total characters of the diff sent to the AI. Larger diffs are summarized or truncated.",
-          "order": 9
+          "order": 41
         },
         "wtfCommit.maxUntrackedFiles": {
           "type": "number",
           "default": 30,
           "minimum": 0,
           "description": "Maximum number of untracked (new) files included in the diff. Set to 0 to disable untracked-file inclusion.",
-          "order": 10
+          "order": 42
         }
       }
     }
