@@ -6,17 +6,20 @@ English | [简体中文](README_zh.md)
 [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/codertesla/wtf-commit)](https://open-vsx.org/extension/codertesla/wtf-commit)
 [![License](https://img.shields.io/github/license/codertesla/wtf-commit)](https://github.com/codertesla/wtf-commit)
 [![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.75.0-007ACC?logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/updates/v1_75)
-[![Gemini 3.1 Flash Lite](https://img.shields.io/badge/Gemini-3.1%20Flash%20Lite-8E75B2?logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite)
+[![GLM 4.7 Flash](https://img.shields.io/badge/GLM-4.7%20Flash%20Free-345FF2?logo=zhipu&logoColor=white)](https://bigmodel.cn/pricing)
+[![Z.AI GLM 4.7 Flash](https://img.shields.io/badge/Z.AI-GLM%204.7%20Flash%20Free-1A1A1A)](https://docs.z.ai/guides/overview/pricing)
 [![DeepSeek V4 Flash](https://img.shields.io/badge/DeepSeek-V4%20Flash-4D6BFE?logo=deepseek&logoColor=white)](https://api-docs.deepseek.com/quick_start/pricing)
+[![MiMo V2.5](https://img.shields.io/badge/MiMo-V2.5-FF6900?logo=xiaomi&logoColor=white)](https://mimo.mi.com/docs/en-US/price/pay-as-you-go)
+[![Gemini 3.1 Flash Lite](https://img.shields.io/badge/Gemini-3.1%20Flash%20Lite-8E75B2?logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite)
 
 Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) | [Website](https://codertesla.github.io/wtf-commit/)
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.10.1)
+## 🆕 Latest (v1.10.2)
 
-- **Z.AI provider**: Added the international Z.AI endpoint (`api.z.ai`) with free default model `glm-4.7-flash`. Separate from the China **GLM** provider — API keys are not interchangeable.
-- **Pricing guide**: README now compares GLM (China) and Z.AI (international) side by side, including free `glm-4.7-flash` and paid `glm-4.7-flashx` tiers.
+- **API Key links**: README lists official API Key pages for each built-in provider (OpenAI, DeepSeek, MiMo, GLM, Z.AI, Gemini, OpenRouter).
+- **Marketplace badges**: README badges now highlight recommended commit models — free GLM / Z.AI, DeepSeek V4 Flash, MiMo V2.5, and Gemini 3.1 Flash Lite.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -93,6 +96,20 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 | **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
+
+### Get API Keys
+
+| Provider | Get API Key |
+|----------|-------------|
+| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| **DeepSeek** | [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) |
+| **MiMo** | [platform.xiaomimimo.com/console/api-keys](https://platform.xiaomimimo.com/console/api-keys) |
+| **GLM** (China) | [open.bigmodel.cn/usercenter/apikeys](https://open.bigmodel.cn/usercenter/apikeys) |
+| **Z.AI** (International) | [z.ai/manage-apikey/apikey-list](https://z.ai/manage-apikey/apikey-list) |
+| **Gemini** | [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys) |
+| **OpenRouter** | [openrouter.ai/keys](https://openrouter.ai/keys) |
+
+> **GLM** and **Z.AI** keys are not interchangeable — create a key on the platform that matches your provider.
 
 ### Choosing a model for commit messages
 
