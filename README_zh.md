@@ -12,7 +12,13 @@
 
 WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更改（或工作区更改）生成简洁且有意义的 Git 提交信息。
 
-## 🆕 最新更新（v1.9.0）
+## 🆕 最新更新（v1.9.1）
+
+- **设置页重新排序**：所有设置项按用途分组排序（界面 → 自动化 → 安全确认 → AI 配置 → Diff 过滤），`wtfCommit.uiLanguage` 等不再被埋没。
+- **设置描述更清晰**：Auto Commit / Auto Push / Smart Stage / Confirm Before Commit / Confirm Before Push 用加粗分组标签说明依赖关系。
+- **Auto Push 自洽引导**：开启 Auto Push 但 Auto Commit 关闭时，提供一键「开启 Auto Commit」操作。
+
+## 🆕 v1.9.0
 
 - **UI 中英双语**：新增 `wtfCommit.uiLanguage` 设置（`en` / `zh`），按钮、提示、通知全部本地化，与提交信息语言相互独立。
 - **更安全的错误信息**：裁剪并脱敏 provider 错误体，避免回显的 key/token 泄露给用户。
