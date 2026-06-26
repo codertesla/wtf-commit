@@ -95,6 +95,13 @@ describe('buildProviderEndpoint', () => {
     );
   });
 
+  it('should handle Z.AI provider', () => {
+    assert.strictEqual(
+      buildProviderEndpoint('https://api.z.ai/api/paas/v4', 'Z.AI'),
+      'https://api.z.ai/api/paas/v4/chat/completions'
+    );
+  });
+
   it('should use the native Gemini Interactions endpoint', () => {
     assert.strictEqual(
       buildProviderEndpoint('https://generativelanguage.googleapis.com/v1beta', 'Gemini'),
