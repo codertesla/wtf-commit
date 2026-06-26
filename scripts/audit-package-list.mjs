@@ -24,6 +24,7 @@ const allowedFiles = new Set([
   'out/filters.js',
   'out/extension.js',
   'out/diff.js',
+  'out/diff-optimize.js',
   'out/config.js',
   'out/ui.js',
   'out/i18n.js',

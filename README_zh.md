@@ -15,10 +15,10 @@
 
 WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更改（或工作区更改）生成简洁且有意义的 Git 提交信息。
 
-## 🆕 最新更新（v1.10.4）
+## 🆕 最新更新（v1.11.0）
 
-- **GLM / Z.AI 默认模型**：服务商默认改为 `glm-4.7-flashx`（移除免费 `glm-4.7-flash`，限流严重）。
-- **使用推荐**：DeepSeek V4 Flash 与 Gemini 3.1 Flash Lite 为速度首选；README 区分 **默认服务商**（OpenAI）、**服务商默认** 与 **使用推荐**。
+- **更精简的 LLM 上下文**：默认 diff 上限降至 10k 字符，多文件自动紧凑、新文件仅发元数据 + 30 行预览 — 生成更快、更省 token。
+- **更智能的过滤**：默认 `ignorePaths` 排除快照、压缩产物与生成文件；超大 diff 改为文件列表 + 样本 hunk 摘要。
 
 > 更早版本的更新说明请查看 [CHANGELOG](CHANGELOG.md)。
 
