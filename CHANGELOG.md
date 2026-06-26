@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Leaner LLM Context**: Reduced default diff budget (`maxDiffChars` 20k → 10k), per-file caps, and new-file preview lines (400 → 30) so commit generation sends less text to the model — faster and cheaper with similar message quality.
+- **Compact Multi-File Diffs**: When more than 12 files change, only a short sample hunk per file is sent automatically.
+- **Large Diff Summary**: Oversized diffs now include a file list plus one sample hunk per file instead of long balanced partial slices.
+- **Default ignorePaths**: Pre-filters `*.snap`, `*.min.js`, `*.min.css`, `.gen.ts`, and `_generated` from AI context.
+- **System Prompt**: Shortened the default prompt to cut fixed per-request overhead.
+
 ## [1.10.4] - 2026-06-26
 ### Changed
 - **GLM / Z.AI Default Model**: Switched from the rate-limited free `glm-4.7-flash` to paid `glm-4.7-flashx`. README now recommends **DeepSeek V4 Flash** and **Gemini 3.1 Flash Lite** for speed; notes that GLM FlashX is often slower.

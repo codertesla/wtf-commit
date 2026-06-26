@@ -1,33 +1,29 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import {
   type Repository,
   type RepositoryState,
   type Change,
   GitStatus,
-  MAX_DIFF_FILE_CHARS,
-  MAX_PARTIAL_DIFF_CHARS,
   MAX_UNTRACKED_FILE_BYTES,
-  MAX_UNTRACKED_FILE_LINES,
-  MAX_SUMMARY_DIRS,
+  DEFAULT_UNTRACKED_PREVIEW_LINES,
   DEFAULT_MAX_UNTRACKED_FILES,
   DEFAULT_MAX_DIFF_CHARS,
 } from './types';
-import { shouldFilterPath, isLikelyBinary, redactSensitiveContent } from './filters';
+import { shouldFilterPath, isLikelyBinary } from './filters';
 import { logInfo, getErrorMessage } from './prompt';
+import {
+  type DiffLimits,
+  type OptimizedDiffResult,
+  finalizeDiffForLlm,
+} from './diff-optimize';
 
-export interface DiffLimits {
-  maxDiffChars: number;
-  maxUntrackedFiles: number;
-}
-
-export interface OptimizedDiffResult {
-  diff: string;
-  truncated: boolean;
-  untrackedFileCount: number;
-  untrackedFileCap: number;
-  untrackedFilesOmitted: number;
-}
+export type { DiffLimits, OptimizedDiffResult } from './diff-optimize';
+export {
+  splitDiffSections,
+  compactDiffSection,
+  extractRepresentativeHunk,
+  finalizeDiffForLlm,
+} from './diff-optimize';
 
 export const DEFAULT_DIFF_LIMITS: DiffLimits = {
   maxDiffChars: DEFAULT_MAX_DIFF_CHARS,
@@ -72,18 +68,23 @@ export async function getOptimizedDiff(
     return { diff: '', truncated: false, untrackedFileCount: 0, untrackedFileCap: untrackedCap, untrackedFilesOmitted };
   }
 
-  diff = redactSensitiveContent(optimizeDiffForLlm(diff, ignorePatterns));
-
-  const maxDiffChars = Math.max(1000, limits.maxDiffChars);
-  if (diff.length < maxDiffChars) {
-    return { diff, truncated: false, untrackedFileCount: untrackedChanges.length, untrackedFileCap: untrackedCap, untrackedFilesOmitted };
-  }
-
   const changes = hasStagedChanges
     ? repository.state.indexChanges
     : [...repository.state.workingTreeChanges, ...untrackedChanges];
-  const summary = buildLargeDiffSummary(diff, changes, maxDiffChars);
-  return { diff: summary, truncated: true, untrackedFileCount: untrackedChanges.length, untrackedFileCap: untrackedCap, untrackedFilesOmitted };
+
+  const summarizedChanges = changes.map((change) => ({
+    relativePath: vscode.workspace.asRelativePath(change.uri, false).replace(/\\/g, '/'),
+  }));
+
+  return finalizeDiffForLlm(
+    diff,
+    summarizedChanges,
+    ignorePatterns,
+    limits,
+    untrackedChanges.length,
+    untrackedCap,
+    untrackedFilesOmitted
+  );
 }
 
 function getUntrackedChanges(state: RepositoryState): Change[] {
@@ -112,174 +113,49 @@ async function buildUntrackedPatch(uri: vscode.Uri, ignorePatterns: ReadonlyArra
 
     const stats = await vscode.workspace.fs.stat(uri);
     if (stats.size > MAX_UNTRACKED_FILE_BYTES) {
-      return [
-        `diff --git a/${relativePath} b/${relativePath}`,
-        'new file',
-        '--- /dev/null',
-        `+++ b/${relativePath}`,
-        '@@ -0,0 +1,1 @@',
-        `+[content omitted: ${relativePath} is ${stats.size} bytes]`,
-      ].join('\n');
+      return buildNewFileMetadataPatch(relativePath, `large file (${stats.size} bytes)`);
     }
 
     const bytes = await vscode.workspace.fs.readFile(uri);
     if (isLikelyBinary(bytes)) {
-      return [
-        `diff --git a/${relativePath} b/${relativePath}`,
-        'new file',
-        '--- /dev/null',
-        `+++ b/${relativePath}`,
-        '@@ -0,0 +1,1 @@',
-        `+[content omitted: ${relativePath} appears to be binary]`,
-      ].join('\n');
+      return buildNewFileMetadataPatch(relativePath, 'binary file');
     }
 
     const content = Buffer.from(bytes).toString('utf8');
     const lines = content.split(/\r?\n/);
-    const visibleLines = lines.slice(0, MAX_UNTRACKED_FILE_LINES);
-
-    const patchLines = [
-      `diff --git a/${relativePath} b/${relativePath}`,
-      'new file',
-      '--- /dev/null',
-      `+++ b/${relativePath}`,
-      `@@ -0,0 +1,${visibleLines.length} @@`,
-      ...visibleLines.map((line) => `+${line}`),
-    ];
-
-    if (lines.length > MAX_UNTRACKED_FILE_LINES) {
-      patchLines.push(`+[content truncated: ${lines.length - MAX_UNTRACKED_FILE_LINES} more lines]`);
-    }
-
-    return patchLines.join('\n');
+    return buildNewFilePreviewPatch(relativePath, lines, stats.size);
   } catch (error) {
     logInfo(`Skipping unreadable untracked file: ${relativePath} (${getErrorMessage(error)})`);
     return null;
   }
 }
 
-function buildLargeDiffSummary(diff: string, changes: Change[], maxDiffChars: number): string {
-  const partialBudget = Math.min(MAX_PARTIAL_DIFF_CHARS, Math.max(1000, Math.floor(maxDiffChars / 4)));
-  if (changes.length === 0) {
-    return `${diff.substring(0, partialBudget)}\n... (truncated)`;
-  }
-
-  const uniqueChanges = [...new Map(changes.map((change) => [change.uri.fsPath, change])).values()];
-  const dirCounts = new Map<string, number>();
-
-  for (const change of uniqueChanges) {
-    const relativePath = vscode.workspace.asRelativePath(change.uri, false).replace(/\\/g, '/');
-    const directory = path.posix.dirname(relativePath);
-    const bucket = directory === '.' ? '(root)' : directory;
-    dirCounts.set(bucket, (dirCounts.get(bucket) || 0) + 1);
-  }
-
-  const topDirs = [...dirCounts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, MAX_SUMMARY_DIRS)
-    .map(([dir, count]) => `- ${dir}: ${count} files`)
-    .join('\n');
-
-  const sections = splitDiffSections(diff);
-  const perFileBudget = Math.max(1, Math.floor(partialBudget / Math.max(sections.length, 1)));
-  const balancedPartialDiff = sections
-    .map((section) => section.substring(0, perFileBudget))
-    .join('\n');
-
+function buildNewFileMetadataPatch(relativePath: string, reason: string): string {
   return [
-    `The diff is too large (${diff.length} characters). Here is a summary of the changes:`,
-    '',
-    `Total changed files: ${uniqueChanges.length}`,
-    '',
-    'Changes by directory:',
-    topDirs,
-    '',
-    `Balanced partial diff (${perFileBudget} characters per file):`,
-    `${balancedPartialDiff}\n... (truncated)`,
+    `diff --git a/${relativePath} b/${relativePath}`,
+    'new file',
+    '--- /dev/null',
+    `+++ b/${relativePath}`,
+    '@@ -0,0 +1,1 @@',
+    `+[new file: ${relativePath} (${reason})]`,
   ].join('\n');
 }
 
-function optimizeDiffForLlm(rawDiff: string, ignorePatterns: ReadonlyArray<string> = []): string {
-  const sections = splitDiffSections(rawDiff);
-  const optimizedSections = sections
-    .map((section) => optimizeDiffSection(section, ignorePatterns))
-    .filter((section) => section.trim().length > 0);
-  return optimizedSections.join('\n');
-}
+function buildNewFilePreviewPatch(relativePath: string, lines: string[], sizeBytes: number): string {
+  const previewLines = lines.slice(0, DEFAULT_UNTRACKED_PREVIEW_LINES);
+  const patchLines = [
+    `diff --git a/${relativePath} b/${relativePath}`,
+    'new file',
+    '--- /dev/null',
+    `+++ b/${relativePath}`,
+    `@@ -0,0 +1,${lines.length} @@`,
+    `+[new file: ${relativePath}, ${lines.length} lines, ${sizeBytes} bytes]`,
+    ...previewLines.map((line) => `+${line}`),
+  ];
 
-function splitDiffSections(rawDiff: string): string[] {
-  const normalized = rawDiff.trim();
-  if (!normalized) {
-    return [];
+  if (lines.length > DEFAULT_UNTRACKED_PREVIEW_LINES) {
+    patchLines.push(`+[preview omitted: ${lines.length - DEFAULT_UNTRACKED_PREVIEW_LINES} more lines]`);
   }
 
-  const parts = normalized.split(/^diff --git /m);
-  return parts
-    .filter((part) => part.trim().length > 0)
-    .map((part) => (part.startsWith('diff --git ') ? part : `diff --git ${part}`));
-}
-
-function optimizeDiffSection(section: string, ignorePatterns: ReadonlyArray<string> = []): string {
-  const targetPath = extractDiffPath(section);
-  if (!targetPath) {
-    return section;
-  }
-
-  if (shouldFilterPath(targetPath, ignorePatterns)) {
-    return buildOmittedSection(targetPath, 'non-code or generated file omitted');
-  }
-
-  if (section.length <= MAX_DIFF_FILE_CHARS) {
-    return section;
-  }
-
-  return truncateDiffSection(section, targetPath);
-}
-
-function extractDiffPath(section: string): string | null {
-  const firstLine = section.split('\n', 1)[0] || '';
-  const match = firstLine.match(/^diff --git a\/.+ b\/(.+)$/);
-  return match?.[1] || null;
-}
-
-function buildOmittedSection(filePath: string, reason: string): string {
-  return [
-    `diff --git a/${filePath} b/${filePath}`,
-    `--- [omitted: ${reason}]`,
-  ].join('\n');
-}
-
-function truncateDiffSection(section: string, filePath: string): string {
-  const lines = section.split('\n');
-  const keptLines: string[] = [];
-  let seenHunk = false;
-  let remainingHunkLines = 80;
-
-  for (const line of lines) {
-    if (!seenHunk) {
-      keptLines.push(line);
-      if (line.startsWith('@@')) {
-        seenHunk = true;
-      }
-      continue;
-    }
-
-    if (line.startsWith('@@')) {
-      if (remainingHunkLines <= 0) {
-        break;
-      }
-      keptLines.push(line);
-      continue;
-    }
-
-    if (remainingHunkLines <= 0) {
-      break;
-    }
-
-    keptLines.push(line);
-    remainingHunkLines -= 1;
-  }
-
-  keptLines.push(`--- [truncated: ${filePath} exceeded ${MAX_DIFF_FILE_CHARS} characters]`);
-  return keptLines.join('\n');
+  return patchLines.join('\n');
 }
