@@ -137,22 +137,39 @@ export type ProviderName = BuiltInProviderName | 'Custom';
 export type RequestFailureCode = 'auth' | 'rate_limit' | 'timeout' | 'network' | 'cancelled' | 'invalid_response' | 'api';
 
 export const SECRET_KEY_PREFIX = 'wtfCommit.key.';
-export const DEFAULT_SYSTEM_PROMPT = 'You are an expert software developer. Generate a clear and concise Git commit message based on the provided diff.';
+export const DEFAULT_SYSTEM_PROMPT =
+  'Generate a concise Git commit message from the provided diff.\n\n' +
+  'Rules:\n' +
+  '1. Use Conventional Commits: <type>(<scope>): <description>\n' +
+  '2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n' +
+  '3. Keep the first line under 72 characters; use imperative mood\n' +
+  '4. Mention new files when relevant; output only the commit message';
+
+export const DEFAULT_IGNORE_PATHS = ['*.snap', '*.min.js', '*.min.css', '.gen.ts', '_generated'] as const;
+
 export const DEFAULT_PROVIDER: ProviderName = 'OpenAI';
 export const DEFAULT_TIMEOUT_MS = 45_000;
 export const REASONING_TIMEOUT_MS = 90_000; // Extended timeout for deep thinkers
-export const DEFAULT_MAX_DIFF_CHARS = 20_000;
-export const DEFAULT_MAX_PARTIAL_DIFF_CHARS = 5_000;
+export const DEFAULT_MAX_DIFF_CHARS = 10_000;
+export const DEFAULT_MAX_PARTIAL_DIFF_CHARS = 2_500;
 export const DEFAULT_MAX_UNTRACKED_FILE_BYTES = 120 * 1024;
-export const DEFAULT_MAX_UNTRACKED_FILE_LINES = 400;
+/** Preview lines included for new/untracked files sent to the LLM. */
+export const DEFAULT_UNTRACKED_PREVIEW_LINES = 15;
 export const DEFAULT_MAX_UNTRACKED_FILES = 30;
 export const DEFAULT_MAX_SUMMARY_DIRS = 10;
-export const DEFAULT_MAX_DIFF_FILE_CHARS = 3_500;
+export const DEFAULT_MAX_DIFF_FILE_CHARS = 2_500;
+/** When changed file count exceeds this, keep only a short sample hunk per file. */
+export const DEFAULT_COMPACT_FILE_THRESHOLD = 12;
+export const DEFAULT_COMPACT_HUNK_LINES = 25;
+export const DEFAULT_SUMMARY_HUNK_LINES = 20;
+export const DEFAULT_TRUNCATE_HUNK_LINES = 40;
+export const DEFAULT_MAX_SUMMARY_FILE_LIST = 50;
 
 export const MAX_DIFF_CHARS = DEFAULT_MAX_DIFF_CHARS;
 export const MAX_PARTIAL_DIFF_CHARS = DEFAULT_MAX_PARTIAL_DIFF_CHARS;
 export const MAX_UNTRACKED_FILE_BYTES = DEFAULT_MAX_UNTRACKED_FILE_BYTES;
-export const MAX_UNTRACKED_FILE_LINES = DEFAULT_MAX_UNTRACKED_FILE_LINES;
+/** @deprecated Use DEFAULT_UNTRACKED_PREVIEW_LINES */
+export const MAX_UNTRACKED_FILE_LINES = DEFAULT_UNTRACKED_PREVIEW_LINES;
 export const MAX_UNTRACKED_FILES = DEFAULT_MAX_UNTRACKED_FILES;
 export const MAX_SUMMARY_DIRS = DEFAULT_MAX_SUMMARY_DIRS;
 export const MAX_DIFF_FILE_CHARS = DEFAULT_MAX_DIFF_FILE_CHARS;
