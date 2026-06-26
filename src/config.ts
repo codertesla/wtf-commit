@@ -10,6 +10,7 @@ import {
   DEFAULT_MAX_UNTRACKED_FILES,
 } from './types';
 import { resolveProviderConfig } from './provider-config';
+import { asUiLanguage } from './i18n';
 
 export function readExtensionConfig(): ExtensionConfig {
   const config = vscode.workspace.getConfiguration('wtfCommit');
@@ -43,6 +44,7 @@ export function readExtensionConfig(): ExtensionConfig {
   return {
     provider,
     language,
+    uiLanguage: asUiLanguage(config.get<string>('uiLanguage')),
     autoCommit: config.get<boolean>('autoCommit') || false,
     autoPush: config.get<boolean>('autoPush') || false,
     smartStage: config.get<boolean>('smartStage') ?? true,

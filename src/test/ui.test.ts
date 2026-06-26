@@ -1,6 +1,6 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
-import { createStreamingSink, maskApiKey } from '../ui';
+import { createStreamingSink, maskApiKey, restoreIntent } from '../ui';
 
 describe('maskApiKey', () => {
   it('should mask the middle of a long key', () => {
@@ -69,5 +69,35 @@ describe('createStreamingSink', () => {
     sink.push('hello world');
     sink.flush();
     assert.deepStrictEqual(reports, ['hello world', 'hello world']);
+  });
+});
+
+describe('restoreIntent', () => {
+  it('should restore the intent when the input box is empty', () => {
+    const inputBox = { value: '' };
+    restoreIntent(inputBox, 'add login form');
+    assert.strictEqual(inputBox.value, 'add login form');
+  });
+
+  it('should not clobber a non-empty input box (e.g. a generated message)', () => {
+    const inputBox = { value: 'feat: add login' };
+    restoreIntent(inputBox, 'add login form');
+    assert.strictEqual(inputBox.value, 'feat: add login');
+  });
+
+  it('should do nothing when there is no captured intent', () => {
+    const inputBox = { value: '' };
+    restoreIntent(inputBox, '');
+    assert.strictEqual(inputBox.value, '');
+  });
+
+  it('should treat a whitespace-only input box as empty', () => {
+    const inputBox = { value: '   ' };
+    restoreIntent(inputBox, 'fix bug');
+    assert.strictEqual(inputBox.value, 'fix bug');
+  });
+
+  it('should be a no-op when the input box is undefined', () => {
+    assert.doesNotThrow(() => restoreIntent(undefined, 'fix bug'));
   });
 });

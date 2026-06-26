@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -98,6 +98,13 @@
           "type": "boolean",
           "default": true,
           "description": "Show a notification with a View Changelog action after the extension is updated.",
+          "order": 0
+        },
+        "wtfCommit.uiLanguage": {
+          "type": "string",
+          "enum": ["en", "zh"],
+          "default": "en",
+          "markdownDescription": "Language for the extension's own UI (buttons, prompts, notifications). Independent of the commit-message language. `en` = English, `zh` = 简体中文.",
           "order": 0
         },
         "wtfCommit.warnOnTruncatedDiff": {

@@ -32,6 +32,13 @@ export interface RepositoryState {
   indexChanges: Change[];
   workingTreeChanges: Change[];
   untrackedChanges: Change[];
+  upstream?: BranchUpstream;
+}
+
+export interface BranchUpstream {
+  name: string;
+  remote: string;
+  commit?: string;
 }
 
 export interface Change {
@@ -51,6 +58,7 @@ export interface ProviderConfig {
 export interface ExtensionConfig {
   provider: ProviderName;
   language: string;
+  uiLanguage: 'en' | 'zh';
   autoCommit: boolean;
   autoPush: boolean;
   smartStage: boolean;
