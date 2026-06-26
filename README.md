@@ -12,7 +12,16 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.8.0)
+## 🆕 Latest (v1.9.0)
+
+- **UI in Chinese or English**: New `wtfCommit.uiLanguage` setting (`en` / `zh`) localizes every button, prompt, and notification — independent of the commit-message language.
+- **Safer error messages**: Provider error bodies are trimmed and redacted so echoed keys/tokens don't leak back to you.
+- **Actionable auto-push warning**: Auto Push without Auto Commit now offers an "Open Settings" button.
+- **Push progress shows remote/branch**: Notifications now say e.g. `origin/main`.
+- **Multi-repo memory**: Remembers your last-used repository across sessions.
+- **Intent preserved on failure**: If generation fails or is cancelled, your typed hint is restored to the SCM input box.
+
+## 🆕 v1.8.0
 
 - **Refactor & tests**: Push-failure classification and the streaming/masking helpers were extracted from `extension.ts` into testable modules, with new unit tests covering them. No user-facing behavior change; the extension is now easier to maintain and verify.
 
@@ -74,6 +83,7 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit` to customize the
 | **Auto Commit** | Automatically commit after generating the message. |
 | **Auto Push** | Automatically push after commit (requires Auto Commit). |
 | **Confirm Before Commit** | Show a confirmation dialog before auto-committing. |
+| **UI Language** | Language for the extension's own UI (`en` / `zh`), independent of the commit-message language. |
 | **Smart Stage** | With Auto Commit, stage current changes before generation so later edits cannot enter the commit (Default: `true`). |
 | **Prompt** | Customize the AI's persona and generation rules. |
 

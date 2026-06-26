@@ -57,3 +57,17 @@ export function maskApiKey(apiKey: string): string {
   }
   return `${apiKey.slice(0, 4)}••••${apiKey.slice(-4)}`;
 }
+
+/**
+ * Restores a previously captured intent into the SCM input box when generation
+ * did not produce a usable message. Only restores when the input box is still
+ * empty, so a successfully generated message is never clobbered by a later error.
+ */
+export function restoreIntent(inputBox: { value: string } | undefined, intent: string): void {
+  if (!inputBox) {
+    return;
+  }
+  if (inputBox.value.trim() === '' && intent) {
+    inputBox.value = intent;
+  }
+}

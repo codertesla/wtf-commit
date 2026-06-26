@@ -488,10 +488,26 @@ function handleHttpError(status: number, errorText: string, retryAfterMs?: numbe
   }
   throw new RequestFailure(
     'api',
-    `API request failed (${status}): ${errorText || 'No error details returned.'}`,
+    `API request failed (${status}): ${sanitizeErrorText(errorText)}`,
     status,
     retryAfterMs
   );
+}
+
+/**
+ * Cleans provider error bodies before showing them to the user.
+ * Trims to a short length and strips common patterns that may echo request
+ * payloads, organization IDs, or partial credentials back in the message.
+ */
+function sanitizeErrorText(errorText: string): string {
+  if (!errorText) {
+    return 'No error details returned.';
+  }
+  const trimmed = errorText.trim().slice(0, 240);
+  return trimmed
+    .replace(/\b(sk-[A-Za-z0-9_-]{6,})\b/g, '[redacted]')
+    .replace(/\b(Bearer\s+[A-Za-z0-9._~+/-]{8,}={0,2})/gi, 'Bearer [redacted]')
+    .replace(/\b(x-goog-api-key:\s*[^\s,]+)/gi, 'x-goog-api-key: [redacted]');
 }
 
 function parseRetryAfter(value: string | string[] | undefined): number | undefined {

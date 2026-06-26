@@ -5,6 +5,17 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- **UI Internationalization (中/英)**: New `wtfCommit.uiLanguage` setting (`en` / `zh`). All extension UI — buttons, prompts, notifications, warnings — now localizes independently of the commit-message language. Chinese users get a fully localized experience.
+- **Error Response Sanitization**: Provider error bodies shown to the user are trimmed and redacted (strips echoed `sk-...` keys, `Bearer` tokens, `x-goog-api-key` values) to avoid leaking credentials back in error messages.
+
+### Changed
+- **Actionable Auto-Push-Without-Commit Warning**: When Auto Push is on but Auto Commit is off, the warning now offers an "Open Settings" action instead of a fleeting status-bar message.
+- **Push Progress With Context**: The push progress notification and success message now include the remote/branch (e.g. `origin/main`) when available.
+- **Multi-Repository Memory**: With multiple Git repos open, WTF Commit now remembers the last-used repository and reuses it (instead of showing the picker every time) until you switch.
+- **Intent Preservation**: If generation fails, is cancelled, or returns an empty message, the text you had typed in the SCM input box is restored so you can retry without retyping your hint. A successful generation is never clobbered.
+
 ## [1.8.0] - 2026-06-25
 ### Changed
 - **Internal Refactor & Test Coverage**: Extracted push-failure classification (`src/push-failure.ts`) and streaming/`maskApiKey` helpers (`src/ui.ts`) out of `extension.ts` so the core logic is unit-testable. Added `push-failure.test.ts` and `ui.test.ts`. The extension entry now loads cleanly with all imports resolved.

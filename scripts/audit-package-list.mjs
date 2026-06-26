@@ -26,6 +26,7 @@ const allowedFiles = new Set([
   'out/diff.js',
   'out/config.js',
   'out/ui.js',
+  'out/i18n.js',
   'out/push-failure.js',
   'out/llm/provider.js',
 ]);
