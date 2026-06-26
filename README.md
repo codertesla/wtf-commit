@@ -6,13 +6,20 @@ English | [简体中文](README_zh.md)
 [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/codertesla/wtf-commit)](https://open-vsx.org/extension/codertesla/wtf-commit)
 [![License](https://img.shields.io/github/license/codertesla/wtf-commit)](https://github.com/codertesla/wtf-commit)
 [![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.75.0-007ACC?logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/updates/v1_75)
-[![Gemini 3.5 Flash](https://img.shields.io/badge/Gemini-3.5%20Flash-8E75B2?logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash)
+[![Gemini 3.1 Flash Lite](https://img.shields.io/badge/Gemini-3.1%20Flash%20Lite-8E75B2?logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite)
+[![DeepSeek V4 Flash](https://img.shields.io/badge/DeepSeek-V4%20Flash-4D6BFE?logo=deepseek&logoColor=white)](https://api-docs.deepseek.com/quick_start/pricing)
 
 Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) | [Website](https://codertesla.github.io/wtf-commit/)
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.9.1)
+## 🆕 Latest (v1.9.2)
+
+- **Gemini default model**: Switched from `gemini-3.5-flash` to the GA `gemini-3.1-flash-lite` — lower cost, still plenty smart for commit messages.
+- **Marketplace badges**: Updated Gemini badge to 3.1 Flash Lite; added DeepSeek V4 Flash badge.
+- **Model recommendation**: README now suggests lightweight models (Gemini 3.1 Flash Lite, DeepSeek V4 Flash) for everyday commit generation.
+
+## 🆕 v1.9.1
 
 - **Settings page reordered**: All settings now have explicit `order` values grouped by purpose (Interface → Automation → Safety → AI → Diff Filtering) so `wtfCommit.uiLanguage` and friends are easy to find.
 - **Clearer setting descriptions**: Auto Commit / Auto Push / Smart Stage / Confirm Before Commit / Confirm Before Push now spell out their dependencies with bold group labels.
@@ -122,11 +129,13 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
 | **Moonshot** | `kimi-k2.6` | `https://api.moonshot.cn/v1` |
 | **GLM** | `glm-5.1` | `https://open.bigmodel.cn/api/paas/v4` |
-| **Gemini** | `gemini-3.5-flash` | `https://generativelanguage.googleapis.com/v1beta` |
+| **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
 
 > OpenRouter default now targets the free route model: `openrouter/free`.
+
+> **Model recommendation**: Generating a git commit message is a lightweight task that doesn't need a frontier model. For everyday use, we recommend cost-effective options such as **Gemini 3.1 Flash Lite** (`gemini-3.1-flash-lite`) or **DeepSeek V4 Flash** (`deepseek-v4-flash`).
 
 > Gemini uses Google's native Interactions REST API (`/v1beta/interactions`), authenticates with the `x-goog-api-key` header, and uses the `minimal` thinking level to reduce latency for commit-message generation.
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.2] - 2026-06-26
+### Changed
+- **Gemini Default Model**: Updated the default Gemini model from `gemini-3.5-flash` to the GA `gemini-3.1-flash-lite`.
+- **Marketplace Badges**: Replaced the Gemini 3.5 Flash badge with Gemini 3.1 Flash Lite and added a DeepSeek V4 Flash badge.
+- **Model Recommendation**: README now suggests lightweight, cost-effective models (e.g. Gemini 3.1 Flash Lite, DeepSeek V4 Flash) for commit-message generation.
+
 ## [1.9.1] - 2026-06-26
 ### Fixed
 - **UI Language setting now visible & ordered**: `wtfCommit.uiLanguage` was stuck with `order: 0` alongside many other settings, burying it. All settings now have explicit `order` values grouped by purpose (Interface → Automation → Safety → AI → Diff Filtering) so the settings page reads top-to-bottom in the order you actually use them.
