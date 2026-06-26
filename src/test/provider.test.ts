@@ -321,3 +321,86 @@ describe('Gemini Interactions API', () => {
     }
   });
 });
+
+describe('Thinking-capable providers', () => {
+  it('should disable thinking for GLM requests', async () => {
+    let requestBody = '';
+    const server = http.createServer((request, response) => {
+      request.on('data', (chunk: Buffer) => {
+        requestBody += chunk.toString('utf8');
+      });
+      request.on('end', () => {
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({
+          choices: [{ message: { content: 'feat: disable thinking' } }],
+        }));
+      });
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const result = await callLLM({
+        provider: 'GLM',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'glm-key',
+        model: 'glm-4.7-flash',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 1_000,
+        temperature: 0.5,
+      });
+
+      const parsedBody = JSON.parse(requestBody) as { thinking?: { type?: string } };
+      assert.strictEqual(result, 'feat: disable thinking');
+      assert.deepStrictEqual(parsedBody.thinking, { type: 'disabled' });
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it('should stream GLM answer content when thinking is disabled', async () => {
+    let requestBody = '';
+    const server = http.createServer((request, response) => {
+      request.on('data', (chunk: Buffer) => {
+        requestBody += chunk.toString('utf8');
+      });
+      request.on('end', () => {
+        response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+        response.write('data: {"choices":[{"delta":{"content":"feat: "}}]}\n\n');
+        response.write('data: {"choices":[{"delta":{"content":"add hello.txt"}}]}\n\n');
+        response.write('data: [DONE]\n\n');
+        response.end();
+      });
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const chunks: string[] = [];
+      const result = await callLLM({
+        provider: 'GLM',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'glm-key',
+        model: 'glm-4.7-flash',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 1_000,
+        temperature: 0.5,
+        onStream: (chunk) => chunks.push(chunk),
+      });
+
+      const parsedBody = JSON.parse(requestBody) as { thinking?: { type?: string }; stream?: boolean };
+      assert.strictEqual(result, 'feat: add hello.txt');
+      assert.deepStrictEqual(chunks, ['feat: ', 'add hello.txt']);
+      assert.deepStrictEqual(parsedBody.thinking, { type: 'disabled' });
+      assert.strictEqual(parsedBody.stream, true);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+});

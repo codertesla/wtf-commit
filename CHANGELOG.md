@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.3] - 2026-06-26
+### Fixed
+- **GLM / Z.AI / DeepSeek Thinking**: Automatically send `thinking: { type: "disabled" }` so GLM-4.7+ models return answer `content` in streaming mode instead of only `reasoning_content` (which caused slow responses and “No content in streaming response” errors).
+
+### Changed
+- **GLM API Key URL**: Updated the China GLM API Key link to [open.bigmodel.cn/apikey/platform](https://open.bigmodel.cn/apikey/platform).
+
 ## [1.10.2] - 2026-06-26
 ### Changed
 - **Marketplace Badges**: README badges now highlight recommended commit models — free GLM / Z.AI, DeepSeek V4 Flash, MiMo V2.5, and Gemini 3.1 Flash Lite.

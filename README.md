@@ -16,10 +16,10 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.10.2)
+## 🆕 Latest (v1.10.3)
 
-- **API Key links**: README lists official API Key pages for each built-in provider (OpenAI, DeepSeek, MiMo, GLM, Z.AI, Gemini, OpenRouter).
-- **Marketplace badges**: README badges now highlight recommended commit models — free GLM / Z.AI, DeepSeek V4 Flash, MiMo V2.5, and Gemini 3.1 Flash Lite.
+- **GLM / DeepSeek fix**: Automatically disables thinking mode for GLM, Z.AI, and DeepSeek — fixes slow responses and “No content in streaming response” errors with `glm-4.7-flash` and similar models.
+- **Gemini**: Uses `thinking_level: minimal` (lowest available) for faster commit-message generation.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -104,7 +104,7 @@ If **Base URL** and **Model** are left empty, the extension uses these defaults:
 | **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **DeepSeek** | [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) |
 | **MiMo** | [platform.xiaomimimo.com/console/api-keys](https://platform.xiaomimimo.com/console/api-keys) |
-| **GLM** (China) | [open.bigmodel.cn/usercenter/apikeys](https://open.bigmodel.cn/usercenter/apikeys) |
+| **GLM** (China) | [open.bigmodel.cn/apikey/platform](https://open.bigmodel.cn/apikey/platform) |
 | **Z.AI** (International) | [z.ai/manage-apikey/apikey-list](https://z.ai/manage-apikey/apikey-list) |
 | **Gemini** | [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys) |
 | **OpenRouter** | [openrouter.ai/keys](https://openrouter.ai/keys) |
@@ -136,7 +136,7 @@ Generating a commit message is a lightweight task — you don't need a frontier 
 **Our recommendation (speed + value):**
 
 1. **GLM-4.7-Flash** (`glm-4.7-flash`) — **free**. Use **GLM** if you have a [Zhipu BigModel](https://bigmodel.cn/pricing) key (China), or **Z.AI** if you have a [Z.AI](https://docs.z.ai/guides/overview/pricing) key (international). Need faster decode? Use **`glm-4.7-flashx`** on the same platform.
-2. **DeepSeek V4 Flash** (`deepseek-v4-flash`) — best paid balance globally. Disable thinking mode (`"thinking": {"type": "disabled"}`) to avoid extra reasoning tokens; WTF Commit already strips thinking tags from the final message.
+2. **DeepSeek V4 Flash** (`deepseek-v4-flash`) — best paid balance globally. WTF Commit automatically disables thinking mode for lower latency and cost.
 3. **MiMo V2.5** (`mimo-v2.5`) — same USD price band as DeepSeek; popular on OpenRouter.
 4. **Gemini 3.1 Flash Lite** (`gemini-3.1-flash-lite`) — slightly pricier on paper, but the free tier is generous for light use.
 5. **`openrouter/free`** — fine for experimenting; switch to a paid flash model for production.

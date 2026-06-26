@@ -19,6 +19,9 @@ interface ChatCompletionRequest {
   temperature: number;
   max_tokens: number;
   stream?: boolean;
+  thinking?: {
+    type: 'disabled' | 'enabled';
+  };
 }
 
 interface GeminiInteractionRequest {
@@ -297,7 +300,12 @@ function buildRequestBody(
     temperature: input.temperature,
     max_tokens: MAX_OUTPUT_TOKENS,
     stream: useStreaming || undefined,
+    ...(shouldDisableThinking(input.provider) ? { thinking: { type: 'disabled' as const } } : {}),
   };
+}
+
+function shouldDisableThinking(provider: ProviderName): boolean {
+  return provider === 'GLM' || provider === 'Z.AI' || provider === 'DeepSeek';
 }
 
 export function extractResponseContent(
