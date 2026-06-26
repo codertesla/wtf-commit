@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-06-26
+### Added
+- **MiMo Provider**: Added Xiaomi MiMo (`mimo-v2.5`) with OpenAI-compatible endpoint `https://api.xiaomimimo.com/v1`.
+
+### Changed
+- **GLM Default Model**: Switched from `glm-5.1` to the free `glm-4.7-flash` on [bigmodel.cn](https://bigmodel.cn/pricing).
+- **Model Pricing Guide**: README includes a per-provider pricing comparison table and commit-message recommendations.
+
+### Removed
+- **Moonshot Provider**: Removed built-in Moonshot/Kimi support — Kimi models are significantly pricier than flash-tier options for commit messages. Former Moonshot users can switch to **Custom** with `https://api.moonshot.cn/v1` if needed.
+
 ## [1.9.2] - 2026-06-26
 ### Changed
 - **Gemini Default Model**: Updated the default Gemini model from `gemini-3.5-flash` to the GA `gemini-3.1-flash-lite`.

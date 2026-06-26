@@ -114,7 +114,7 @@ export interface GeminiInteractionResponse {
 export const BUILT_IN_PROVIDER_NAMES = [
   'OpenAI',
   'DeepSeek',
-  'Moonshot',
+  'MiMo',
   'GLM',
   'Gemini',
   'OpenRouter',
@@ -125,8 +125,8 @@ export type BuiltInProviderName = typeof BUILT_IN_PROVIDER_NAMES[number];
 export const PROVIDERS = {
   OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
-  Moonshot: { baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2.6' },
-  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-5.1' },
+  MiMo: { baseUrl: 'https://api.xiaomimimo.com/v1', model: 'mimo-v2.5' },
+  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7-flash' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.1-flash-lite' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 } satisfies Record<BuiltInProviderName, ProviderConfig>;

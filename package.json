@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -145,7 +145,7 @@
           "enum": [
             "OpenAI",
             "DeepSeek",
-            "Moonshot",
+            "MiMo",
             "GLM",
             "Gemini",
             "OpenRouter",
