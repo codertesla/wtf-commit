@@ -12,7 +12,7 @@ describe('resolveProviderConfig', () => {
       }),
       {
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
-        model: 'gemini-3.5-flash',
+        model: 'gemini-3.1-flash-lite',
       }
     );
   });
