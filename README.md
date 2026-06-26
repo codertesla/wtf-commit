@@ -19,46 +19,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 - **Marketplace badges**: Updated Gemini badge to 3.1 Flash Lite; added DeepSeek V4 Flash badge.
 - **Model recommendation**: README now suggests lightweight models (Gemini 3.1 Flash Lite, DeepSeek V4 Flash) for everyday commit generation.
 
-## 🆕 v1.9.1
-
-- **Settings page reordered**: All settings now have explicit `order` values grouped by purpose (Interface → Automation → Safety → AI → Diff Filtering) so `wtfCommit.uiLanguage` and friends are easy to find.
-- **Clearer setting descriptions**: Auto Commit / Auto Push / Smart Stage / Confirm Before Commit / Confirm Before Push now spell out their dependencies with bold group labels.
-- **Auto Push self-correction**: Turning on Auto Push while Auto Commit is off now offers a one-click "Enable Auto Commit" action.
-
-## 🆕 v1.9.0
-
-- **UI in Chinese or English**: New `wtfCommit.uiLanguage` setting (`en` / `zh`) localizes every button, prompt, and notification — independent of the commit-message language.
-- **Safer error messages**: Provider error bodies are trimmed and redacted so echoed keys/tokens don't leak back to you.
-- **Actionable auto-push warning**: Auto Push without Auto Commit now offers an "Open Settings" button.
-- **Push progress shows remote/branch**: Notifications now say e.g. `origin/main`.
-- **Multi-repo memory**: Remembers your last-used repository across sessions.
-- **Intent preserved on failure**: If generation fails or is cancelled, your typed hint is restored to the SCM input box.
-
-## 🆕 v1.8.0
-
-- **Refactor & tests**: Push-failure classification and the streaming/masking helpers were extracted from `extension.ts` into testable modules, with new unit tests covering them. No user-facing behavior change; the extension is now easier to maintain and verify.
-
-## 🆕 v1.7.0
-
-- **Smarter retries**: Exponential backoff with jitter replaces fixed delays, and the server's `Retry-After` header is honored on 429/503 — no more re-hammering a rate limit.
-- **Stricter commit validation**: The `revert:` type is now recognized and the 72-character subject limit is enforced. AI Repair gets a specific reason and the post-repair warning names exactly what's still off.
-- **Stronger normalization**: Strips bold/italic/inline-code/blockquote wrapping and interior code-fence lines that some models add.
-- **Full reasoning trace**: All `reasoning_details` segments are joined in the log, not just the first.
-
-## 🆕 v1.6.0
-
-- **Live streaming preview**: The commit message streams into the Source Control input box as the AI writes it — watch the draft form and cancel early if it drifts. The progress notification is throttled to stop flicker.
-- **Set API Key no longer hijacks your provider**: Setting a key for another provider now asks before switching, and shows a masked key hint so you can tell keys apart.
-- **"Don't Remind Me" for the mixed-stage warning**: Stop the recurring staged/unstaged prompt from nagging you.
-- **Friendlier first-run guidance**: Closing the welcome prompt no longer permanently hides it — only an explicit "Don't Show Again" does.
-
-## 🆕 v1.5.0
-
-- **More control, less noise**: Toggle the status bar button, disable the changelog popup, and get warned when a large diff is truncated before being sent to the AI.
-- **Safer auto-push**: An optional extra confirmation before pushing protects one-keystroke auto-commit + auto-push flows.
-- **Custom ignore list**: Exclude extra files/directories/extensions (e.g. `generated`, `*.snap`, `.gen.ts`) from AI context via `wtfCommit.ignorePaths`.
-- **Tunable context limits**: New `wtfCommit.maxDiffChars` and `wtfCommit.maxUntrackedFiles` settings.
-- **Show Output command**: Open the extension log channel for troubleshooting.
+> See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
 ## 🚀 Features
 
