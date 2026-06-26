@@ -70,6 +70,9 @@ export function activate(context: vscode.ExtensionContext) {
       if (event.affectsConfiguration('wtfCommit.uiLanguage')) {
         syncUiLanguage();
       }
+      if (event.affectsConfiguration('wtfCommit.autoPush')) {
+        void warnIfAutoPushWithoutAutoCommit();
+      }
     })
   );
 
@@ -102,6 +105,30 @@ export function activate(context: vscode.ExtensionContext) {
 function asUiLanguageFromConfig(): UiLanguage {
   const raw = vscode.workspace.getConfiguration('wtfCommit').get<string>('uiLanguage');
   return asUiLanguage(raw);
+}
+
+/**
+ * autoPush has no effect without autoCommit. Instead of silently ignoring it
+ * (or only telling the user at generation time), proactively offer to enable
+ * Auto Commit right from the notification when the misconfiguration is detected.
+ */
+async function warnIfAutoPushWithoutAutoCommit(): Promise<void> {
+  const cfg = vscode.workspace.getConfiguration('wtfCommit');
+  const autoPush = cfg.get<boolean>('autoPush', false);
+  const autoCommit = cfg.get<boolean>('autoCommit', false);
+  if (!autoPush || autoCommit) {
+    return;
+  }
+  const enableLabel = t('enableAutoCommit');
+  const dismissLabel = t('dismiss');
+  const action = await vscode.window.showInformationMessage(
+    t('autoPushNeedsAutoCommit'),
+    enableLabel,
+    dismissLabel
+  );
+  if (action === enableLabel) {
+    await cfg.update('autoCommit', true, vscode.ConfigurationTarget.Global);
+  }
 }
 
 export function deactivate() {}
