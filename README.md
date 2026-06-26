@@ -15,10 +15,10 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.10.4)
+## 🆕 Latest (v1.11.0)
 
-- **GLM / Z.AI default**: Provider default model is now `glm-4.7-flashx` (free `glm-4.7-flash` removed — heavily rate-limited).
-- **Recommendations**: DeepSeek V4 Flash and Gemini 3.1 Flash Lite are the top picks for speed; README clarifies **Default Provider** (OpenAI) vs **provider default** vs **our recommendation**.
+- **Leaner LLM context**: Lower default diff budget (10k chars), compact multi-file diffs, metadata + 30-line preview for new files — faster and cheaper generation.
+- **Smarter filtering**: Default `ignorePaths` for snapshots, minified assets, and generated files; lighter oversized-diff summaries.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
