@@ -127,8 +127,8 @@ export const PROVIDERS = {
   OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
   MiMo: { baseUrl: 'https://api.xiaomimimo.com/v1', model: 'mimo-v2.5' },
-  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7-flash' },
-  'Z.AI': { baseUrl: 'https://api.z.ai/api/paas/v4', model: 'glm-4.7-flash' },
+  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7-flashx' },
+  'Z.AI': { baseUrl: 'https://api.z.ai/api/paas/v4', model: 'glm-4.7-flashx' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.1-flash-lite' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 } satisfies Record<BuiltInProviderName, ProviderConfig>;
