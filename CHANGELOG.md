@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.9.1] - 2026-06-26
 ### Fixed
 - **UI Language setting now visible & ordered**: `wtfCommit.uiLanguage` was stuck with `order: 0` alongside many other settings, burying it. All settings now have explicit `order` values grouped by purpose (Interface → Automation → Safety → AI → Diff Filtering) so the settings page reads top-to-bottom in the order you actually use them.
 - **Setting descriptions clarified**: Auto Commit / Auto Push / Smart Stage / Confirm Before Commit / Confirm Before Push now lead with a bolded group label and spell out their dependencies, removing the previous ambiguity between the two confirm toggles.
@@ -14,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Auto Push self-correction**: Turning on Auto Push while Auto Commit is off now triggers an inline notification offering a one-click "Enable Auto Commit" action, instead of silently no-oping until the next generation.
 
 ## [1.9.0] - 2026-06-26
+### Added
+- **UI Internationalization (中/英)**: New `wtfCommit.uiLanguage` setting (`en` / `zh`). All extension UI — buttons, prompts, notifications, warnings — now localizes independently of the commit-message language. Chinese users get a fully localized experience.
+- **Error Response Sanitization**: Provider error bodies shown to the user are trimmed and redacted (strips echoed `sk-...` keys, `Bearer` tokens, `x-goog-api-key` values) to avoid leaking credentials back in error messages.
+
+### Changed
+- **Actionable Auto-Push-Without-Commit Warning**: When Auto Push is on but Auto Commit is off, the warning now offers an "Open Settings" action instead of a fleeting status-bar message.
+- **Push Progress With Context**: The push progress notification and success message now include the remote/branch (e.g. `origin/main`) when available.
+- **Multi-Repository Memory**: With multiple Git repos open, WTF Commit now remembers the last-used repository and reuses it (instead of showing the picker every time) until you switch.
+- **Intent Preservation**: If generation fails, is cancelled, or returns an empty message, the text you had typed in the SCM input box is restored so you can retry without retyping your hint. A successful generation is never clobbered.
+
+## [1.8.0] - 2026-06-25
 ### Changed
 - **Internal Refactor & Test Coverage**: Extracted push-failure classification (`src/push-failure.ts`) and streaming/`maskApiKey` helpers (`src/ui.ts`) out of `extension.ts` so the core logic is unit-testable. Added `push-failure.test.ts` and `ui.test.ts`. The extension entry now loads cleanly with all imports resolved.
 

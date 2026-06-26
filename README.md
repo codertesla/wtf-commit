@@ -12,7 +12,13 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.9.0)
+## 🆕 Latest (v1.9.1)
+
+- **Settings page reordered**: All settings now have explicit `order` values grouped by purpose (Interface → Automation → Safety → AI → Diff Filtering) so `wtfCommit.uiLanguage` and friends are easy to find.
+- **Clearer setting descriptions**: Auto Commit / Auto Push / Smart Stage / Confirm Before Commit / Confirm Before Push now spell out their dependencies with bold group labels.
+- **Auto Push self-correction**: Turning on Auto Push while Auto Commit is off now offers a one-click "Enable Auto Commit" action.
+
+## 🆕 v1.9.0
 
 - **UI in Chinese or English**: New `wtfCommit.uiLanguage` setting (`en` / `zh`) localizes every button, prompt, and notification — independent of the commit-message language.
 - **Safer error messages**: Provider error bodies are trimmed and redacted so echoed keys/tokens don't leak back to you.
