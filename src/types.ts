@@ -143,7 +143,7 @@ export const DEFAULT_SYSTEM_PROMPT =
   '1. Use Conventional Commits: <type>(<scope>): <description>\n' +
   '2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n' +
   '3. Keep the first line under 72 characters; use imperative mood\n' +
-  '4. Mention new files when relevant; output only the commit message';
+  '4. If a new file is added, mention it in the description (especially docs or features); output only the commit message';
 
 export const DEFAULT_IGNORE_PATHS = ['*.snap', '*.min.js', '*.min.css', '.gen.ts', '_generated'] as const;
 
@@ -154,7 +154,7 @@ export const DEFAULT_MAX_DIFF_CHARS = 10_000;
 export const DEFAULT_MAX_PARTIAL_DIFF_CHARS = 2_500;
 export const DEFAULT_MAX_UNTRACKED_FILE_BYTES = 120 * 1024;
 /** Preview lines included for new/untracked files sent to the LLM. */
-export const DEFAULT_UNTRACKED_PREVIEW_LINES = 15;
+export const DEFAULT_UNTRACKED_PREVIEW_LINES = 30;
 export const DEFAULT_MAX_UNTRACKED_FILES = 30;
 export const DEFAULT_MAX_SUMMARY_DIRS = 10;
 export const DEFAULT_MAX_DIFF_FILE_CHARS = 2_500;
