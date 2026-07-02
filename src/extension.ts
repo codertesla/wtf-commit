@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Status bar button for quick access
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   statusBarItem.command = 'wtf-commit.generate';
-  statusBarItem.text = '$(sparkle) WTF';
+  statusBarItem.text = '$(sparkle)';
   statusBarItem.tooltip = t('statusBarButtonTooltip');
   context.subscriptions.push(statusBarItem);
 
@@ -76,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  if (vscode.workspace.getConfiguration('wtfCommit').get<boolean>('changelogPopup', true)) {
+  if (vscode.workspace.getConfiguration('wtfCommit').get<boolean>('changelogPopup', false)) {
     checkChangelog(context).catch((error) => {
       logError('Failed to check changelog', error);
     });
@@ -197,11 +197,13 @@ async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
       }
     }
 
-    showStatusMessage(`$(key) ${t('apiKeySaved', { provider })}`, STATUS_MESSAGE_TIMEOUT_MS);
-    vscode.window.showInformationMessage(
-      switchedProvider
-        ? t('apiKeySwitchedTo', { provider })
-        : t('apiKeySavedUnchanged', { provider, current: String(currentProvider) })
+    showStatusMessage(
+      `$(key) ${
+        switchedProvider
+          ? t('apiKeySwitchedTo', { provider })
+          : t('apiKeySavedUnchanged', { provider, current: String(currentProvider) })
+      }`,
+      LONG_STATUS_MESSAGE_TIMEOUT_MS
     );
   } catch (error) {
     logError('Failed to set API key', error);
@@ -477,11 +479,11 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
             await repository.push();
           }
         );
-        showStatusMessage('$(cloud-upload) Commit and push completed.', LONG_STATUS_MESSAGE_TIMEOUT_MS);
-        vscode.window.showInformationMessage(
+        showStatusMessage(
           upstream
-            ? `${t('pushSuccessful')} (${upstream.remote}/${upstream.name})`
-            : t('pushSuccessful')
+            ? `$(cloud-upload) ${t('pushSuccessful')} (${upstream.remote}/${upstream.name})`
+            : `$(cloud-upload) ${t('pushSuccessful')}`,
+          LONG_STATUS_MESSAGE_TIMEOUT_MS
         );
       } catch (error) {
         await handlePushFailure(repository, error);
