@@ -68,12 +68,12 @@
         "wtfCommit.showStatusBarItem": {
           "type": "boolean",
           "default": true,
-          "description": "Show the WTF Commit button in the status bar.",
+          "description": "Show the WTF Commit icon in the status bar.",
           "order": 1
         },
         "wtfCommit.changelogPopup": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Show a notification with a View Changelog action after the extension is updated.",
           "order": 2
         },
@@ -109,7 +109,7 @@
         },
         "wtfCommit.warnOnTruncatedDiff": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Show a warning when the diff is too large and only a summarized/partial diff is sent to the AI.",
           "order": 22
         },

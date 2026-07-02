@@ -56,14 +56,14 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit` to customize the
 | Setting | Description |
 |---------|-------------|
 | **UI Language** | Language for the extension's own UI (`en` / `zh`), independent of the commit-message language. |
-| **Show Status Bar Item** | Show the WTF Commit button in the status bar. |
-| **Changelog Popup** | Show a notification after the extension is updated. |
+| **Show Status Bar Item** | Show the compact WTF Commit icon in the status bar. |
+| **Changelog Popup** | Show a notification after the extension is updated (off by default). |
 | **Auto Commit** | Commit automatically after generating. Off = message goes to the Source Control box for manual review (recommended for most users). |
 | **Auto Push** | Push automatically after the auto-commit. ⚠️ No effect unless Auto Commit is on. |
 | **Smart Stage** | With Auto Commit, stage current changes before generation so later edits cannot sneak in. |
 | **Confirm Before Commit** | Confirm before the auto-commit (only when Auto Commit is on). |
 | **Confirm Before Push** | Extra confirmation before pushing (only when Auto Commit + Auto Push are on). |
-| **Warn On Truncated Diff** | Warn when the diff is large and only a partial diff is sent to the AI. |
+| **Warn On Truncated Diff** | Warn when the diff is large and only a partial diff is sent to the AI (off by default). |
 | **Prompt** | Customize the AI's persona and generation rules. |
 
 ### 2. Custom Model & Endpoints
