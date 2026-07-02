@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.2] - 2026-07-02
+### Changed
+- **Release-only bump**: Bumped version to republish on Open VSX after 1.11.1 was already published.
+
 ## [1.11.1] - 2026-07-02
 ### Added
 - **NVIDIA NIM Provider**: Added NVIDIA NIM as a built-in OpenAI-compatible provider with default model `nvidia/nemotron-3-super-120b-a12b` and base URL `https://integrate.api.nvidia.com/v1`.

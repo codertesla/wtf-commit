@@ -15,7 +15,7 @@
 
 WTF Commit 是一款简约的 VS Code 扩展，利用 AI 根据您暂存的更改（或工作区更改）生成简洁且有意义的 Git 提交信息。
 
-## 🆕 最新更新（v1.11.1）
+## 🆕 最新更新（v1.11.2）
 
 - **NVIDIA NIM 服务商**：新增免费的 OpenAI 兼容 NVIDIA NIM Provider，默认使用 `nvidia/nemotron-3-super-120b-a12b`。
 - **已验证端点**：已使用 NVIDIA 托管 API 测试默认模型的提交信息生成延迟与响应兼容性。

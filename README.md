@@ -15,7 +15,7 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.11.1)
+## 🆕 Latest (v1.11.2)
 
 - **NVIDIA NIM provider**: Added a free OpenAI-compatible NVIDIA NIM provider using `nvidia/nemotron-3-super-120b-a12b` by default.
 - **Verified endpoint**: Tested the default model against NVIDIA's hosted API for commit-message generation latency and response compatibility.
