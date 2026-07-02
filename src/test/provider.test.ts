@@ -102,6 +102,13 @@ describe('buildProviderEndpoint', () => {
     );
   });
 
+  it('should handle NVIDIA NIM provider', () => {
+    assert.strictEqual(
+      buildProviderEndpoint('https://integrate.api.nvidia.com/v1', 'NVIDIA NIM'),
+      'https://integrate.api.nvidia.com/v1/chat/completions'
+    );
+  });
+
   it('should use the native Gemini Interactions endpoint', () => {
     assert.strictEqual(
       buildProviderEndpoint('https://generativelanguage.googleapis.com/v1beta', 'Gemini'),

@@ -15,10 +15,10 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.11.0)
+## 🆕 Latest (v1.11.1)
 
-- **Leaner LLM context**: Lower default diff budget (10k chars), compact multi-file diffs, metadata + 30-line preview for new files — faster and cheaper generation.
-- **Smarter filtering**: Default `ignorePaths` for snapshots, minified assets, and generated files; lighter oversized-diff summaries.
+- **NVIDIA NIM provider**: Added a free OpenAI-compatible NVIDIA NIM provider using `nvidia/nemotron-3-super-120b-a12b` by default.
+- **Verified endpoint**: Tested the default model against NVIDIA's hosted API for commit-message generation latency and response compatibility.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -102,6 +102,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 | **Z.AI** | `glm-4.7-flashx` | `https://api.z.ai/api/paas/v4` |
 | **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
+| **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | `https://integrate.api.nvidia.com/v1` |
 | **Custom** | - | - |
 
 ### Get API Keys
@@ -115,6 +116,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 | **Z.AI** (International) | [z.ai/manage-apikey/apikey-list](https://z.ai/manage-apikey/apikey-list) |
 | **Gemini** | [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys) |
 | **OpenRouter** | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| **NVIDIA NIM** | [build.nvidia.com](https://build.nvidia.com/) |
 
 > **GLM** and **Z.AI** keys are not interchangeable — create a key on the platform that matches your provider.
 
@@ -135,6 +137,7 @@ The list below is **our recommendation** — change **Provider** in settings to 
 | **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Recommended** — fast, cheap, great quality |
 | **MiMo** | `mimo-v2.5` | $0.14 | $0.28 | ~$0.0007 | Same price tier as DeepSeek; OpenAI-compatible |
 | **Gemini** | `gemini-3.1-flash-lite` | $0.25 | $1.50 | ~$0.0015 | **Recommended** — fast; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
+| **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | $0 | $0 | ~$0 | Free development endpoint; rate limits and availability vary |
 
 † Rough estimate for **~5K input + 150 output tokens** (typical diff + commit message), no prompt cache. GLM CNY prices converted at ~¥7.2/$ for comparison. Actual cost depends on diff size and model verbosity.
 
@@ -147,10 +150,13 @@ The list below is **our recommendation** — change **Provider** in settings to 
 3. **MiMo V2.5** — set **Provider** to **MiMo**; leave **Model** empty → `mimo-v2.5`. Same USD price band as DeepSeek.
 4. **GLM / Z.AI** — set **Provider** to **GLM** (China) or **Z.AI** (international); leave **Model** empty → `glm-4.7-flashx`. Works reliably but is often **slower** than DeepSeek or Gemini Flash Lite. Requires a paid balance.
 5. **`openrouter/free`** — set **Provider** to **OpenRouter**; fine for experimenting.
+6. **NVIDIA NIM** — set **Provider** to **NVIDIA NIM**; leave **Model** empty → `nvidia/nemotron-3-super-120b-a12b`. Good for free development testing across NVIDIA's hosted model catalog; expect lower rate limits and no production SLA.
 
-Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [MiMo](https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [Zhipu GLM](https://bigmodel.cn/pricing) · [Z.AI](https://docs.z.ai/guides/overview/pricing) · [OpenRouter](https://openrouter.ai/models)
+Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [MiMo](https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [Zhipu GLM](https://bigmodel.cn/pricing) · [Z.AI](https://docs.z.ai/guides/overview/pricing) · [OpenRouter](https://openrouter.ai/models) · [NVIDIA NIM](https://build.nvidia.com/explore/discover)
 
 > OpenRouter **provider default** is `openrouter/free`.
+
+> NVIDIA NIM **provider default** is `nvidia/nemotron-3-super-120b-a12b`. NVIDIA NIM is best treated as a free development/testing endpoint, not a guaranteed production backend.
 
 > Gemini uses Google's native Interactions REST API (`/v1beta/interactions`), authenticates with the `x-goog-api-key` header, and uses the `minimal` thinking level to reduce latency for commit-message generation.
 

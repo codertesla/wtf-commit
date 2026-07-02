@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI-powered Git commit message generator",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -150,6 +150,7 @@
             "Z.AI",
             "Gemini",
             "OpenRouter",
+            "NVIDIA NIM",
             "Custom"
           ],
           "default": "OpenAI",

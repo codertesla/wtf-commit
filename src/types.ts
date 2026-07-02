@@ -119,6 +119,7 @@ export const BUILT_IN_PROVIDER_NAMES = [
   'Z.AI',
   'Gemini',
   'OpenRouter',
+  'NVIDIA NIM',
 ] as const;
 
 export type BuiltInProviderName = typeof BUILT_IN_PROVIDER_NAMES[number];
@@ -131,6 +132,7 @@ export const PROVIDERS = {
   'Z.AI': { baseUrl: 'https://api.z.ai/api/paas/v4', model: 'glm-4.7-flashx' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.1-flash-lite' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
+  'NVIDIA NIM': { baseUrl: 'https://integrate.api.nvidia.com/v1', model: 'nvidia/nemotron-3-super-120b-a12b' },
 } satisfies Record<BuiltInProviderName, ProviderConfig>;
 
 export type ProviderName = BuiltInProviderName | 'Custom';
