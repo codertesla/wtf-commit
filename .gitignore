@@ -30,3 +30,6 @@ Thumbs.db
 # Local scripts
 scripts/*
 !scripts/audit-package-list.mjs
+
+# Maintainer-only release checklist (keep local, do not publish)
+UPDATEFLOW.md
