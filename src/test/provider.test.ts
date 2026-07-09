@@ -410,4 +410,120 @@ describe('Thinking-capable providers', () => {
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     }
   });
+
+  it('should stream OpenAI-compatible delta text fields', async () => {
+    const server = http.createServer((_request, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+      response.write('data: {"choices":[{"delta":{"text":"fix: "}}]}\n\n');
+      response.write('data: {"choices":[{"delta":{"output_text":"accept alternate stream fields"}}]}\n\n');
+      response.write('data: [DONE]\n\n');
+      response.end();
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const chunks: string[] = [];
+      const result = await callLLM({
+        provider: 'Custom',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'custom-key',
+        model: 'custom-model',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 1_000,
+        temperature: 0.5,
+        onStream: (chunk) => chunks.push(chunk),
+      });
+
+      assert.strictEqual(result, 'fix: accept alternate stream fields');
+      assert.deepStrictEqual(chunks, ['fix: ', 'accept alternate stream fields']);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it('should process a final SSE data line without a trailing newline', async () => {
+    const server = http.createServer((_request, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+      response.end('data: {"choices":[{"delta":{"content":"fix: parse final buffer"}}]}');
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const result = await callLLM({
+        provider: 'OpenAI',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'test-key',
+        model: 'test-model',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 1_000,
+        temperature: 0.5,
+        onStream: () => undefined,
+      });
+
+      assert.strictEqual(result, 'fix: parse final buffer');
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it('should fall back to non-streaming when a stream has no parsable content', async () => {
+    let requestCount = 0;
+    const requestBodies: Array<{ stream?: boolean }> = [];
+    const server = http.createServer((request, response) => {
+      let requestBody = '';
+      request.on('data', (chunk: Buffer) => {
+        requestBody += chunk.toString('utf8');
+      });
+      request.on('end', () => {
+        requestCount += 1;
+        requestBodies.push(JSON.parse(requestBody) as { stream?: boolean });
+
+        if (requestCount === 1) {
+          response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+          response.write('data: {"choices":[{"delta":{"reasoning_content":"thinking only"}}]}\n\n');
+          response.write('data: [DONE]\n\n');
+          response.end();
+          return;
+        }
+
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({
+          choices: [{ message: { content: 'fix: recover without streaming' } }],
+        }));
+      });
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const result = await callLLM({
+        provider: 'Custom',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'custom-key',
+        model: 'custom-model',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 1_000,
+        temperature: 0.5,
+        onStream: () => undefined,
+      });
+
+      assert.strictEqual(result, 'fix: recover without streaming');
+      assert.strictEqual(requestCount, 2);
+      assert.strictEqual(requestBodies[0].stream, true);
+      assert.strictEqual(requestBodies[1].stream, undefined);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
 });
