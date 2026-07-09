@@ -156,6 +156,21 @@ describe('extractResponseContent', () => {
 
     assert.strictEqual(result.content, 'fix: keep compatibility');
   });
+
+  it('should accept alternate OpenAI-compatible non-streaming fields', () => {
+    assert.strictEqual(
+      extractResponseContent({ choices: [{ text: 'fix: choice text' }] }, 'Custom').content,
+      'fix: choice text'
+    );
+    assert.strictEqual(
+      extractResponseContent({ choices: [{ message: { text: 'fix: message text' } }] }, 'Custom').content,
+      'fix: message text'
+    );
+    assert.strictEqual(
+      extractResponseContent({ output_text: 'fix: top-level output' }, 'Custom').content,
+      'fix: top-level output'
+    );
+  });
 });
 
 describe('Gemini Interactions API', () => {
@@ -522,6 +537,162 @@ describe('Thinking-capable providers', () => {
       assert.strictEqual(requestCount, 2);
       assert.strictEqual(requestBodies[0].stream, true);
       assert.strictEqual(requestBodies[1].stream, undefined);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it('should stream choice message content and top-level text fields', async () => {
+    const server = http.createServer((_request, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+      response.write('data: {"choices":[{"message":{"content":"fix: "}}]}\n\n');
+      response.write('data: {"choices":[{"text":"message "}]}\n\n');
+      response.write('data: {"text":"and top-level"}\n\n');
+      response.write('data: [DONE]\n\n');
+      response.end();
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const chunks: string[] = [];
+      const result = await callLLM({
+        provider: 'Custom',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'custom-key',
+        model: 'custom-model',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 1_000,
+        temperature: 0.5,
+        onStream: (chunk) => chunks.push(chunk),
+      });
+
+      assert.strictEqual(result, 'fix: message and top-level');
+      assert.deepStrictEqual(chunks, ['fix: ', 'message ', 'and top-level']);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it('should omit unclosed think markup from streamed chunks', async () => {
+    const server = http.createServer((_request, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+      response.write('data: {"choices":[{"delta":{"content":"<think>hidden"}}]}\n\n');
+      response.write('data: {"choices":[{"delta":{"content":"</think>fix: visible"}}]}\n\n');
+      response.write('data: [DONE]\n\n');
+      response.end();
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const chunks: string[] = [];
+      const result = await callLLM({
+        provider: 'Custom',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'custom-key',
+        model: 'custom-model',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 1_000,
+        temperature: 0.5,
+        onStream: (chunk) => chunks.push(chunk),
+      });
+
+      assert.strictEqual(result, 'fix: visible');
+      assert.deepStrictEqual(chunks, ['fix: visible']);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it('should give the non-streaming fallback its own timeout budget', async () => {
+    let requestCount = 0;
+    const server = http.createServer((request, response) => {
+      let requestBody = '';
+      request.on('data', (chunk: Buffer) => {
+        requestBody += chunk.toString('utf8');
+      });
+      request.on('end', () => {
+        requestCount += 1;
+        if (requestCount === 1) {
+          response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+          // Consume part of the once-budget, then return an empty stream so the
+          // fallback must start a fresh AbortController with the remaining time.
+          setTimeout(() => {
+            response.write('data: {"choices":[{"delta":{"reasoning_content":"slow think"}}]}\n\n');
+            response.write('data: [DONE]\n\n');
+            response.end();
+          }, 120);
+          return;
+        }
+
+        setTimeout(() => {
+          response.writeHead(200, { 'Content-Type': 'application/json' });
+          response.end(JSON.stringify({
+            output_text: 'fix: fallback with remaining timeout',
+          }));
+        }, 80);
+      });
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const result = await callLLM({
+        provider: 'Custom',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'custom-key',
+        model: 'custom-model',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/a.ts b/a.ts',
+        token: cancellationToken,
+        timeoutMs: 400,
+        temperature: 0.5,
+        onStream: () => undefined,
+      });
+
+      assert.strictEqual(result, 'fix: fallback with remaining timeout');
+      assert.strictEqual(requestCount, 2);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it('should not fall back when the streaming request times out', async () => {
+    let requestCount = 0;
+    const server = http.createServer((_request, response) => {
+      requestCount += 1;
+      response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+      // Never end the stream; the client timeout should abort it.
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      await assert.rejects(
+        () => callLLM({
+          provider: 'Custom',
+          endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+          apiKey: 'custom-key',
+          model: 'custom-model',
+          systemPrompt: 'Return a commit message.',
+          diff: 'diff --git a/a.ts b/a.ts',
+          token: cancellationToken,
+          timeoutMs: 80,
+          temperature: 0.5,
+          onStream: () => undefined,
+        }),
+        (error: unknown) => error instanceof RequestFailure && error.code === 'timeout'
+      );
+      assert.strictEqual(requestCount, 1);
     } finally {
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     }

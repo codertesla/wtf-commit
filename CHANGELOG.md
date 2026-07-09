@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.4] - 2026-07-09
+### Fixed
+- **Fallback timeout budget**: Non-streaming fallback after an empty stream now uses a fresh AbortController with the remaining once-timeout, instead of sharing a possibly already-expired timer.
+- **Non-streaming field compatibility**: Non-streaming responses now accept the same alternate OpenAI-compatible shapes (`message.text`, `choices[0].text`, top-level `content` / `text` / `output_text`).
+- **Streamed think markup**: Unclosed `<think>` blocks are held back from the UI preview until closed, so raw think tags are not flashed into the SCM input.
+
 ## [1.11.3] - 2026-07-09
 ### Fixed
 - **Streaming fallback**: When a streaming response returns 2xx but yields no parsable content, automatically retry once without streaming.
