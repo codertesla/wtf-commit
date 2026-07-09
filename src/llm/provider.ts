@@ -48,10 +48,20 @@ interface StreamDelta {
   choices?: Array<{
     delta?: {
       content?: string;
+      text?: string;
+      output_text?: string;
       reasoning_content?: string;
+      reasoning?: string;
     };
+    message?: {
+      content?: string;
+    };
+    text?: string;
     finish_reason?: string | null;
   }>;
+  content?: string;
+  text?: string;
+  output_text?: string;
 }
 
 interface GeminiStreamEvent {
@@ -201,8 +211,6 @@ async function callLLMOnce(input: LlmCallInput, effectiveTimeout: number): Promi
 
   const useStreaming = Boolean(input.onStream);
 
-  const requestBody = buildRequestBody(input, systemPrompt, userContent, useStreaming);
-
   const controller = new AbortController();
   let timedOut = false;
 
@@ -217,40 +225,27 @@ async function callLLMOnce(input: LlmCallInput, effectiveTimeout: number): Promi
 
   try {
     if (useStreaming) {
-      return await streamResponse(
-        input,
-        requestBody,
-        controller.signal,
-        () => timedOut,
-        effectiveTimeout
-      );
+      try {
+        return await streamResponse(
+          input,
+          buildRequestBody(input, systemPrompt, userContent, true),
+          controller.signal,
+          () => timedOut,
+          effectiveTimeout
+        );
+      } catch (error) {
+        if (!isEmptyStreamingResponse(error) || input.token.isCancellationRequested || timedOut) {
+          throw error;
+        }
+        logInfo('Streaming response contained no parsable content. Retrying without streaming...');
+      }
     }
 
-    const response = await postJson(input.endpoint, requestBody, input.apiKey, input.provider, controller.signal);
-
-    if (!response.ok) {
-      const errorText = await safeReadResponseText(response);
-      handleHttpError(response.status, errorText, response.retryAfterMs);
-    }
-
-    let data: unknown;
-    try {
-      data = await response.json();
-    } catch (error) {
-      throw new RequestFailure('invalid_response', `Failed to parse API response: ${getErrorMessage(error)}`);
-    }
-
-    const { content, reasoning } = extractResponseContent(data, input.provider);
-
-    if (reasoning) {
-      logInfo(`Reasoning Trace: ${reasoning}`);
-    }
-
-    if (!content || !content.trim()) {
-      throw new RequestFailure('invalid_response', 'No content in API response.');
-    }
-
-    return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    return await requestNonStreamingCompletion(
+      input,
+      buildRequestBody(input, systemPrompt, userContent, false),
+      controller.signal
+    );
   } catch (error) {
     if (error instanceof RequestFailure) {
       throw error;
@@ -269,6 +264,45 @@ async function callLLMOnce(input: LlmCallInput, effectiveTimeout: number): Promi
     clearTimeout(timeoutHandle);
     cancellationDisposable.dispose();
   }
+}
+
+function isEmptyStreamingResponse(error: unknown): boolean {
+  return error instanceof RequestFailure
+    && error.code === 'invalid_response'
+    && error.message === 'No content in streaming response.';
+}
+
+async function requestNonStreamingCompletion(
+  input: LlmCallInput,
+  requestBody: ChatCompletionRequest | GeminiInteractionRequest,
+  signal: AbortSignal
+): Promise<string> {
+  const response = await postJson(input.endpoint, requestBody, input.apiKey, input.provider, signal);
+
+  if (!response.ok) {
+    const errorText = await safeReadResponseText(response);
+    handleHttpError(response.status, errorText, response.retryAfterMs);
+  }
+
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch (error) {
+    throw new RequestFailure('invalid_response', `Failed to parse API response: ${getErrorMessage(error)}`);
+  }
+
+  const { content, reasoning } = extractResponseContent(data, input.provider);
+
+  if (reasoning) {
+    logInfo(`Reasoning Trace: ${reasoning}`);
+  }
+
+  const cleaned = cleanModelContent(content || '');
+  if (!cleaned) {
+    throw new RequestFailure('invalid_response', 'No content in API response.');
+  }
+
+  return cleaned;
 }
 
 function buildRequestBody(
@@ -400,21 +434,15 @@ async function streamResponse(
         let fullContent = '';
         let buffer = '';
 
-        response.on('data', (chunk: Buffer | string) => {
-          buffer += Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk;
-
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
+        const consumeLine = (line: string) => {
             const trimmed = line.trim();
             if (!trimmed || !trimmed.startsWith('data:')) {
-              continue;
+              return;
             }
 
             const data = trimmed.slice(5).trimStart();
             if (data === '[DONE]') {
-              continue;
+              return;
             }
 
             try {
@@ -432,11 +460,24 @@ async function streamResponse(
             } catch {
               // Skip malformed SSE lines
             }
+        };
+
+        response.on('data', (chunk: Buffer | string) => {
+          buffer += Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk;
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            consumeLine(line);
           }
         });
 
         response.on('end', () => {
-          const cleaned = fullContent.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+          if (buffer.trim()) {
+            consumeLine(buffer);
+          }
+          const cleaned = cleanModelContent(fullContent);
           if (!cleaned) {
             reject(new RequestFailure('invalid_response', 'No content in streaming response.'));
             return;
@@ -477,10 +518,28 @@ function extractStreamContent(
   }
 
   const delta = (event as StreamDelta).choices?.[0]?.delta;
+  const choice = (event as StreamDelta).choices?.[0];
   return {
-    content: delta?.content || '',
-    reasoning: delta?.reasoning_content,
+    content: firstText(
+      delta?.content,
+      delta?.text,
+      delta?.output_text,
+      choice?.message?.content,
+      choice?.text,
+      (event as StreamDelta).content,
+      (event as StreamDelta).text,
+      (event as StreamDelta).output_text
+    ),
+    reasoning: firstText(delta?.reasoning_content, delta?.reasoning),
   };
+}
+
+function firstText(...values: Array<string | undefined>): string {
+  return values.find((value) => typeof value === 'string' && value.length > 0) || '';
+}
+
+function cleanModelContent(content: string): string {
+  return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 }
 
 function handleHttpError(status: number, errorText: string, retryAfterMs?: number): never {

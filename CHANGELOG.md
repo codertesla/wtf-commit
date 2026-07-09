@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.3] - 2026-07-09
+### Fixed
+- **Streaming fallback**: When a streaming response returns 2xx but yields no parsable content, automatically retry once without streaming.
+- **SSE final buffer**: Process the last SSE `data:` line even when the stream ends without a trailing newline.
+- **Stream field compatibility**: Accept alternate OpenAI-compatible stream shapes (`delta.text`, `delta.output_text`, `message.content`, `choices[0].text`, and top-level `content` / `text` / `output_text`).
+
 ## [1.11.2] - 2026-07-02
 ### Changed
 - **Release-only bump**: Bumped version to republish on Open VSX after 1.11.1 was already published.
