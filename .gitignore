@@ -10,6 +10,8 @@ dist/
 # Environment variables (contains sensitive data)
 .env
 .env.local
+# Maintainer-only Open VSX token template (keep local, do not publish)
+.env.example
 
 # OS metadata
 .DS_Store
