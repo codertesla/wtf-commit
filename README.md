@@ -15,10 +15,11 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.11.3)
+## 🆕 Latest (v1.11.4)
 
-- **Streaming resilience**: Empty or unparsable streaming responses now fall back to a non-streaming request automatically.
-- **Broader stream formats**: Accepts more OpenAI-compatible SSE field shapes and flushes a final SSE line even without a trailing newline.
+- **Stronger streaming fallback**: Empty streams retry without streaming using a fresh remaining timeout budget.
+- **Consistent response parsing**: Non-streaming responses accept the same alternate OpenAI-compatible field shapes as streaming.
+- **Cleaner stream preview**: Unclosed `<think>` markup is held back from the live SCM preview.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 

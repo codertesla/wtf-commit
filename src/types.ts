@@ -96,9 +96,16 @@ export interface LlmResponse {
   choices?: Array<{
     message?: {
       content?: string;
+      text?: string;
+      reasoning_content?: string;
+      reasoning?: string;
       reasoning_details?: Array<{ text: string }>;
     };
+    text?: string;
   }>;
+  content?: string;
+  text?: string;
+  output_text?: string;
 }
 
 export interface GeminiInteractionResponse {

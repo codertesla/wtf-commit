@@ -210,42 +210,68 @@ async function callLLMOnce(input: LlmCallInput, effectiveTimeout: number): Promi
     : buildGenerationPrompt(input.diff, input.intent);
 
   const useStreaming = Boolean(input.onStream);
+  const startedAt = Date.now();
 
+  if (useStreaming) {
+    try {
+      return await runWithTimeout(input, effectiveTimeout, (signal, isTimedOut) =>
+        streamResponse(
+          input,
+          buildRequestBody(input, systemPrompt, userContent, true),
+          signal,
+          isTimedOut,
+          effectiveTimeout
+        )
+      );
+    } catch (error) {
+      if (!isEmptyStreamingResponse(error) || input.token.isCancellationRequested) {
+        throw error;
+      }
+      logInfo('Streaming response contained no parsable content. Retrying without streaming...');
+    }
+
+    const remainingMs = effectiveTimeout - (Date.now() - startedAt);
+    if (remainingMs <= 0) {
+      throw new RequestFailure('timeout', `Request timed out after ${Math.round(effectiveTimeout / 1000)} seconds.`);
+    }
+
+    return await runWithTimeout(input, remainingMs, (signal) =>
+      requestNonStreamingCompletion(
+        input,
+        buildRequestBody(input, systemPrompt, userContent, false),
+        signal
+      )
+    );
+  }
+
+  return await runWithTimeout(input, effectiveTimeout, (signal) =>
+    requestNonStreamingCompletion(
+      input,
+      buildRequestBody(input, systemPrompt, userContent, false),
+      signal
+    )
+  );
+}
+
+async function runWithTimeout<T>(
+  input: LlmCallInput,
+  timeoutMs: number,
+  run: (signal: AbortSignal, isTimedOut: () => boolean) => Promise<T>
+): Promise<T> {
   const controller = new AbortController();
   let timedOut = false;
 
   const timeoutHandle = setTimeout(() => {
     timedOut = true;
     controller.abort();
-  }, effectiveTimeout);
+  }, timeoutMs);
 
   const cancellationDisposable = input.token.onCancellationRequested(() => {
     controller.abort();
   });
 
   try {
-    if (useStreaming) {
-      try {
-        return await streamResponse(
-          input,
-          buildRequestBody(input, systemPrompt, userContent, true),
-          controller.signal,
-          () => timedOut,
-          effectiveTimeout
-        );
-      } catch (error) {
-        if (!isEmptyStreamingResponse(error) || input.token.isCancellationRequested || timedOut) {
-          throw error;
-        }
-        logInfo('Streaming response contained no parsable content. Retrying without streaming...');
-      }
-    }
-
-    return await requestNonStreamingCompletion(
-      input,
-      buildRequestBody(input, systemPrompt, userContent, false),
-      controller.signal
-    );
+    return await run(controller.signal, () => timedOut);
   } catch (error) {
     if (error instanceof RequestFailure) {
       throw error;
@@ -256,7 +282,7 @@ async function callLLMOnce(input: LlmCallInput, effectiveTimeout: number): Promi
     }
 
     if (timedOut) {
-      throw new RequestFailure('timeout', `Request timed out after ${Math.round(effectiveTimeout / 1000)} seconds.`);
+      throw new RequestFailure('timeout', `Request timed out after ${Math.round(timeoutMs / 1000)} seconds.`);
     }
 
     throw new RequestFailure('network', `Network request failed: ${getErrorMessage(error)}`);
@@ -303,6 +329,21 @@ async function requestNonStreamingCompletion(
   }
 
   return cleaned;
+}
+
+function firstText(...values: Array<string | undefined>): string {
+  return values.find((value) => typeof value === 'string' && value.length > 0) || '';
+}
+
+function cleanModelContent(content: string): string {
+  return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+}
+
+/** Like cleanModelContent, but holds back an unclosed trailing <think> block during streaming. */
+function cleanModelContentForStream(content: string): string {
+  const withoutClosed = content.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  const openMatch = /<think>/i.exec(withoutClosed);
+  return openMatch ? withoutClosed.slice(0, openMatch.index) : withoutClosed;
 }
 
 function buildRequestBody(
@@ -358,14 +399,25 @@ export function extractResponseContent(
   }
 
   const response = data as LlmResponse;
-  const message = response.choices?.[0]?.message;
-  const reasoning = message?.reasoning_details
+  const choice = response.choices?.[0];
+  const message = choice?.message;
+  const reasoningFromDetails = message?.reasoning_details
     ?.map((detail) => detail?.text || '')
     .filter(Boolean)
     .join('\n');
+  const content = firstText(
+    message?.content,
+    message?.text,
+    choice?.text,
+    response.content,
+    response.text,
+    response.output_text
+  );
+  const reasoning = firstText(reasoningFromDetails, message?.reasoning_content, message?.reasoning);
+
   return {
-    content: message?.content,
-    reasoning,
+    content: content || undefined,
+    reasoning: reasoning || undefined,
   };
 }
 
@@ -432,6 +484,7 @@ async function streamResponse(
         }
 
         let fullContent = '';
+        let emittedClean = '';
         let buffer = '';
 
         const consumeLine = (line: string) => {
@@ -455,7 +508,14 @@ async function streamResponse(
 
               if (content) {
                 fullContent += content;
-                input.onStream?.(content);
+                const cleaned = cleanModelContentForStream(fullContent);
+                if (cleaned.startsWith(emittedClean)) {
+                  const delta = cleaned.slice(emittedClean.length);
+                  if (delta) {
+                    emittedClean = cleaned;
+                    input.onStream?.(delta);
+                  }
+                }
               }
             } catch {
               // Skip malformed SSE lines
@@ -532,14 +592,6 @@ function extractStreamContent(
     ),
     reasoning: firstText(delta?.reasoning_content, delta?.reasoning),
   };
-}
-
-function firstText(...values: Array<string | undefined>): string {
-  return values.find((value) => typeof value === 'string' && value.length > 0) || '';
-}
-
-function cleanModelContent(content: string): string {
-  return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 }
 
 function handleHttpError(status: number, errorText: string, retryAfterMs?: number): never {
