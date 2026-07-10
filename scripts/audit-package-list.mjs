@@ -30,6 +30,13 @@ const allowedFiles = new Set([
   'out/i18n.js',
   'out/push-failure.js',
   'out/generate-lock.js',
+  'out/log.js',
+  'out/errors.js',
+  'out/status.js',
+  'out/staged-snapshot.js',
+  'out/flow/diff-source.js',
+  'out/commands/generate.js',
+  'out/commands/set-api-key.js',
   'out/llm/provider.js',
 ]);
 

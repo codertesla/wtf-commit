@@ -1,4 +1,4 @@
-import { getGitCommandError, getErrorMessage } from './prompt';
+import { getGitCommandError, getErrorMessage } from './errors';
 
 export type PushFailureKind =
   | 'push_succeeded_with_followup_warning'

@@ -8,19 +8,17 @@ English | [简体中文](README_zh.md)
 [![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.75.0-007ACC?logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/updates/v1_75)
 [![DeepSeek V4 Flash](https://img.shields.io/badge/DeepSeek-V4%20Flash-4D6BFE?logo=deepseek&logoColor=white)](https://api-docs.deepseek.com/quick_start/pricing)
 [![Gemini 3.1 Flash Lite](https://img.shields.io/badge/Gemini-3.1%20Flash%20Lite-8E75B2?logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite)
-[![GLM 4.7 FlashX](https://img.shields.io/badge/GLM-4.7%20FlashX-345FF2?logo=zhipu&logoColor=white)](https://bigmodel.cn/pricing)
-[![MiMo V2.5](https://img.shields.io/badge/MiMo-V2.5-FF6900?logo=xiaomi&logoColor=white)](https://mimo.mi.com/docs/en-US/price/pay-as-you-go)
 
 Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) | [Website](https://codertesla.github.io/wtf-commit/)
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.11.5)
+## 🆕 Latest (v1.12.0)
 
-- **Generate single-flight lock**: Concurrent Generate triggers are ignored while a run is already in progress.
-- **Local Conventional Commits repair**: Spacing, full-width colon, and over-long subject fixes run before the AI Repair dialog.
-- **Cancel / empty restore**: Cancelling generation clears partial stream text and restores your SCM intent.
-- **Large-diff hard cap**: Summarized diffs stay within `maxDiffChars`; AI Repair also receives capped diff context.
+- **Working-tree confirmation**: When nothing is staged and Auto Commit is off, confirm before generating from the working tree.
+- **Lightweight staged snapshot**: Auto Commit safety checks use an index signature + content hash.
+- **Cleaner stream preview**: Live SCM preview strips complete markdown fences and matches final normalize.
+- **Clearer internals**: Generate flow split into focused modules with unit tests for diff-source planning.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -28,7 +26,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 
 - **Multi-lingual Support**: Preset support for English, Chinese, Japanese, Classical Chinese, and **Custom** strings.
 - **Conventional Commits**: Automatically follows conventional commit standards (feat, fix, docs, etc.).
-- **Smart Diffing**: Prioritizes staged changes, confirms mixed staged/unstaged states, falls back to working tree changes, and strips more low-value diff noise before generation.
+- **Smart Diffing**: Prioritizes staged changes, confirms mixed staged/unstaged states, and (when Auto Commit is off) confirms before using unstaged working tree changes; strips low-value diff noise before generation.
 - **Intent-Aware Generation**: Reuses any text already typed into the SCM input box as a zero-config generation hint.
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
 - **Interactive Tuning**: Auto-commit flows support real-time message editing without blocking Git staging.

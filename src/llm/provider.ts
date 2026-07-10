@@ -1,7 +1,8 @@
 import * as http from 'node:http';
 import * as https from 'node:https';
 import { type GeminiInteractionResponse, type LlmCallInput, type LlmResponse, RequestFailure, REASONING_TIMEOUT_MS, type ProviderName } from '../types';
-import { logInfo, logError, getErrorMessage } from '../prompt';
+import { logInfo, logError } from '../log';
+import { getErrorMessage } from '../errors';
 
 const MAX_RETRIES = 2;
 const BASE_RETRY_DELAY_MS = 500;

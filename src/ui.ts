@@ -1,3 +1,5 @@
+import { normalizeCommitMessage } from './prompt';
+
 export interface ProgressReporter {
   report(value: { message?: string; increment?: number }): void;
 }
@@ -15,6 +17,16 @@ export interface StreamingSink {
 
 const DEFAULT_REPORT_INTERVAL_MS = 100;
 
+/**
+ * Preview text for the SCM input while streaming.
+ * Prefer a lightly normalized form so fences/emphasis do not flash;
+ * fall back to raw buffer when normalize would empty a partial stream.
+ */
+export function previewStreamText(buffered: string): string {
+  const normalized = normalizeCommitMessage(buffered);
+  return normalized || buffered;
+}
+
 export function createStreamingSink(
   progress: ProgressReporter,
   inputBox?: InputBoxLike,
@@ -31,17 +43,17 @@ export function createStreamingSink(
     push(chunk: string) {
       buffered += chunk;
       if (inputBox) {
-        inputBox.value = buffered;
+        inputBox.value = previewStreamText(buffered);
       }
       const current = now();
       if (lastReportAt === undefined || current - lastReportAt >= reportIntervalMs) {
         lastReportAt = current;
-        progress.report({ message: buffered.slice(-60) });
+        progress.report({ message: previewStreamText(buffered).slice(-60) });
       }
     },
     flush() {
       if (buffered) {
-        progress.report({ message: buffered.slice(-60) });
+        progress.report({ message: previewStreamText(buffered).slice(-60) });
       }
     },
   };
