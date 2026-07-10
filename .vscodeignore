@@ -36,6 +36,7 @@ yarn.lock
 
 # Documentation & process (not needed in VSIX)
 UPDATEFLOW.md
+specs/**
 .DS_Store
 .git/**
 .gitignore

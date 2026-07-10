@@ -10,14 +10,16 @@ import {
 } from './types';
 import { readExtensionConfig, getSecretKeyName } from './config';
 import { resolveRepository, collectStageablePaths } from './git';
-import { getOptimizedDiff } from './diff';
+import { DiffPreparationError, getOptimizedDiff } from './diff';
 import { buildProviderEndpoint, callLLM } from './llm/provider';
 import { classifyPushFailure, formatPushFailureMessage } from './push-failure';
-import { createStreamingSink, maskApiKey, restoreIntent } from './ui';
+import { createStreamingSink, maskApiKey, restoreIntent, restoreIntentOnAbort } from './ui';
 import { setUiLanguage, t, asUiLanguage, type UiLanguage } from './i18n';
+import { generateLock } from './generate-lock';
 import {
   normalizeCommitMessage,
   findConventionalCommitIssues,
+  tryLocalConventionalRepair,
   getGitCommandError,
   getErrorMessage,
   logInfo,
@@ -212,6 +214,11 @@ async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
 }
 
 async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
+  if (!generateLock.tryAcquire()) {
+    showStatusMessage(`$(sync~spin) ${t('generateInProgress')}`, STATUS_MESSAGE_TIMEOUT_MS);
+    return;
+  }
+
   let repositoryForRestore: Repository | null = null;
   let intentForRestore = '';
   try {
@@ -296,38 +303,59 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
     // The intent was already captured above, so clearing it is safe.
     repository.inputBox.value = '';
 
-    const commitMessage = await generateCommitMessage(
-      {
-        provider: config.provider,
-        endpoint,
-        apiKey,
-        model: config.model,
-        systemPrompt: config.systemPrompt,
-        diff,
-        intent,
-        temperature: config.temperature,
-      },
-      repository.inputBox
-    );
+    let commitMessage: string | undefined;
+    try {
+      commitMessage = await generateCommitMessage(
+        {
+          provider: config.provider,
+          endpoint,
+          apiKey,
+          model: config.model,
+          systemPrompt: config.systemPrompt,
+          diff,
+          intent,
+          temperature: config.temperature,
+        },
+        repository.inputBox
+      );
+    } catch (error) {
+      if (error instanceof RequestFailure && error.code === 'cancelled') {
+        restoreIntentOnAbort(repository.inputBox, intent);
+        await handleRequestFailure(error);
+        return;
+      }
+      throw error;
+    }
 
     if (!commitMessage) {
-      restoreIntent(repository.inputBox, intent);
+      restoreIntentOnAbort(repository.inputBox, intent);
       return;
     }
 
     let normalizedCommitMessage = normalizeCommitMessage(commitMessage);
     if (!normalizedCommitMessage) {
       vscode.window.showErrorMessage(t('generatedEmpty'));
-      restoreIntent(repository.inputBox, intent);
+      restoreIntentOnAbort(repository.inputBox, intent);
       return;
     }
 
     // Always populate the input box with generated result
     repository.inputBox.value = normalizedCommitMessage;
 
-    const issues = findConventionalCommitIssues(normalizedCommitMessage);
+    let issues = findConventionalCommitIssues(normalizedCommitMessage);
+    if (issues.length > 0) {
+      const localRepaired = tryLocalConventionalRepair(normalizedCommitMessage);
+      if (localRepaired) {
+        normalizedCommitMessage = localRepaired;
+        repository.inputBox.value = normalizedCommitMessage;
+        issues = findConventionalCommitIssues(normalizedCommitMessage);
+        logInfo('Applied local Conventional Commits repair.');
+      }
+    }
+
     if (issues.length > 0) {
       const issueSummary = issues.map((issue) => issue.message).join(' ');
+      const preRepairMessage = normalizedCommitMessage;
       const action = await vscode.window.showWarningMessage(
         t('needsAdjustment', { detail: issueSummary }),
         t('aiRepair'),
@@ -355,6 +383,7 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
           );
         } catch (error) {
           if (error instanceof RequestFailure) {
+            repository.inputBox.value = preRepairMessage;
             await handleRequestFailure(error);
             await vscode.commands.executeCommand('workbench.view.scm');
             showStatusMessage(`$(warning) ${t('repairFailedOriginalKept')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
@@ -365,11 +394,14 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
         }
 
         if (!repairedMessage) {
+          // Cancelled or empty stream during repair — keep the pre-repair message.
+          repository.inputBox.value = preRepairMessage;
           return;
         }
 
         const normalizedRepairedMessage = normalizeCommitMessage(repairedMessage);
         if (!normalizedRepairedMessage) {
+          repository.inputBox.value = preRepairMessage;
           vscode.window.showErrorMessage(t('repairEmpty'));
           return;
         }
@@ -490,15 +522,26 @@ async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
       }
     }
   } catch (error) {
+    if (error instanceof DiffPreparationError && error.code === 'NO_STAGED_CHANGES') {
+      vscode.window.showErrorMessage(t('noStagedChangesSmartStageOff'));
+      return;
+    }
+
     if (error instanceof RequestFailure) {
+      if (error.code === 'cancelled') {
+        restoreIntentOnAbort(repositoryForRestore?.inputBox, intentForRestore);
+      } else {
+        restoreIntent(repositoryForRestore?.inputBox, intentForRestore);
+      }
       await handleRequestFailure(error);
-      restoreIntent(repositoryForRestore?.inputBox, intentForRestore);
       return;
     }
 
     logError('Generate flow failed', error);
     vscode.window.showErrorMessage(t('generateFailed', { message: getErrorMessage(error) }));
     restoreIntent(repositoryForRestore?.inputBox, intentForRestore);
+  } finally {
+    generateLock.release();
   }
 }
 async function confirmStagedOnlyGeneration(context: vscode.ExtensionContext): Promise<boolean> {

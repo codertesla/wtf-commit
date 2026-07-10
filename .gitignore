@@ -35,3 +35,6 @@ scripts/*
 
 # Maintainer-only release checklist (keep local, do not publish)
 UPDATEFLOW.md
+
+# Local design / planning artifacts (not part of the extension)
+specs/

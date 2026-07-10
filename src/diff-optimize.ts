@@ -61,7 +61,25 @@ export function finalizeDiffForLlm(
   }
 
   const summary = buildLargeDiffSummary(diff, changes, maxDiffChars);
-  return { diff: summary, truncated: true, ...baseResult };
+  return { diff: hardCapDiffText(summary, maxDiffChars), truncated: true, ...baseResult };
+}
+
+const HARD_TRUNCATE_SUFFIX = '\n... (hard truncated)';
+
+/**
+ * Ensures text never exceeds maxChars (suffix included when truncation is needed).
+ */
+export function hardCapDiffText(text: string, maxChars: number): string {
+  const limit = Math.max(1, maxChars);
+  if (text.length <= limit) {
+    return text;
+  }
+
+  if (limit <= HARD_TRUNCATE_SUFFIX.length) {
+    return text.slice(0, limit);
+  }
+
+  return `${text.slice(0, limit - HARD_TRUNCATE_SUFFIX.length)}${HARD_TRUNCATE_SUFFIX}`;
 }
 
 function buildLargeDiffSummary(diff: string, changes: SummarizedChange[], maxDiffChars: number): string {

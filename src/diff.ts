@@ -25,6 +25,18 @@ export {
   finalizeDiffForLlm,
 } from './diff-optimize';
 
+export type DiffPreparationErrorCode = 'NO_STAGED_CHANGES';
+
+export class DiffPreparationError extends Error {
+  constructor(
+    public readonly code: DiffPreparationErrorCode,
+    message: string
+  ) {
+    super(message);
+    this.name = 'DiffPreparationError';
+  }
+}
+
 export const DEFAULT_DIFF_LIMITS: DiffLimits = {
   maxDiffChars: DEFAULT_MAX_DIFF_CHARS,
   maxUntrackedFiles: DEFAULT_MAX_UNTRACKED_FILES,
@@ -44,7 +56,10 @@ export async function getOptimizedDiff(
   } else if (smartStage) {
     diff = await repository.diff(false);
   } else {
-    throw new Error('No staged changes found. Please stage your changes first.');
+    throw new DiffPreparationError(
+      'NO_STAGED_CHANGES',
+      'No staged changes found. Please stage your changes first, or enable Smart Stage.'
+    );
   }
 
   const untrackedCap = Math.max(0, limits.maxUntrackedFiles);

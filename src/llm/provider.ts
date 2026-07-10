@@ -206,7 +206,7 @@ async function callLLMOnce(input: LlmCallInput, effectiveTimeout: number): Promi
     : input.systemPrompt;
 
   const userContent = isRepair
-    ? buildRepairPrompt(input.repairMessage || '', input.repairReason)
+    ? buildRepairPrompt(input.repairMessage || '', input.repairReason, input.diff)
     : buildGenerationPrompt(input.diff, input.intent);
 
   const useStreaming = Boolean(input.onStream);
@@ -649,7 +649,10 @@ function parseRetryAfter(value: string | string[] | undefined): number | undefin
   return undefined;
 }
 
-function buildGenerationPrompt(diff: string, intent?: string): string {
+/** Max characters of diff context included in repair prompts (token control). */
+export const REPAIR_DIFF_MAX_CHARS = 4_000;
+
+export function buildGenerationPrompt(diff: string, intent?: string): string {
   const sections: string[] = [];
 
   if (intent?.trim()) {
@@ -660,7 +663,7 @@ function buildGenerationPrompt(diff: string, intent?: string): string {
   return sections.join('\n\n');
 }
 
-function buildRepairPrompt(message: string, reason?: string): string {
+export function buildRepairPrompt(message: string, reason?: string, diff?: string): string {
   const sections = [
     'Fix the following commit message without changing its meaning:',
     message.trim(),
@@ -672,6 +675,15 @@ function buildRepairPrompt(message: string, reason?: string): string {
     sections.push(
       'Validation issue:\nThe first line must match Conventional Commits: <type>(<scope>): <description>.'
     );
+  }
+
+  const diffContext = diff?.trim();
+  if (diffContext) {
+    const capped =
+      diffContext.length > REPAIR_DIFF_MAX_CHARS
+        ? `${diffContext.slice(0, REPAIR_DIFF_MAX_CHARS)}\n... (diff truncated for repair)`
+        : diffContext;
+    sections.push(`Git diff context (may be truncated):\n${capped}`);
   }
 
   return sections.join('\n\n');

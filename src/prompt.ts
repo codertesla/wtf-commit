@@ -98,6 +98,94 @@ export function findConventionalCommitIssues(message: string): ConventionalCommi
   return issues;
 }
 
+/** Loose first-line match used only for local deterministic repairs. */
+const LOOSE_CC_FIRST_LINE_RE = new RegExp(
+  `^(${CONVENTIONAL_TYPE_PATTERN})(\\([^)]*\\))?!?\\s*[:：]\\s*(.+)$`,
+  'u'
+);
+const LOOSE_REVERT_FIRST_LINE_RE = /^revert\s*[:：]\s*(.+)$/iu;
+
+/**
+ * Attempt deterministic Conventional Commits fixes without calling the LLM.
+ * Returns a repaired message only when validation would then pass; otherwise undefined.
+ * Does not invent a type for free-form subjects.
+ */
+export function tryLocalConventionalRepair(message: string): string | undefined {
+  const trimmed = message.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  if (findConventionalCommitIssues(trimmed).length === 0) {
+    return undefined;
+  }
+
+  const lines = trimmed.split(/\r?\n/);
+  let firstLine = lines[0] || '';
+  const rest = lines.slice(1);
+
+  const revertMatch = LOOSE_REVERT_FIRST_LINE_RE.exec(firstLine);
+  if (revertMatch) {
+    firstLine = `revert: ${revertMatch[1].trim()}`;
+  } else {
+    const match = LOOSE_CC_FIRST_LINE_RE.exec(firstLine);
+    if (!match) {
+      return undefined;
+    }
+    const type = match[1].toLowerCase();
+    const scope = match[2] || '';
+    const hasBang = /^(?:\w+)(?:\([^)]*\))?!/.test(firstLine.trim());
+    const description = match[3].trim();
+    if (!description) {
+      return undefined;
+    }
+    firstLine = `${type}${scope}${hasBang ? '!' : ''}: ${description}`;
+  }
+
+  if (firstLine.length > CONVENTIONAL_SUBJECT_MAX_LENGTH) {
+    firstLine = truncateSubjectLine(firstLine, CONVENTIONAL_SUBJECT_MAX_LENGTH);
+  }
+
+  const repaired = [firstLine, ...rest].join('\n').trim();
+  if (findConventionalCommitIssues(repaired).length > 0) {
+    return undefined;
+  }
+  if (repaired === trimmed) {
+    return undefined;
+  }
+  return repaired;
+}
+
+function truncateSubjectLine(line: string, maxLength: number): string {
+  if (line.length <= maxLength) {
+    return line;
+  }
+
+  const separator = ': ';
+  const sepIndex = line.indexOf(separator);
+  if (sepIndex < 0) {
+    return line.slice(0, maxLength).trimEnd();
+  }
+
+  const prefix = line.slice(0, sepIndex + separator.length);
+  const descriptionBudget = maxLength - prefix.length;
+  if (descriptionBudget <= 0) {
+    return line.slice(0, maxLength).trimEnd();
+  }
+
+  let description = line.slice(sepIndex + separator.length);
+  if (description.length <= descriptionBudget) {
+    return line;
+  }
+
+  description = description.slice(0, descriptionBudget);
+  const lastSpace = description.lastIndexOf(' ');
+  if (lastSpace >= Math.floor(descriptionBudget * 0.5)) {
+    description = description.slice(0, lastSpace);
+  }
+  return `${prefix}${description.trimEnd()}`;
+}
+
 export function getGitCommandError(error: unknown): GitCommandErrorLike | undefined {
   if (!(error instanceof Error)) {
     return undefined;

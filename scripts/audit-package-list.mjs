@@ -29,6 +29,7 @@ const allowedFiles = new Set([
   'out/ui.js',
   'out/i18n.js',
   'out/push-failure.js',
+  'out/generate-lock.js',
   'out/llm/provider.js',
 ]);
 
