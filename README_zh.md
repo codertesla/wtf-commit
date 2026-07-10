@@ -24,11 +24,25 @@
 
 上手刻意拆成 **两个阶段**：AI 只配一次，之后就该变成肌肉记忆里的快捷键。
 
+### 安装方式
+
+| 编辑器 | 如何安装 | 更新 |
+|--------|----------|------|
+| **Cursor / VSCodium**（Open VSX） | 扩展市场搜索 **`WTF Commit`** → 安装 | 可由市场自动更新 |
+| **VS Code**（尚未上架微软 Marketplace） | 使用 **`.vsix`** 安装（见下） | **不会自动更新** — 需要新版本时请重新下载并安装 VSIX |
+
+**通过 VSIX 安装（VS Code）：**
+
+1. 从 [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit)、[GitHub Releases](https://github.com/codertesla/wtf-commit/releases) 或项目介绍页下载最新 `.vsix`。
+2. 任选一种方式：
+   - 扩展视图 → **⋯**（视图和更多操作）→ **从 VSIX 安装…** → 选择文件；或
+   - 将 `.vsix` **拖入**扩展的 **已安装** 列表，即可安装。
+
 ## ① 配置 AI（只需一次）
 
 你只需要「服务商 + Key」，其它都可以保持默认。
 
-1. **安装** — 扩展市场搜索 **`WTF Commit`**（Open VSX）→ 安装。
+1. **安装** — 见上表（Open VSX 搜索，或在 VS Code 用 VSIX）。
 2. **设置 API Key** — 命令面板 → **`WTF Commit: Set API Key`**。
 3. **在列表里选服务商** — 插件默认是 **DeepSeek**（**Gemini** 同样推荐）。**Model** 留空即用内置默认。
 4. **粘贴 Key**。若你选的不是 DeepSeek，提示切换时选 **切换 Provider**，让当前服务商与 Key 一致。
