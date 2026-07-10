@@ -24,11 +24,25 @@ Works in **Cursor**, **VSCodium**, and other Open VSX–compatible editors (and 
 
 Onboarding is intentionally **two phases**. You only configure AI once; after that it should feel like a muscle-memory shortcut.
 
+### Install
+
+| Editor | How to install | Updates |
+|--------|----------------|---------|
+| **Cursor / VSCodium** (Open VSX) | Extensions → search **`WTF Commit`** → Install | Marketplace can auto-update |
+| **VS Code** (Microsoft Marketplace does **not** list this extension yet) | Install from a **`.vsix`** (see below) | **No auto-update** — download a new VSIX when you want a new version |
+
+**Install from VSIX (VS Code):**
+
+1. Get the latest package from [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit), [GitHub Releases](https://github.com/codertesla/wtf-commit/releases), or the project site.
+2. Either:
+   - Extensions view → **⋯** (Views and More Actions) → **Install from VSIX…** → pick the file, or
+   - Drag the `.vsix` onto the **Installed** extensions list to install.
+
 ## ① Configure AI (once)
 
 You need a provider and a key. Everything else can stay on defaults.
 
-1. **Install** — Extensions → search **`WTF Commit`** (Open VSX) → Install.
+1. **Install** — use the table above (Open VSX search, or VSIX on stock VS Code).
 2. **Set API Key** — Command Palette → **`WTF Commit: Set API Key`**.
 3. **Choose a provider** in the picker — the extension default is **DeepSeek** (also great: **Gemini**). Leave **Model** empty for the built-in default.
 4. **Paste the key**. If you picked someone other than DeepSeek, choose **Switch Provider** when prompted so the active provider matches the key.

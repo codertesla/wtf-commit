@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Install docs**: README (EN/ZH) documents Open VSX vs VSIX install paths for VS Code, including drag-and-drop / “Install from VSIX…”, and that VSIX installs do not auto-update.
+
 ## [1.13.0] - 2026-07-10
 ### Changed
 - **Default provider**: **DeepSeek** (`deepseek-v4-flash`) instead of OpenAI — better default for fast, low-cost commit messages.
