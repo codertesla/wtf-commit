@@ -155,7 +155,7 @@ const en: Dictionary = {
   invalidApiResponse: 'Invalid API response: {message}',
   undoCommit: 'Undo Commit',
   welcomeTitle:
-    'Welcome to WTF Commit! Set up an API key to start generating commit messages with AI.',
+    'Welcome to WTF Commit! Step 1: set a provider + API key once. Step 2: generate anytime with your shortcut (default Cmd/Ctrl+Alt+G — rebindable).',
   remindMeLater: 'Remind Me Later',
   dontShowAgain: "Don't Show Again",
   updatedToVersion: 'WTF Commit has been updated to v{version}!',
@@ -234,7 +234,8 @@ const zh: Dictionary = {
   authFailed: '认证失败（{status}）',
   invalidApiResponse: '无效的 API 响应：{message}',
   undoCommit: '撤销提交',
-  welcomeTitle: '欢迎使用 WTF Commit！设置 API Key 即可开始用 AI 生成提交信息。',
+  welcomeTitle:
+    '欢迎使用 WTF Commit！① 先配置一次：选择服务商并设置 API Key；② 日常用快捷键生成（默认 Cmd/Ctrl+Alt+G，可改成例如连按两次 Cmd+G）。',
   remindMeLater: '稍后提醒',
   dontShowAgain: '不再显示',
   updatedToVersion: 'WTF Commit 已更新到 v{version}！',

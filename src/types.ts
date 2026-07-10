@@ -156,7 +156,7 @@ export const DEFAULT_SYSTEM_PROMPT =
 
 export const DEFAULT_IGNORE_PATHS = ['*.snap', '*.min.js', '*.min.css', '.gen.ts', '_generated'] as const;
 
-export const DEFAULT_PROVIDER: ProviderName = 'OpenAI';
+export const DEFAULT_PROVIDER: ProviderName = 'DeepSeek';
 export const DEFAULT_TIMEOUT_MS = 45_000;
 export const REASONING_TIMEOUT_MS = 90_000; // Extended timeout for deep thinkers
 export const DEFAULT_MAX_DIFF_CHARS = 10_000;
