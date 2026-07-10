@@ -53,6 +53,8 @@ export type MessageKey =
   | 'repairFailedOriginalKept'
   | 'mixedStageWarning'
   | 'useStagedChanges'
+  | 'workingTreeOnlyWarning'
+  | 'useWorkingTreeChanges'
   | 'dontRemindMe'
   | 'openSourceControl'
   | 'openSettings'
@@ -137,6 +139,9 @@ const en: Dictionary = {
   mixedStageWarning:
     'Staged and unstaged changes were both detected. WTF Commit will generate from staged changes only.',
   useStagedChanges: 'Use Staged Changes',
+  workingTreeOnlyWarning:
+    'Nothing is staged. Generate a commit message from working tree changes? Stage the files yourself before committing.',
+  useWorkingTreeChanges: 'Use Working Tree',
   dontRemindMe: "Don't Remind Me",
   openSourceControl: 'Open Source Control',
   openSettings: 'Open Settings',
@@ -214,6 +219,9 @@ const zh: Dictionary = {
   repairFailedOriginalKept: 'AI 修复失败，原信息已保留在源代码管理中。',
   mixedStageWarning: '同时检测到已暂存与未暂存变更。WTF Commit 将仅基于已暂存变更生成。',
   useStagedChanges: '使用已暂存变更',
+  workingTreeOnlyWarning:
+    '暂存区为空。是否基于工作区变更生成提交信息？提交前请自行 stage 相关文件。',
+  useWorkingTreeChanges: '使用工作区变更',
   dontRemindMe: '不再提醒',
   openSourceControl: '打开源代码管理',
   openSettings: '打开设置',

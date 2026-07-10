@@ -1,13 +1,3 @@
-import type * as vscode from 'vscode';
-
-type GitCommandErrorLike = Error & {
-  stderr?: string;
-  stdout?: string;
-  gitCommand?: string;
-  gitArgs?: string[];
-  exitCode?: number;
-};
-
 export function normalizeCommitMessage(rawMessage: string): string {
   let message = rawMessage.trim();
 
@@ -186,47 +176,6 @@ function truncateSubjectLine(line: string, maxLength: number): string {
   return `${prefix}${description.trimEnd()}`;
 }
 
-export function getGitCommandError(error: unknown): GitCommandErrorLike | undefined {
-  if (!(error instanceof Error)) {
-    return undefined;
-  }
-
-  const gitError = error as GitCommandErrorLike;
-  if (!gitError.gitCommand && !gitError.stderr && !gitError.stdout) {
-    return undefined;
-  }
-
-  return gitError;
-}
-
-export function getErrorMessage(error: unknown): string {
-  const gitError = getGitCommandError(error);
-  const stderr = gitError?.stderr?.trim();
-
-  if (stderr) {
-    return gitError?.gitCommand ? `git ${gitError.gitCommand}: ${stderr}` : stderr;
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  return String(error);
-}
-
-let outputChannel: vscode.OutputChannel | undefined;
-
-export function setOutputChannel(channel: vscode.OutputChannel) {
-  outputChannel = channel;
-}
-
-export function logInfo(message: string): void {
-  outputChannel?.appendLine(`[INFO] ${message}`);
-}
-
-export function logError(message: string, error?: unknown): void {
-  if (error) {
-    outputChannel?.appendLine(`[ERROR] ${message}: ${getErrorMessage(error)}`);
-  } else {
-    outputChannel?.appendLine(`[ERROR] ${message}`);
-  }
-}
+// Backward-compatible re-exports (prefer importing from ./errors and ./log).
+export { getErrorMessage, getGitCommandError } from './errors';
+export { logError, logInfo, setOutputChannel } from './log';

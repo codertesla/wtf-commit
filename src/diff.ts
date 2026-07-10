@@ -10,7 +10,8 @@ import {
   DEFAULT_MAX_DIFF_CHARS,
 } from './types';
 import { shouldFilterPath, isLikelyBinary } from './filters';
-import { logInfo, getErrorMessage } from './prompt';
+import { logInfo } from './log';
+import { getErrorMessage } from './errors';
 import {
   type DiffLimits,
   type OptimizedDiffResult,

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-07-10
+### Added
+- **Working-tree confirmation**: When nothing is staged and Auto Commit is off, confirm before generating from the working tree (with optional “Don’t Remind Me”).
+- **Lightweight staged snapshot**: Auto Commit compares an index signature + content hash instead of raw multi-megabyte string equality.
+
+### Changed
+- **Stream preview cleanup**: Live SCM preview applies the same light normalize path as the final message (e.g. strips complete markdown fences).
+- **Module split**: Generate / Set API Key commands, diff-source planner, log/errors helpers extracted from the monolithic entrypoint for clearer ownership and unit tests.
+- **Marketplace badges**: README header badges now highlight only DeepSeek and Gemini as recommended models (other providers remain fully supported).
+
 ## [1.11.5] - 2026-07-10
 ### Added
 - **Generate single-flight lock**: Concurrent Generate triggers are ignored while a run is in progress.

@@ -1,6 +1,12 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
-import { createStreamingSink, maskApiKey, restoreIntent, restoreIntentOnAbort } from '../ui';
+import {
+  createStreamingSink,
+  maskApiKey,
+  previewStreamText,
+  restoreIntent,
+  restoreIntentOnAbort,
+} from '../ui';
 
 describe('maskApiKey', () => {
   it('should mask the middle of a long key', () => {
@@ -14,6 +20,17 @@ describe('maskApiKey', () => {
 
   it('should mask keys just over the threshold', () => {
     assert.strictEqual(maskApiKey('123456789'), '1234••••6789');
+  });
+});
+
+describe('previewStreamText', () => {
+  it('should strip complete markdown fences for the live preview', () => {
+    assert.strictEqual(previewStreamText('```\nfeat: add login\n```'), 'feat: add login');
+  });
+
+  it('should keep partial raw text when normalize would be empty', () => {
+    // Whitespace-only after trim → fall back to buffered.
+    assert.strictEqual(previewStreamText('   '), '   ');
   });
 });
 
@@ -34,6 +51,19 @@ describe('createStreamingSink', () => {
     assert.strictEqual(sink.buffered, 'feat: add login');
     // First chunk reports immediately so the user sees activity right away.
     assert.deepStrictEqual(reports, ['feat']);
+  });
+
+  it('should write a fence-stripped preview into the input box', () => {
+    const inputBox = { value: '' };
+    const sink = createStreamingSink(
+      { report: () => undefined },
+      inputBox,
+      Number.POSITIVE_INFINITY,
+      () => 0
+    );
+    sink.push('```\nfeat: add login\n```');
+    assert.strictEqual(inputBox.value, 'feat: add login');
+    assert.strictEqual(sink.buffered, '```\nfeat: add login\n```');
   });
 
   it('should report progress at most once per interval', () => {
