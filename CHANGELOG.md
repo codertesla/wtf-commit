@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **Install docs**: README (EN/ZH) documents Open VSX vs VSIX install paths for VS Code, including drag-and-drop / “Install from VSIX…”, and that VSIX installs do not auto-update.
+- **Install docs**: README (EN/ZH) lists **VS Code Marketplace** (`CoderTesla.wtf-commit`) with auto-update, plus Open VSX for Cursor; Marketplace badges added; VSIX kept as optional offline path.
+- **Dual-market release**: `publish:vscode` / `release:all` package with temporary publisher `CoderTesla` for Microsoft while keeping `codertesla` for Open VSX (`scripts/run-with-publisher.mjs`).
 
 ## [1.13.0] - 2026-07-10
 ### Changed

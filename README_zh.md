@@ -2,18 +2,19 @@
 
 # WTF Commit ✨
 
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/CoderTesla.wtf-commit?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/CoderTesla.wtf-commit)](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit)
 [![Open VSX Version](https://img.shields.io/open-vsx/v/codertesla/wtf-commit)](https://open-vsx.org/extension/codertesla/wtf-commit)
 [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/codertesla/wtf-commit)](https://open-vsx.org/extension/codertesla/wtf-commit)
 [![License](https://img.shields.io/github/license/codertesla/wtf-commit)](https://github.com/codertesla/wtf-commit)
-[![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.75.0-007ACC?logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/updates/v1_75)
 [![DeepSeek V4 Flash](https://img.shields.io/badge/DeepSeek-V4%20Flash-4D6BFE?logo=deepseek&logoColor=white)](https://api-docs.deepseek.com/quick_start/pricing)
 [![Gemini 3.1 Flash Lite](https://img.shields.io/badge/Gemini-3.1%20Flash%20Lite-8E75B2?logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite)
 
-链接： [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) | [插件介绍页](https://codertesla.github.io/wtf-commit/)
+链接： [GitHub](https://github.com/codertesla/wtf-commit) · [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit) · [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) · [插件介绍页](https://codertesla.github.io/wtf-commit/)
 
 **一键生成 commit message。** WTF Commit 读取你的 git diff，按约定式提交规范生成清晰标题，并写入源代码管理输入框——**使用你自己的 API Key**，不绑定单一厂商。
 
-适用于 **Cursor**、**VSCodium** 等兼容 Open VSX 的编辑器（也可通过 Open VSX / VSIX 安装到 VS Code）。**持续维护**，MIT 免费开源。
+适用于 **VS Code**（微软 Marketplace：可搜索安装、**自动更新**）、**Cursor**、**VSCodium** 等。**持续维护**，MIT 免费开源。
 
 | | |
 |:--|:--|
@@ -28,21 +29,16 @@
 
 | 编辑器 | 如何安装 | 更新 |
 |--------|----------|------|
-| **Cursor / VSCodium**（Open VSX） | 扩展市场搜索 **`WTF Commit`** → 安装 | 可由市场自动更新 |
-| **VS Code**（尚未上架微软 Marketplace） | 使用 **`.vsix`** 安装（见下） | **不会自动更新** — 需要新版本时请重新下载并安装 VSIX |
+| **VS Code** | 扩展市场搜索 **`WTF Commit`** → 安装（[Marketplace 页面](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit)） | **自动更新**（微软市场） |
+| **Cursor / VSCodium** | 扩展市场搜索 **`WTF Commit`** → 安装（[Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit)） | 自动更新（Open VSX） |
 
-**通过 VSIX 安装（VS Code）：**
-
-1. 从 [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit)、[GitHub Releases](https://github.com/codertesla/wtf-commit/releases) 或项目介绍页下载最新 `.vsix`。
-2. 任选一种方式：
-   - 扩展视图 → **⋯**（视图和更多操作）→ **从 VSIX 安装…** → 选择文件；或
-   - 将 `.vsix` **拖入**扩展的 **已安装** 列表，即可安装。
+**VSIX（可选 / 离线）：** 从 [GitHub Releases](https://github.com/codertesla/wtf-commit/releases) 或上述市场下载 `.vsix`，扩展视图 → **⋯** → **从 VSIX 安装…**，或拖入「已安装」列表。手动 VSIX **不会**自动更新，能走市场安装时请优先用市场。
 
 ## ① 配置 AI（只需一次）
 
 你只需要「服务商 + Key」，其它都可以保持默认。
 
-1. **安装** — 见上表（Open VSX 搜索，或在 VS Code 用 VSIX）。
+1. **安装** — 在编辑器扩展视图搜索 **`WTF Commit`**（VS Code 或 Cursor）。
 2. **设置 API Key** — 命令面板 → **`WTF Commit: Set API Key`**。
 3. **在列表里选服务商** — 插件默认是 **DeepSeek**（**Gemini** 同样推荐）。**Model** 留空即用内置默认。
 4. **粘贴 Key**。若你选的不是 DeepSeek，提示切换时选 **切换 Provider**，让当前服务商与 Key 一致。
