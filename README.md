@@ -2,18 +2,19 @@ English | [简体中文](README_zh.md)
 
 # WTF Commit ✨
 
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/CoderTesla.wtf-commit?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/CoderTesla.wtf-commit)](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit)
 [![Open VSX Version](https://img.shields.io/open-vsx/v/codertesla/wtf-commit)](https://open-vsx.org/extension/codertesla/wtf-commit)
 [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/codertesla/wtf-commit)](https://open-vsx.org/extension/codertesla/wtf-commit)
 [![License](https://img.shields.io/github/license/codertesla/wtf-commit)](https://github.com/codertesla/wtf-commit)
-[![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.75.0-007ACC?logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/updates/v1_75)
 [![DeepSeek V4 Flash](https://img.shields.io/badge/DeepSeek-V4%20Flash-4D6BFE?logo=deepseek&logoColor=white)](https://api-docs.deepseek.com/quick_start/pricing)
 [![Gemini 3.1 Flash Lite](https://img.shields.io/badge/Gemini-3.1%20Flash%20Lite-8E75B2?logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite)
 
-Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) | [Website](https://codertesla.github.io/wtf-commit/)
+Links: [GitHub](https://github.com/codertesla/wtf-commit) · [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit) · [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) · [Website](https://codertesla.github.io/wtf-commit/)
 
 **One shortcut to generate your commit message.** WTF Commit reads your git diff and fills the Source Control box with a clear Conventional Commit — with **your own API key**, not a locked-in vendor.
 
-Works in **Cursor**, **VSCodium**, and other Open VSX–compatible editors (and VS Code when the extension is installed from Open VSX / VSIX). **Actively maintained** (MIT, free).
+Works in **VS Code** (Microsoft Marketplace — search, install, **auto-update**), **Cursor**, **VSCodium**, and other Open VSX–compatible editors. **Actively maintained** (MIT, free).
 
 | | |
 |:--|:--|
@@ -28,21 +29,16 @@ Onboarding is intentionally **two phases**. You only configure AI once; after th
 
 | Editor | How to install | Updates |
 |--------|----------------|---------|
-| **Cursor / VSCodium** (Open VSX) | Extensions → search **`WTF Commit`** → Install | Marketplace can auto-update |
-| **VS Code** (Microsoft Marketplace does **not** list this extension yet) | Install from a **`.vsix`** (see below) | **No auto-update** — download a new VSIX when you want a new version |
+| **VS Code** | Extensions → search **`WTF Commit`** → Install ([Marketplace page](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit)) | **Auto-update** from Microsoft Marketplace |
+| **Cursor / VSCodium** | Extensions → search **`WTF Commit`** → Install ([Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit)) | Auto-update from Open VSX |
 
-**Install from VSIX (VS Code):**
-
-1. Get the latest package from [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit), [GitHub Releases](https://github.com/codertesla/wtf-commit/releases), or the project site.
-2. Either:
-   - Extensions view → **⋯** (Views and More Actions) → **Install from VSIX…** → pick the file, or
-   - Drag the `.vsix` onto the **Installed** extensions list to install.
+**VSIX (optional / offline):** download from [GitHub Releases](https://github.com/codertesla/wtf-commit/releases) or the marketplaces above, then Extensions → **⋯** → **Install from VSIX…**, or drag the `.vsix` onto the Installed list. Manual VSIX installs do **not** auto-update — prefer the marketplace install when you can.
 
 ## ① Configure AI (once)
 
 You need a provider and a key. Everything else can stay on defaults.
 
-1. **Install** — use the table above (Open VSX search, or VSIX on stock VS Code).
+1. **Install** — search **`WTF Commit`** in your editor’s Extensions view (VS Code or Cursor).
 2. **Set API Key** — Command Palette → **`WTF Commit: Set API Key`**.
 3. **Choose a provider** in the picker — the extension default is **DeepSeek** (also great: **Gemini**). Leave **Model** empty for the built-in default.
 4. **Paste the key**. If you picked someone other than DeepSeek, choose **Switch Provider** when prompted so the active provider matches the key.

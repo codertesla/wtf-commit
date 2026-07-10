@@ -29,9 +29,10 @@ Thumbs.db
 # NPM config (developer-specific)
 .npmrc
 
-# Local scripts
+# Local scripts (allowlist published release helpers)
 scripts/*
 !scripts/audit-package-list.mjs
+!scripts/run-with-publisher.mjs
 
 # Maintainer-only release checklist (keep local, do not publish)
 UPDATEFLOW.md
