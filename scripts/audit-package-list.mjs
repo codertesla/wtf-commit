@@ -26,6 +26,8 @@ const allowedFiles = new Set([
   'out/diff.js',
   'out/diff-optimize.js',
   'out/config.js',
+  'out/settings-resolve.js',
+  'out/settings-migrate.js',
   'out/ui.js',
   'out/i18n.js',
   'out/push-failure.js',

@@ -64,11 +64,11 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.13.0)
+## 🆕 Latest (v1.14.0)
 
-- **Default provider: DeepSeek** — first install uses `deepseek-v4-flash` (fast, low-cost commit messages).
-- **Smoother defaults**: Auto Commit on, no confirm-before-commit dialog; Auto Push stays off; Confirm Before Push stays on for safety.
-- **Clearer onboarding docs**: configure AI once, then daily shortcut (including rebinding tips like double `Cmd+G`).
+- **Simpler settings**: Everyday options live under **WTF Commit**; prompt, endpoints, and diff limits moved to **WTF Commit › Advanced**.
+- **Clearer language names**: **Commit Message Language** (vs UI Language); old `language` / `customLanguage` keys migrate automatically.
+- **One override path**: Built-in provider endpoints use **Provider Overrides** only (legacy per-provider keys migrate on activate).
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -88,33 +88,38 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 ## 🛠️ Advanced Tutorial
 
 ### 1. Plugin Settings
-Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit` to customize the behavior:
+Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit`. Settings are split into **WTF Commit** (basics) and **WTF Commit › Advanced**.
+
+**Basics** — what most people need:
 
 | Setting | Description |
 |---------|-------------|
-| **UI Language** | Language for the extension's own UI (`en` / `zh`), independent of the commit-message language. |
-| **Show Status Bar Item** | Show the compact WTF Commit icon in the status bar. |
-| **Changelog Popup** | Show a notification after the extension is updated (off by default). |
+| **UI Language** | Extension UI language (`en` / `zh`), independent of commit-message language. |
+| **Commit Message Language** | Language for generated commit messages. |
+| **Custom Commit Message Language** | Used only when Commit Message Language is `Custom`. |
+| **Provider** | AI backend (default DeepSeek). |
 | **Auto Commit** | **Default on** — commit after generate. Off = message only in Source Control. |
 | **Auto Push** | **Default off** — enable for push after commit. Requires Auto Commit. |
 | **Smart Stage** | With Auto Commit, stage current changes before generation when nothing is staged. |
 | **Confirm Before Commit** | **Default off** — no modal before auto-commit. Turn on for a final check. |
 | **Confirm Before Push** | **Default on** — ask before auto-push. Power users can disable for a full hands-off shortcut. |
-| **Warn On Truncated Diff** | Warn when the diff is large and only a partial diff is sent to the AI (off by default). |
-| **Prompt** | Customize the AI's persona and generation rules. |
+
+**Advanced** — prompt, temperature, Custom Base URL/Model, Provider Overrides, diff limits, status bar / changelog toggles.
 
 ### 2. Custom Model & Endpoints
-You can use any OpenAI-compatible model (like local models via Ollama) by changing the **Provider** or **Model/Base URL**:
+You can use any OpenAI-compatible model (like local models via Ollama):
 
 1. In Settings, set **Provider** to `Custom`.
-2. Enter the **Base URL** (e.g., `http://localhost:11434/v1`).
+2. Under **WTF Commit › Advanced**, enter the **Base URL** (e.g., `http://localhost:11434/v1`).
 3. Enter the **Model** name (e.g., `llama3`).
+
+To override a built-in provider's endpoint/model, use **Provider Overrides** (not the global Base URL / Model fields).
 
 ### 3. Custom Commit Language
 If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji-only):
 
-1. Set **Language** to `Custom`.
-2. Enter your target language in **Custom Language** (e.g., `Emoji only`).
+1. Set **Commit Message Language** to `Custom`.
+2. Enter your target language in **Custom Commit Message Language** (e.g., `Emoji only`).
 
 ---
 
@@ -125,7 +130,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 | Term | Meaning |
 |------|---------|
 | **Default Provider** | **DeepSeek** — used on first install until you change **Provider** in settings. |
-| **Provider default** | Each built-in provider has its own default **Model** and **Base URL** (table below). Applies only when that provider is **selected** and **Model** / **Base URL** are left empty. |
+| **Provider default** | Each built-in provider has its own default **Model** and **Base URL** (table below). Applies when that provider is **selected** and no **Provider Overrides** (or Custom Base URL/Model) are set. |
 | **Our recommendation** | Editorial picks for commit messages (see [Choosing a model](#choosing-a-model-for-commit-messages)) — **not** the extension default provider. |
 
 **Provider defaults** — when **Base URL** and **Model** are left empty:

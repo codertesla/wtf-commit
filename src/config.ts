@@ -12,21 +12,23 @@ import {
 } from './types';
 import { resolveProviderConfig } from './provider-config';
 import { asUiLanguage } from './i18n';
+import { readProviderOverride, resolveCommitMessageLanguage } from './settings-resolve';
 
 export function readExtensionConfig(): ExtensionConfig {
   const config = vscode.workspace.getConfiguration('wtfCommit');
 
   const provider = asProviderName(config.get<string>('provider'));
-  const languageSetting = config.get<string>('language') || 'English';
-  const customLanguage = config.get<string>('customLanguage') || 'English';
-  const language = languageSetting === 'Custom' ? customLanguage : languageSetting;
+  const language = resolveCommitMessageLanguage({
+    commitMessageLanguage: readExplicitOrUndefined(config, 'commitMessageLanguage'),
+    customCommitMessageLanguage: readExplicitOrUndefined(config, 'customCommitMessageLanguage'),
+    legacyLanguage: readExplicitOrUndefined(config, 'language'),
+    legacyCustomLanguage: readExplicitOrUndefined(config, 'customLanguage'),
+  });
 
-  // 1. Try to read provider-specific overrides
   const overrides = config.get<Record<string, { baseUrl?: string; model?: string }>>('providerOverrides') || {};
-  const providerBaseUrl = overrides[provider]?.baseUrl?.trim() || config.get<string>(`${provider}.baseUrl`)?.trim();
-  const providerModel = overrides[provider]?.model?.trim() || config.get<string>(`${provider}.model`)?.trim();
+  const { baseUrl: providerBaseUrl, model: providerModel } = readProviderOverride(overrides, provider);
 
-  // 2. Global values are only safe for Custom. Built-in providers may use
+  // Global values are only safe for Custom. Built-in providers may use
   // different wire protocols, so sharing an endpoint/model can break them.
   const globalBaseUrl = config.get<string>('baseUrl')?.trim();
   const globalModel = config.get<string>('model')?.trim();
@@ -51,8 +53,6 @@ export function readExtensionConfig(): ExtensionConfig {
     smartStage: config.get<boolean>('smartStage') ?? true,
     confirmBeforeCommit: config.get<boolean>('confirmBeforeCommit') ?? false,
     confirmAutoPush: config.get<boolean>('confirmAutoPush') ?? true,
-    showStatusBarItem: config.get<boolean>('showStatusBarItem') ?? true,
-    changelogPopup: config.get<boolean>('changelogPopup') ?? false,
     warnOnTruncatedDiff: config.get<boolean>('warnOnTruncatedDiff') ?? false,
     ignorePaths: readIgnorePaths(config),
     systemPrompt,
@@ -62,6 +62,15 @@ export function readExtensionConfig(): ExtensionConfig {
     maxDiffChars: clampInt(config.get<number>('maxDiffChars'), DEFAULT_MAX_DIFF_CHARS, 1000),
     maxUntrackedFiles: Math.max(0, config.get<number>('maxUntrackedFiles') ?? DEFAULT_MAX_UNTRACKED_FILES),
   };
+}
+
+/** Prefer user/workspace values; ignore package defaults so legacy keys can still win. */
+function readExplicitOrUndefined(config: vscode.WorkspaceConfiguration, key: string): string | undefined {
+  const inspected = config.inspect<string>(key);
+  if (!inspected) {
+    return undefined;
+  }
+  return inspected.workspaceFolderValue ?? inspected.workspaceValue ?? inspected.globalValue;
 }
 
 function readIgnorePaths(config: vscode.WorkspaceConfiguration): string[] {

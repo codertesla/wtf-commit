@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, Gemini, OpenAI, and more.",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -76,167 +76,174 @@
         "mac": "cmd+alt+g"
       }
     ],
-    "configuration": {
-      "title": "WTF Commit",
-      "properties": {
-        "wtfCommit.uiLanguage": {
-          "type": "string",
-          "enum": ["en", "zh"],
-          "default": "en",
-          "markdownDescription": "**Interface Language** — Language for the extension's own UI (buttons, prompts, notifications). Independent of the commit-message language. `en` = English, `zh` = 简体中文.",
-          "order": 0
-        },
-        "wtfCommit.showStatusBarItem": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show the WTF Commit icon in the status bar.",
-          "order": 1
-        },
-        "wtfCommit.changelogPopup": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show a notification with a View Changelog action after the extension is updated.",
-          "order": 2
-        },
-        "wtfCommit.autoCommit": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "**Automation — Auto Commit** (default on): After generating, commit automatically. Turn off if you only want the message in Source Control for manual review.",
-          "order": 10
-        },
-        "wtfCommit.autoPush": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "**Automation — Auto Push** (default off): After auto-commit, push to the remote. Keep off for new users; enable when you want a full local generate → commit → push shortcut. ⚠️ Requires **Auto Commit**.",
-          "order": 11
-        },
-        "wtfCommit.smartStage": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "**Automation — Smart Stage**: When Auto Commit is on and nothing is staged, stage current changes before generation so later edits cannot sneak into the commit. Only relevant when Auto Commit is enabled.",
-          "order": 12
-        },
-        "wtfCommit.confirmBeforeCommit": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "**Safety — Confirm Before Commit** (default off): Extra dialog before auto-commit. Leave off for a smooth generate → commit flow; turn on if you want a final check.",
-          "order": 20
-        },
-        "wtfCommit.confirmAutoPush": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "**Safety — Confirm Before Push** (default on): Ask before pushing when Auto Push is enabled. New users should keep this on; experienced users can turn it off for a fully unattended generate → commit → push shortcut.",
-          "order": 21
-        },
-        "wtfCommit.warnOnTruncatedDiff": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show a warning when the diff is too large and only a summarized/partial diff is sent to the AI.",
-          "order": 22
-        },
-        "wtfCommit.prompt": {
-          "type": "string",
-          "default": "Generate a concise Git commit message from the provided diff.\n\nRules:\n1. Use Conventional Commits: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters; use imperative mood\n4. If a new file is added, mention it in the description (especially docs or features); output only the commit message",
-          "description": "System Prompt for AI (supports multi-line)",
-          "editPresentation": "multilineText",
-          "order": 30
-        },
-        "wtfCommit.language": {
-          "type": "string",
-          "enum": [
-            "English",
-            "简体中文",
-            "繁体中文",
-            "Japanese",
-            "Classical Chinese (文言文)",
-            "Custom"
-          ],
-          "default": "English",
-          "description": "Language for the generated commit message",
-          "order": 31
-        },
-        "wtfCommit.customLanguage": {
-          "type": "string",
-          "default": "English",
-          "description": "Enter your target language (only used when Language is set to 'Custom'). e.g. 'French', 'Emoji only', 'Cantonese'.",
-          "order": 32
-        },
-        "wtfCommit.provider": {
-          "type": "string",
-          "enum": [
-            "OpenAI",
-            "DeepSeek",
-            "MiMo",
-            "GLM",
-            "Z.AI",
-            "Gemini",
-            "OpenRouter",
-            "NVIDIA NIM",
-            "Custom"
-          ],
-          "default": "DeepSeek",
-          "description": "Select an AI provider. Default is DeepSeek (deepseek-v4-flash) — fast and low-cost for commit messages.",
-          "order": 33
-        },
-        "wtfCommit.baseUrl": {
-          "type": "string",
-          "default": "",
-          "description": "API Base URL for the Custom provider. Built-in providers use their defaults or Provider Overrides.",
-          "markdownDescription": "API Base URL for the **Custom** provider. Built-in providers use their own defaults unless configured in **Provider Overrides**. This prevents endpoints for incompatible API protocols from being mixed.",
-          "order": 34
-        },
-        "wtfCommit.model": {
-          "type": "string",
-          "default": "",
-          "description": "Model name for the Custom provider. Built-in providers use their defaults or Provider Overrides.",
-          "markdownDescription": "Model name for the **Custom** provider. Built-in providers use their own defaults unless configured in **Provider Overrides**.",
-          "order": 35
-        },
-        "wtfCommit.temperature": {
-          "type": "number",
-          "default": 1,
-          "minimum": 0,
-          "maximum": 2,
-          "description": "Temperature for AI generation. Lower values produce more deterministic results.",
-          "order": 36
-        },
-        "wtfCommit.providerOverrides": {
-          "type": "object",
-          "default": {},
-          "markdownDescription": "Custom Base URL and Model specifically for each AI provider. Overrides the global settings.\n\n**Example in `settings.json`:**\n```json\n{\n  \"DeepSeek\": {\n    \"baseUrl\": \"https://api.deepseek.com/beta\",\n    \"model\": \"deepseek-coder\"\n  },\n  \"Custom\": {\n    \"baseUrl\": \"https://my-custom-endpoint.com/v1\",\n    \"model\": \"my-custom-model\"\n  }\n}\n```",
-          "order": 37
-        },
-        "wtfCommit.ignorePaths": {
-          "type": "array",
-          "items": {
-            "type": "string"
+    "configuration": [
+      {
+        "title": "WTF Commit",
+        "properties": {
+          "wtfCommit.uiLanguage": {
+            "type": "string",
+            "enum": ["en", "zh"],
+            "default": "en",
+            "markdownDescription": "**Interface Language** — Language for the extension's own UI (buttons, prompts, notifications). Independent of the commit-message language. `en` = English, `zh` = 简体中文.",
+            "order": 0
           },
-          "default": [
-            "*.snap",
-            "*.min.js",
-            "*.min.css",
-            ".gen.ts",
-            "_generated"
-          ],
-          "markdownDescription": "Extra file or directory name patterns to exclude from the diff sent to the AI. Each entry is matched against a path segment (for a bare name like `generated`) or as a filename suffix (for an entry starting with `.` or `*`, e.g. `*.snap`, `.gen.ts`). Matches are case-insensitive. Built-in filters (lock files, build outputs, binaries, etc.) always apply. Set to `[]` to disable these defaults.",
-          "order": 40
-        },
-        "wtfCommit.maxDiffChars": {
-          "type": "number",
-          "default": 10000,
-          "minimum": 1000,
-          "description": "Maximum total characters of the diff sent to the AI. Larger diffs are summarized or truncated.",
-          "order": 41
-        },
-        "wtfCommit.maxUntrackedFiles": {
-          "type": "number",
-          "default": 30,
-          "minimum": 0,
-          "description": "Maximum number of untracked (new) files included in the diff. Set to 0 to disable untracked-file inclusion.",
-          "order": 42
+          "wtfCommit.commitMessageLanguage": {
+            "type": "string",
+            "enum": [
+              "English",
+              "简体中文",
+              "繁体中文",
+              "Japanese",
+              "Classical Chinese (文言文)",
+              "Custom"
+            ],
+            "default": "English",
+            "markdownDescription": "**Commit Message Language** — Language for the generated commit message (not the extension UI).",
+            "order": 1
+          },
+          "wtfCommit.customCommitMessageLanguage": {
+            "type": "string",
+            "default": "English",
+            "markdownDescription": "Used only when **Commit Message Language** is `Custom`. e.g. `French`, `Emoji only`, `Cantonese`.",
+            "order": 2
+          },
+          "wtfCommit.provider": {
+            "type": "string",
+            "enum": [
+              "OpenAI",
+              "DeepSeek",
+              "MiMo",
+              "GLM",
+              "Z.AI",
+              "Gemini",
+              "OpenRouter",
+              "NVIDIA NIM",
+              "Custom"
+            ],
+            "default": "DeepSeek",
+            "description": "Select an AI provider. Default is DeepSeek (deepseek-v4-flash) — fast and low-cost for commit messages.",
+            "order": 3
+          },
+          "wtfCommit.autoCommit": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "**Automation — Auto Commit** (default on): After generating, commit automatically. Turn off if you only want the message in Source Control for manual review.",
+            "order": 10
+          },
+          "wtfCommit.autoPush": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "**Automation — Auto Push** (default off): After auto-commit, push to the remote. Keep off for new users; enable when you want a full local generate → commit → push shortcut. ⚠️ Requires **Auto Commit**.",
+            "order": 11
+          },
+          "wtfCommit.smartStage": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "**Automation — Smart Stage**: When Auto Commit is on and nothing is staged, stage current changes before generation so later edits cannot sneak into the commit. Only relevant when Auto Commit is enabled.",
+            "order": 12
+          },
+          "wtfCommit.confirmBeforeCommit": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "**Safety — Confirm Before Commit** (default off): Extra dialog before auto-commit. Leave off for a smooth generate → commit flow; turn on if you want a final check.",
+            "order": 20
+          },
+          "wtfCommit.confirmAutoPush": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "**Safety — Confirm Before Push** (default on): Ask before pushing when Auto Push is enabled. New users should keep this on; experienced users can turn it off for a fully unattended generate → commit → push shortcut.",
+            "order": 21
+          }
+        }
+      },
+      {
+        "title": "WTF Commit › Advanced",
+        "properties": {
+          "wtfCommit.showStatusBarItem": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show the WTF Commit icon in the status bar.",
+            "order": 0
+          },
+          "wtfCommit.changelogPopup": {
+            "type": "boolean",
+            "default": false,
+            "description": "Show a notification with a View Changelog action after the extension is updated.",
+            "order": 1
+          },
+          "wtfCommit.warnOnTruncatedDiff": {
+            "type": "boolean",
+            "default": false,
+            "description": "Show a warning when the diff is too large and only a summarized/partial diff is sent to the AI.",
+            "order": 2
+          },
+          "wtfCommit.prompt": {
+            "type": "string",
+            "default": "Generate a concise Git commit message from the provided diff.\n\nRules:\n1. Use Conventional Commits: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters; use imperative mood\n4. If a new file is added, mention it in the description (especially docs or features); output only the commit message",
+            "description": "System Prompt for AI (supports multi-line)",
+            "editPresentation": "multilineText",
+            "order": 10
+          },
+          "wtfCommit.temperature": {
+            "type": "number",
+            "default": 1,
+            "minimum": 0,
+            "maximum": 2,
+            "description": "Temperature for AI generation. Lower values produce more deterministic results.",
+            "order": 11
+          },
+          "wtfCommit.baseUrl": {
+            "type": "string",
+            "default": "",
+            "description": "API Base URL for the Custom provider. Built-in providers use their defaults or Provider Overrides.",
+            "markdownDescription": "API Base URL for the **Custom** provider only. Built-in providers use their own defaults unless configured in **Provider Overrides**.",
+            "order": 20
+          },
+          "wtfCommit.model": {
+            "type": "string",
+            "default": "",
+            "description": "Model name for the Custom provider. Built-in providers use their defaults or Provider Overrides.",
+            "markdownDescription": "Model name for the **Custom** provider only. Built-in providers use their own defaults unless configured in **Provider Overrides**.",
+            "order": 21
+          },
+          "wtfCommit.providerOverrides": {
+            "type": "object",
+            "default": {},
+            "markdownDescription": "Per-provider Base URL and Model overrides (preferred way to customize built-in providers).\n\n**Example in `settings.json`:**\n```json\n{\n  \"DeepSeek\": {\n    \"baseUrl\": \"https://api.deepseek.com/beta\",\n    \"model\": \"deepseek-coder\"\n  }\n}\n```",
+            "order": 22
+          },
+          "wtfCommit.ignorePaths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "*.snap",
+              "*.min.js",
+              "*.min.css",
+              ".gen.ts",
+              "_generated"
+            ],
+            "markdownDescription": "Extra file or directory name patterns to exclude from the diff sent to the AI. Each entry is matched against a path segment (for a bare name like `generated`) or as a filename suffix (for an entry starting with `.` or `*`, e.g. `*.snap`, `.gen.ts`). Matches are case-insensitive. Built-in filters (lock files, build outputs, binaries, etc.) always apply. Set to `[]` to disable these defaults.",
+            "order": 30
+          },
+          "wtfCommit.maxDiffChars": {
+            "type": "number",
+            "default": 10000,
+            "minimum": 1000,
+            "description": "Maximum total characters of the diff sent to the AI. Larger diffs are summarized or truncated.",
+            "order": 31
+          },
+          "wtfCommit.maxUntrackedFiles": {
+            "type": "number",
+            "default": 30,
+            "minimum": 0,
+            "description": "Maximum number of untracked (new) files included in the diff. Set to 0 to disable untracked-file inclusion.",
+            "order": 32
+          }
         }
       }
-    }
+    ]
   },
   "scripts": {
     "compile": "tsc -p ./",

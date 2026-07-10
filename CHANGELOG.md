@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-07-10
 ### Changed
+- **Settings reorganization**: Split into **WTF Commit** (basics) and **WTF Commit › Advanced** so everyday options (provider, languages, auto commit/push, confirms) are not buried under prompt/diff/endpoint knobs.
+- **Clearer language naming**: `wtfCommit.language` → `wtfCommit.commitMessageLanguage`, `wtfCommit.customLanguage` → `wtfCommit.customCommitMessageLanguage` (legacy keys still read; migrated on activate).
+- **Single override path**: Stopped reading legacy `wtfCommit.{Provider}.baseUrl/model`; values are migrated into `providerOverrides` on activate.
 - **Install docs**: README (EN/ZH) lists **VS Code Marketplace** (`CoderTesla.wtf-commit`) with auto-update, plus Open VSX for Cursor; Marketplace badges added; VSIX kept as optional offline path.
 - **Dual-market release**: `publish:vscode` / `release:all` package with temporary publisher `CoderTesla` for Microsoft while keeping `codertesla` for Open VSX (`scripts/run-with-publisher.mjs`).
 

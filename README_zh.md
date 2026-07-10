@@ -64,11 +64,11 @@
 
 > 只想生成信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.13.0）
+## 🆕 最新更新（v1.14.0）
 
-- **默认服务商 DeepSeek** — 首次安装使用 `deepseek-v4-flash`（提交信息场景又快又便宜）。
-- **更顺手的默认流程**：默认开启 Auto Commit、关闭提交前确认；Auto Push 仍默认关闭；推送前确认默认开启。
-- **上手文档更清晰**：配置一次 AI + 日常快捷键（含改成连按两次 `Cmd+G` 等说明）。
+- **设置更清爽**：日常选项在 **WTF Commit**；Prompt、端点、diff 限制移到 **WTF Commit › Advanced**。
+- **语言命名更清晰**：**Commit Message Language**（与 UI Language 区分）；旧的 `language` / `customLanguage` 会自动迁移。
+- **端点覆盖统一**：内置服务商只走 **Provider Overrides**（遗留的 per-provider key 启动时迁移）。
 
 > 更早版本的更新说明请查看 [CHANGELOG](CHANGELOG.md)。
 
@@ -88,33 +88,38 @@
 ## 🛠️ 进阶教程
 
 ### 1. 更多设置项
-您可以进入 VS Code **设置** (`Cmd+,`)，搜索 `WTF Commit` 来深度定制：
+进入 VS Code **设置** (`Cmd+,`)，搜索 `WTF Commit`。设置分为 **WTF Commit**（基础）与 **WTF Commit › Advanced**（高级）。
+
+**基础** — 大多数人只需要这些：
 
 | 设置项目 | 描述 |
 |---------|-------------|
-| **UI Language** | 插件自身界面语言（`en` / `zh`），与提交信息语言相互独立。 |
-| **Show Status Bar Item** | 在状态栏显示紧凑的 WTF Commit 图标。 |
-| **Changelog Popup** | 更新后显示更新日志通知（默认关闭）。 |
+| **UI Language** | 插件界面语言（`en` / `zh`），与提交信息语言相互独立。 |
+| **Commit Message Language** | 生成的提交信息语言。 |
+| **Custom Commit Message Language** | 仅当 Commit Message Language 为 `Custom` 时生效。 |
+| **Provider** | AI 服务商（默认 DeepSeek）。 |
 | **Auto Commit** | **默认开启** — 生成后自动 commit。关闭则只写入 SCM，自行提交。 |
 | **Auto Push** | **默认关闭** — 开启后自动推送。需同时开启 Auto Commit。 |
 | **Smart Stage** | Auto Commit 开启且暂存区为空时，生成前自动 stage。 |
 | **Confirm Before Commit** | **默认关闭** — 自动提交前不再弹窗；需要最终确认时再打开。 |
 | **Confirm Before Push** | **默认开启** — 自动推送前询问；老手可关掉以做到完全一键。 |
-| **Warn On Truncated Diff** | diff 过大而只发送部分内容时弹出提醒（默认关闭）。 |
-| **Prompt** | 自定义 AI 的角色和生成规则。 |
+
+**高级** — Prompt、温度、Custom 的 Base URL/Model、Provider Overrides、diff 限制、状态栏 / 更新日志开关等。
 
 ### 2. 自定义模型与端点 (Custom Model)
-除了内置的服务商，您还可以通过 **Provider: Custom** 或直接修改 **Model** / **Base URL** 来使用任何 OpenAI 兼容的模型（如本地 Ollama 运行的模型）：
+使用任意 OpenAI 兼容模型（如本地 Ollama）：
 
 1. 在设置中将 **Provider** 设为 `Custom`。
-2. 填写 **Base URL** (例如 `http://localhost:11434/v1`)。
-3. 填写 **Model** (例如 `llama3`)。
+2. 在 **WTF Commit › Advanced** 中填写 **Base URL**（例如 `http://localhost:11434/v1`）。
+3. 填写 **Model**（例如 `llama3`）。
+
+若要覆盖内置服务商的端点/模型，请使用 **Provider Overrides**（不要改全局 Base URL / Model）。
 
 ### 3. 自定义提交语言
 如果您想让 AI 使用特定的语言（如粤语、法语或仅使用 Emoji）生成提交信息：
 
-1. 在设置中将 **Language** 改为 `Custom`。
-2. 在 **Custom Language** 中输入您想要的语言名称或规则（例如 `Emoji only`）。
+1. 将 **Commit Message Language** 设为 `Custom`。
+2. 在 **Custom Commit Message Language** 中输入语言名称或规则（例如 `Emoji only`）。
 
 ---
 
@@ -125,7 +130,7 @@
 | 术语 | 含义 |
 |------|------|
 | **默认服务商** | **DeepSeek** — 首次安装或未改过设置中的 **Provider** 时使用。 |
-| **服务商默认** | 每个内置 Provider 有各自的默认 **Model** 与 **Base URL**（见下表）。仅在该 Provider **被选中**且 **Model** / **Base URL** 留空时生效。 |
+| **服务商默认** | 每个内置 Provider 有各自的默认 **Model** 与 **Base URL**（见下表）。仅在该 Provider **被选中**且未设置 **Provider Overrides**（或 Custom 的 Base URL/Model）时生效。 |
 | **使用推荐** | 针对提交信息场景的编辑推荐（见[如何选型](#提交信息场景如何选型)）— 现与默认服务商一致时，优先用 DeepSeek。 |
 
 **各服务商默认模型** — 当 **Base URL** 和 **Model** 留空时：

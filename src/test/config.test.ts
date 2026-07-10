@@ -1,6 +1,7 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
 import { resolveProviderConfig } from '../provider-config';
+import { readProviderOverride, resolveCommitMessageLanguage } from '../settings-resolve';
 
 describe('resolveProviderConfig', () => {
   it('should ignore Custom global values for built-in providers', () => {
@@ -50,5 +51,64 @@ describe('resolveProviderConfig', () => {
       () => resolveProviderConfig({ provider: 'Custom', customBaseUrl: 'http://localhost:11434/v1' }),
       /Model is missing/
     );
+  });
+});
+
+describe('resolveCommitMessageLanguage', () => {
+  it('uses the new setting when present', () => {
+    assert.strictEqual(
+      resolveCommitMessageLanguage({ commitMessageLanguage: '简体中文' }),
+      '简体中文'
+    );
+  });
+
+  it('falls back to legacy language', () => {
+    assert.strictEqual(
+      resolveCommitMessageLanguage({ legacyLanguage: 'Japanese' }),
+      'Japanese'
+    );
+  });
+
+  it('expands Custom via the new custom field', () => {
+    assert.strictEqual(
+      resolveCommitMessageLanguage({
+        commitMessageLanguage: 'Custom',
+        customCommitMessageLanguage: 'French',
+      }),
+      'French'
+    );
+  });
+
+  it('expands Custom via legacy customLanguage', () => {
+    assert.strictEqual(
+      resolveCommitMessageLanguage({
+        legacyLanguage: 'Custom',
+        legacyCustomLanguage: 'Emoji only',
+      }),
+      'Emoji only'
+    );
+  });
+
+  it('defaults to English', () => {
+    assert.strictEqual(resolveCommitMessageLanguage({}), 'English');
+  });
+});
+
+describe('readProviderOverride', () => {
+  it('returns trimmed override fields', () => {
+    assert.deepStrictEqual(
+      readProviderOverride(
+        { DeepSeek: { baseUrl: ' https://proxy.example/ ', model: ' deepseek-coder ' } },
+        'DeepSeek'
+      ),
+      { baseUrl: 'https://proxy.example/', model: 'deepseek-coder' }
+    );
+  });
+
+  it('returns empty fields when missing', () => {
+    assert.deepStrictEqual(readProviderOverride({}, 'OpenAI'), {
+      baseUrl: undefined,
+      model: undefined,
+    });
   });
 });
