@@ -1,8 +1,8 @@
 {
   "name": "wtf-commit",
   "displayName": "WTF Commit",
-  "description": "AI-powered Git commit message generator",
-  "version": "1.12.0",
+  "description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, Gemini, OpenAI, and more.",
+  "version": "1.13.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -10,11 +10,32 @@
     "type": "git",
     "url": "https://github.com/codertesla/wtf-commit"
   },
+  "homepage": "https://codertesla.github.io/wtf-commit/",
+  "bugs": {
+    "url": "https://github.com/codertesla/wtf-commit/issues"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "commit message",
+    "ai",
+    "llm",
+    "conventional commits",
+    "scm",
+    "source control",
+    "deepseek",
+    "gemini",
+    "openai",
+    "cursor",
+    "changelog",
+    "auto commit"
+  ],
   "engines": {
     "vscode": "^1.75.0"
   },
   "categories": [
     "SCM Providers",
+    "Machine Learning",
     "Other"
   ],
   "main": "./out/extension.js",
@@ -79,32 +100,32 @@
         },
         "wtfCommit.autoCommit": {
           "type": "boolean",
-          "default": false,
-          "markdownDescription": "**Automation — Auto Commit**: After generating the message, commit automatically without you having to click. Off = message is placed in the Source Control input box for you to review and commit manually (recommended for most users).",
+          "default": true,
+          "markdownDescription": "**Automation — Auto Commit** (default on): After generating, commit automatically. Turn off if you only want the message in Source Control for manual review.",
           "order": 10
         },
         "wtfCommit.autoPush": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "**Automation — Auto Push**: After the auto-commit, push to the remote automatically. ⚠️ Has no effect unless **Auto Commit** is also enabled.",
+          "markdownDescription": "**Automation — Auto Push** (default off): After auto-commit, push to the remote. Keep off for new users; enable when you want a full local generate → commit → push shortcut. ⚠️ Requires **Auto Commit**.",
           "order": 11
         },
         "wtfCommit.smartStage": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "**Automation — Smart Stage**: When Auto Commit is on and nothing is staged, stage the current changes before generation so later edits cannot sneak into the commit. Only relevant when Auto Commit is enabled.",
+          "markdownDescription": "**Automation — Smart Stage**: When Auto Commit is on and nothing is staged, stage current changes before generation so later edits cannot sneak into the commit. Only relevant when Auto Commit is enabled.",
           "order": 12
         },
         "wtfCommit.confirmBeforeCommit": {
           "type": "boolean",
-          "default": true,
-          "markdownDescription": "**Safety — Confirm Before Commit**: Show a confirmation dialog before the auto-commit happens. Only relevant when Auto Commit is enabled.",
+          "default": false,
+          "markdownDescription": "**Safety — Confirm Before Commit** (default off): Extra dialog before auto-commit. Leave off for a smooth generate → commit flow; turn on if you want a final check.",
           "order": 20
         },
         "wtfCommit.confirmAutoPush": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "**Safety — Confirm Before Push**: Show an extra confirmation before pushing to the remote. A safety net for one-keystroke auto-push flows. Only relevant when both Auto Commit and Auto Push are enabled.",
+          "markdownDescription": "**Safety — Confirm Before Push** (default on): Ask before pushing when Auto Push is enabled. New users should keep this on; experienced users can turn it off for a fully unattended generate → commit → push shortcut.",
           "order": 21
         },
         "wtfCommit.warnOnTruncatedDiff": {
@@ -153,8 +174,8 @@
             "NVIDIA NIM",
             "Custom"
           ],
-          "default": "OpenAI",
-          "description": "Select an AI provider",
+          "default": "DeepSeek",
+          "description": "Select an AI provider. Default is DeepSeek (deepseek-v4-flash) — fast and low-cost for commit messages.",
           "order": 33
         },
         "wtfCommit.baseUrl": {

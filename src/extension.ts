@@ -88,7 +88,7 @@ function asUiLanguageFromConfig(): UiLanguage {
 async function warnIfAutoPushWithoutAutoCommit(): Promise<void> {
   const cfg = vscode.workspace.getConfiguration('wtfCommit');
   const autoPush = cfg.get<boolean>('autoPush', false);
-  const autoCommit = cfg.get<boolean>('autoCommit', false);
+  const autoCommit = cfg.get<boolean>('autoCommit', true);
   if (!autoPush || autoCommit) {
     return;
   }

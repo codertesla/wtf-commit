@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-07-10
+### Changed
+- **Default provider**: **DeepSeek** (`deepseek-v4-flash`) instead of OpenAI — better default for fast, low-cost commit messages.
+- **Automation defaults**: **Auto Commit on**, **Confirm Before Commit off** for a smooth generate → commit shortcut; **Auto Push off** and **Confirm Before Push on** so new users never surprise-push (power users can enable Auto Push and optionally disable push confirm).
+- **Growth-oriented docs**: Stronger marketplace description and keywords; README (EN/ZH) two-phase onboarding (configure once / daily shortcut) and feedback CTA. Demo GIF still pending.
+
 ## [1.12.0] - 2026-07-10
 ### Added
 - **Working-tree confirmation**: When nothing is staged and Auto Commit is off, confirm before generating from the working tree (with optional “Don’t Remind Me”).

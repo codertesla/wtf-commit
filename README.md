@@ -11,40 +11,70 @@ English | [简体中文](README_zh.md)
 
 Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) | [Website](https://codertesla.github.io/wtf-commit/)
 
-WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
+**One shortcut to generate your commit message.** WTF Commit reads your git diff and fills the Source Control box with a clear Conventional Commit — with **your own API key**, not a locked-in vendor.
 
-## 🆕 Latest (v1.12.0)
+Works in **Cursor**, **VSCodium**, and other Open VSX–compatible editors (and VS Code when the extension is installed from Open VSX / VSIX). **Actively maintained** (MIT, free).
 
-- **Working-tree confirmation**: When nothing is staged and Auto Commit is off, confirm before generating from the working tree.
-- **Lightweight staged snapshot**: Auto Commit safety checks use an index signature + content hash.
-- **Cleaner stream preview**: Live SCM preview strips complete markdown fences and matches final normalize.
-- **Clearer internals**: Generate flow split into focused modules with unit tests for diff-source planning.
+| | |
+|:--|:--|
+| **Default provider** | **DeepSeek** (`deepseek-v4-flash`) — fast and cheap for commit messages |
+| **Setup once** | Paste an API key for your provider (~1 minute) |
+| **Default flow** | Generate → **auto commit** (no extra confirm). **Auto Push stays off** until you enable it |
+| **Power users** | Turn on Auto Push (+ optionally turn off Confirm Before Push) for generate → commit → push in one shortcut |
+
+Onboarding is intentionally **two phases**. You only configure AI once; after that it should feel like a muscle-memory shortcut.
+
+## ① Configure AI (once)
+
+You need a provider and a key. Everything else can stay on defaults.
+
+1. **Install** — Extensions → search **`WTF Commit`** (Open VSX) → Install.
+2. **Set API Key** — Command Palette → **`WTF Commit: Set API Key`**.
+3. **Choose a provider** in the picker — the extension default is **DeepSeek** (also great: **Gemini**). Leave **Model** empty for the built-in default.
+4. **Paste the key**. If you picked someone other than DeepSeek, choose **Switch Provider** when prompted so the active provider matches the key.
+
+Need a key? [DeepSeek](https://platform.deepseek.com/api_keys) · [Gemini](https://aistudio.google.com/api-keys) · more in [Supported providers](#ℹ️-supported-providers--models).
+
+> You can also set **Provider** under Settings → WTF Commit, then run **Set API Key** for that provider. Same result.
+
+## ② Daily use (every commit)
+
+1. Make your code changes (stage when you can; with Auto Commit + Smart Stage, unstaged work can be staged for you).
+2. Press the generate shortcut — the message streams in, then **commits by default** (no extra “confirm commit” dialog).
+3. Push yourself when ready — **Auto Push is off by default** so new users never surprise-push.
+
+**Default shortcut:** `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
+
+**Make it yours** — the binding is fully customizable. A popular Cursor-style habit is a **double press** of `Cmd+G` / `Ctrl+G` (chord):
+
+1. Open Keyboard Shortcuts (`Cmd+K Cmd+S` / `Ctrl+K Ctrl+S`).
+2. Search **`WTF Commit: Generate`**.
+3. Double-click the keybinding → press **`Cmd+G` twice** (or `Ctrl+G` twice on Windows/Linux) → Enter.
+
+**One-keystroke power flow (optional):** Settings → enable **Auto Push**. Leave **Confirm Before Push** on until you trust it; turn that confirm off only when you want generate → commit → push with zero dialogs.
+
+Other triggers: ✨ on the Source Control title bar, or Command Palette → **`WTF Commit: Generate`**.
+
+> Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
+
+## 🆕 Latest (v1.13.0)
+
+- **Default provider: DeepSeek** — first install uses `deepseek-v4-flash` (fast, low-cost commit messages).
+- **Smoother defaults**: Auto Commit on, no confirm-before-commit dialog; Auto Push stays off; Confirm Before Push stays on for safety.
+- **Clearer onboarding docs**: configure AI once, then daily shortcut (including rebinding tips like double `Cmd+G`).
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
 ## 🚀 Features
 
-- **Multi-lingual Support**: Preset support for English, Chinese, Japanese, Classical Chinese, and **Custom** strings.
-- **Conventional Commits**: Automatically follows conventional commit standards (feat, fix, docs, etc.).
-- **Smart Diffing**: Prioritizes staged changes, confirms mixed staged/unstaged states, and (when Auto Commit is off) confirms before using unstaged working tree changes; strips low-value diff noise before generation.
-- **Intent-Aware Generation**: Reuses any text already typed into the SCM input box as a zero-config generation hint.
-- **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
-- **Interactive Tuning**: Auto-commit flows support real-time message editing without blocking Git staging.
-- **Lightweight Recovery**: Applies local Conventional Commits fixes when possible, then offers an inline `AI Repair` action when the title still needs a quick fix.
-- **Reliable Request Flow**: Built-in timeout + automatic retry with categorized API error handling, with extended reasoning for DeepSeek and other thinking models.
-- **Streaming Generation**: Real-time streaming preview in the progress notification while the commit message is generated.
-- **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
-- **Customizable**: Fully adjustable system prompt and Base URL for custom LLM endpoints.
-
----
-
-## ⏱️ Quick Start Tutorial
-
-Get started with AI commits in 3 simple steps:
-
-1. **Install**: Search for `WTF Commit` in the Open VSX Extensions marketplace and install.
-2. **Set API Key**: Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows), type **`WTF Commit: Set API Key`**, select your provider, and paste your key.
-3. **Generate**: Press **`Cmd+Alt+G`** (Mac) or **`Ctrl+Alt+G`** (Windows). The extension will automatically generate a message based on your code diff.
+- **Conventional Commits** — `feat` / `fix` / `docs` / … with optional local format fix + **AI Repair**.
+- **Smart diffing** — Prefers staged changes; confirms mixed or working-tree-only cases so the message matches what you intend to commit.
+- **Intent-aware** — Text already in the SCM input is used as a generation hint (no extra prompt UI).
+- **Streaming preview** — Watch the message appear live while the model runs.
+- **Auto Commit & Push** — Optional one-keystroke pipeline with confirmations.
+- **Multi-language messages** — English, 简体/繁体中文, Japanese, Classical Chinese, or **Custom**.
+- **Bring your own endpoint** — Built-in providers plus **Custom** (Ollama, proxies, etc.).
+- **Keyboard shortcut** — Default `Cmd+Alt+G` / `Ctrl+Alt+G`; rebind freely (e.g. double `Cmd+G`).
 
 ---
 
@@ -58,11 +88,11 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit` to customize the
 | **UI Language** | Language for the extension's own UI (`en` / `zh`), independent of the commit-message language. |
 | **Show Status Bar Item** | Show the compact WTF Commit icon in the status bar. |
 | **Changelog Popup** | Show a notification after the extension is updated (off by default). |
-| **Auto Commit** | Commit automatically after generating. Off = message goes to the Source Control box for manual review (recommended for most users). |
-| **Auto Push** | Push automatically after the auto-commit. ⚠️ No effect unless Auto Commit is on. |
-| **Smart Stage** | With Auto Commit, stage current changes before generation so later edits cannot sneak in. |
-| **Confirm Before Commit** | Confirm before the auto-commit (only when Auto Commit is on). |
-| **Confirm Before Push** | Extra confirmation before pushing (only when Auto Commit + Auto Push are on). |
+| **Auto Commit** | **Default on** — commit after generate. Off = message only in Source Control. |
+| **Auto Push** | **Default off** — enable for push after commit. Requires Auto Commit. |
+| **Smart Stage** | With Auto Commit, stage current changes before generation when nothing is staged. |
+| **Confirm Before Commit** | **Default off** — no modal before auto-commit. Turn on for a final check. |
+| **Confirm Before Push** | **Default on** — ask before auto-push. Power users can disable for a full hands-off shortcut. |
 | **Warn On Truncated Diff** | Warn when the diff is large and only a partial diff is sent to the AI (off by default). |
 | **Prompt** | Customize the AI's persona and generation rules. |
 
@@ -87,7 +117,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 
 | Term | Meaning |
 |------|---------|
-| **Default Provider** | **OpenAI** — used on first install until you change **Provider** in settings. |
+| **Default Provider** | **DeepSeek** — used on first install until you change **Provider** in settings. |
 | **Provider default** | Each built-in provider has its own default **Model** and **Base URL** (table below). Applies only when that provider is **selected** and **Model** / **Base URL** are left empty. |
 | **Our recommendation** | Editorial picks for commit messages (see [Choosing a model](#choosing-a-model-for-commit-messages)) — **not** the extension default provider. |
 
@@ -131,10 +161,10 @@ The list below is **our recommendation** — change **Provider** in settings to 
 | Provider | Model | Input | Output | ~Cost / generation† | Notes |
 |----------|-------|------:|-------:|--------------------:|-------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | Zero-cost trials; quality/latency vary |
-| **OpenAI** | `gpt-5-nano` | $0.05 | $0.40 | ~$0.0003 | **Default Provider** default model |
+| **OpenAI** | `gpt-5-nano` | $0.05 | $0.40 | ~$0.0003 | OpenAI provider default |
 | **Z.AI** | `glm-4.7-flashx` | $0.07 | $0.40 | ~$0.0004 | **Z.AI** provider default; often slower |
 | **GLM** | `glm-4.7-flashx` | ¥0.5 (~$0.07) | ¥3 (~$0.42) | ~$0.0004 | **GLM** provider default; often slower |
-| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Recommended** — fast, cheap, great quality |
+| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Default Provider** — fast, cheap, great quality |
 | **MiMo** | `mimo-v2.5` | $0.14 | $0.28 | ~$0.0007 | Same price tier as DeepSeek; OpenAI-compatible |
 | **Gemini** | `gemini-3.1-flash-lite` | $0.25 | $1.50 | ~$0.0015 | **Recommended** — fast; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
 | **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | $0 | $0 | ~$0 | Free development endpoint; rate limits and availability vary |
@@ -145,7 +175,7 @@ The list below is **our recommendation** — change **Provider** in settings to 
 
 **Our recommendation** (speed + value) — set **Provider** in settings to match your pick:
 
-1. **DeepSeek V4 Flash** — set **Provider** to **DeepSeek**; leave **Model** empty → `deepseek-v4-flash`. **Best overall**: fast, cheap, high quality. Thinking mode is disabled automatically.
+1. **DeepSeek V4 Flash** — **Default Provider**; leave **Model** empty → `deepseek-v4-flash`. **Best overall**: fast, cheap, high quality. Thinking mode is disabled automatically.
 2. **Gemini 3.1 Flash Lite** — set **Provider** to **Gemini**; leave **Model** empty → `gemini-3.1-flash-lite`. **Also excellent**: fast with a generous free tier; uses `thinking_level: minimal`.
 3. **MiMo V2.5** — set **Provider** to **MiMo**; leave **Model** empty → `mimo-v2.5`. Same USD price band as DeepSeek.
 4. **GLM / Z.AI** — set **Provider** to **GLM** (China) or **Z.AI** (international); leave **Model** empty → `glm-4.7-flashx`. Works reliably but is often **slower** than DeepSeek or Gemini Flash Lite. Requires a paid balance.
@@ -163,19 +193,14 @@ Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pri
 > [!IMPORTANT]
 > **Claude Support**: Native Claude format is not supported yet. Please use a proxy service that provides an OpenAI-compatible endpoint.
 
-## 🕹️ Other Ways to Trigger
+## 🕹️ Other entry points
 
-- **Source Control Icon**: Click the ✨ icon at the top of the Git panel.
-- **Command Palette**: Run `WTF Commit: Generate`.
-- **Command Palette**: Run `WTF Commit: Set API Key` to configure or rotate your API key.
-- **Chorded Keybinding**: You can bind a double-press like `Cmd+G` `Cmd+G`. See `💡 Pro Tips`.
+- **Source Control** title bar ✨ · Command Palette **`WTF Commit: Generate`** · rebindable shortcut (see [Daily use](#②-daily-use-every-commit)).
+- Rotate keys anytime with **`WTF Commit: Set API Key`**.
 
-## 💡 Pro Tips
+## 💬 Feedback
 
-**How to set a chorded keybinding?**
-1. Open Keyboard Shortcuts (`Cmd+K Cmd+S`).
-2. Search for `WTF Commit: Generate`.
-3. Double-click and press `Cmd+G` twice.
+Using WTF Commit and finding it useful? A [GitHub star](https://github.com/codertesla/wtf-commit), an [Open VSX review](https://open-vsx.org/extension/codertesla/wtf-commit), or a short [issue](https://github.com/codertesla/wtf-commit/issues) (bugs or ideas) all help more people discover it — and help us keep improving.
 
 ## 📄 License
 MIT License.
