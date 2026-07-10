@@ -1,6 +1,6 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
-import { createStreamingSink, maskApiKey, restoreIntent } from '../ui';
+import { createStreamingSink, maskApiKey, restoreIntent, restoreIntentOnAbort } from '../ui';
 
 describe('maskApiKey', () => {
   it('should mask the middle of a long key', () => {
@@ -99,5 +99,23 @@ describe('restoreIntent', () => {
 
   it('should be a no-op when the input box is undefined', () => {
     assert.doesNotThrow(() => restoreIntent(undefined, 'fix bug'));
+  });
+});
+
+describe('restoreIntentOnAbort', () => {
+  it('should replace a partial stream with the original intent', () => {
+    const inputBox = { value: 'feat: add log' };
+    restoreIntentOnAbort(inputBox, 'fix auth bug');
+    assert.strictEqual(inputBox.value, 'fix auth bug');
+  });
+
+  it('should clear the input box when intent was empty', () => {
+    const inputBox = { value: 'partial stream junk' };
+    restoreIntentOnAbort(inputBox, '');
+    assert.strictEqual(inputBox.value, '');
+  });
+
+  it('should be a no-op when the input box is undefined', () => {
+    assert.doesNotThrow(() => restoreIntentOnAbort(undefined, 'fix bug'));
   });
 });

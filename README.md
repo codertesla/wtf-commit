@@ -15,11 +15,12 @@ Links: [GitHub](https://github.com/codertesla/wtf-commit) | [Open VSX](https://o
 
 WTF Commit is a minimalist VS Code extension that uses AI to generate concise and meaningful Git commit messages from your staged changes (or working tree changes).
 
-## 🆕 Latest (v1.11.4)
+## 🆕 Latest (v1.11.5)
 
-- **Stronger streaming fallback**: Empty streams retry without streaming using a fresh remaining timeout budget.
-- **Consistent response parsing**: Non-streaming responses accept the same alternate OpenAI-compatible field shapes as streaming.
-- **Cleaner stream preview**: Unclosed `<think>` markup is held back from the live SCM preview.
+- **Generate single-flight lock**: Concurrent Generate triggers are ignored while a run is already in progress.
+- **Local Conventional Commits repair**: Spacing, full-width colon, and over-long subject fixes run before the AI Repair dialog.
+- **Cancel / empty restore**: Cancelling generation clears partial stream text and restores your SCM intent.
+- **Large-diff hard cap**: Summarized diffs stay within `maxDiffChars`; AI Repair also receives capped diff context.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -31,7 +32,7 @@ WTF Commit is a minimalist VS Code extension that uses AI to generate concise an
 - **Intent-Aware Generation**: Reuses any text already typed into the SCM input box as a zero-config generation hint.
 - **Auto Commit & Push**: Full automation pipeline — generate, commit, and push in one keystroke.
 - **Interactive Tuning**: Auto-commit flows support real-time message editing without blocking Git staging.
-- **Lightweight Recovery**: Offers an inline `AI Repair` action when the generated title format needs a quick fix.
+- **Lightweight Recovery**: Applies local Conventional Commits fixes when possible, then offers an inline `AI Repair` action when the title still needs a quick fix.
 - **Reliable Request Flow**: Built-in timeout + automatic retry with categorized API error handling, with extended reasoning for DeepSeek and other thinking models.
 - **Streaming Generation**: Real-time streaming preview in the progress notification while the commit message is generated.
 - **Keyboard Shortcut**: Default binding `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).

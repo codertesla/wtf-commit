@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.5] - 2026-07-10
+### Added
+- **Generate single-flight lock**: Concurrent Generate triggers are ignored while a run is in progress.
+- **Local Conventional Commits repair**: Spacing, full-width colon, and over-long subject fixes run before the AI Repair dialog.
+- **Repair diff context**: AI Repair prompts include a capped copy of the (already filtered) diff.
+
+### Fixed
+- **Cancel / empty generation**: SCM input box is force-restored to the original intent instead of leaving a partial stream.
+- **Large-diff budget**: Summarized diffs are hard-capped to `maxDiffChars`.
+- **Smart Stage off**: Missing staged changes shows a localized, actionable error instead of a generic English exception.
+
 ## [1.11.4] - 2026-07-09
 ### Fixed
 - **Fallback timeout budget**: Non-streaming fallback after an empty stream now uses a fresh AbortController with the remaining once-timeout, instead of sharing a possibly already-expired timer.

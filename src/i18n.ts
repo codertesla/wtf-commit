@@ -2,6 +2,8 @@ export type UiLanguage = 'en' | 'zh';
 
 export type MessageKey =
   | 'statusBarButtonTooltip'
+  | 'generateInProgress'
+  | 'noStagedChangesSmartStageOff'
   | 'noChangesDetected'
   | 'noDiffContent'
   | 'diffTruncatedWarning'
@@ -75,6 +77,9 @@ type Dictionary = Record<MessageKey, string>;
 
 const en: Dictionary = {
   statusBarButtonTooltip: 'WTF Commit: Generate commit message',
+  generateInProgress: 'Commit message generation already in progress.',
+  noStagedChangesSmartStageOff:
+    'No staged changes. Stage files first, or enable Smart Stage.',
   noChangesDetected: 'No changes detected in working tree or staging area.',
   noDiffContent: 'No diff content found.',
   diffTruncatedWarning:
@@ -156,6 +161,8 @@ const en: Dictionary = {
 
 const zh: Dictionary = {
   statusBarButtonTooltip: 'WTF Commit：生成提交信息',
+  generateInProgress: '正在生成提交信息，请稍候。',
+  noStagedChangesSmartStageOff: '没有已暂存的变更。请先暂存文件，或开启 Smart Stage。',
   noChangesDetected: '工作区与暂存区均无变更。',
   noDiffContent: '未找到 diff 内容。',
   diffTruncatedWarning: 'diff 较大，仅向 AI 发送了摘要/部分 diff，提交信息可能不够精确。',

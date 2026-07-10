@@ -71,3 +71,18 @@ export function restoreIntent(inputBox: { value: string } | undefined, intent: s
     inputBox.value = intent;
   }
 }
+
+/**
+ * Force-restores the pre-generation intent after cancel or empty generation.
+ * Stream previews often leave a partial message in the input box; those must
+ * be cleared even when the original intent was empty.
+ */
+export function restoreIntentOnAbort(
+  inputBox: { value: string } | undefined,
+  intent: string
+): void {
+  if (!inputBox) {
+    return;
+  }
+  inputBox.value = intent;
+}

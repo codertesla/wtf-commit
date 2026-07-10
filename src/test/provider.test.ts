@@ -2,13 +2,45 @@ import * as assert from 'node:assert';
 import * as http from 'node:http';
 import { describe, it } from 'mocha';
 import type * as vscode from 'vscode';
-import { buildProviderEndpoint, callLLM, extractResponseContent } from '../llm/provider';
+import {
+  buildProviderEndpoint,
+  buildRepairPrompt,
+  callLLM,
+  extractResponseContent,
+  REPAIR_DIFF_MAX_CHARS,
+} from '../llm/provider';
 import { RequestFailure } from '../types';
 
 const cancellationToken = {
   isCancellationRequested: false,
   onCancellationRequested: () => ({ dispose: () => undefined }),
 } as unknown as vscode.CancellationToken;
+
+describe('buildRepairPrompt', () => {
+  it('should include validation issue and message', () => {
+    const prompt = buildRepairPrompt('feat add login', 'Missing colon after type.');
+    assert.ok(prompt.includes('feat add login'));
+    assert.ok(prompt.includes('Missing colon after type.'));
+  });
+
+  it('should append capped diff context when provided', () => {
+    const prompt = buildRepairPrompt('feat: add login', 'too long', 'diff --git a/a.ts b/a.ts\n+hello');
+    assert.ok(prompt.includes('Git diff context'));
+    assert.ok(prompt.includes('diff --git a/a.ts b/a.ts'));
+  });
+
+  it('should truncate oversized diff context', () => {
+    const hugeDiff = 'x'.repeat(REPAIR_DIFF_MAX_CHARS + 500);
+    const prompt = buildRepairPrompt('feat: x', 'length', hugeDiff);
+    assert.ok(prompt.includes('diff truncated for repair'));
+    assert.ok(!prompt.includes(hugeDiff));
+  });
+
+  it('should omit the diff section when diff is empty', () => {
+    const prompt = buildRepairPrompt('feat: add login', 'format', '   ');
+    assert.ok(!prompt.includes('Git diff context'));
+  });
+});
 
 describe('buildProviderEndpoint', () => {
   it('should append /chat/completions to base URL', () => {

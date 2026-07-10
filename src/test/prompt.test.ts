@@ -1,6 +1,12 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
-import { normalizeCommitMessage, looksLikeConventionalCommit, findConventionalCommitIssues } from '../prompt';
+import {
+  normalizeCommitMessage,
+  looksLikeConventionalCommit,
+  findConventionalCommitIssues,
+  tryLocalConventionalRepair,
+  CONVENTIONAL_SUBJECT_MAX_LENGTH,
+} from '../prompt';
 
 describe('normalizeCommitMessage', () => {
   it('should trim whitespace', () => {
@@ -149,5 +155,45 @@ describe('findConventionalCommitIssues', () => {
     const longRevert = `revert: ${'x'.repeat(80)}`;
     const issues = findConventionalCommitIssues(longRevert);
     assert.ok(issues.some((issue) => issue.field === 'subject_length'));
+  });
+});
+
+describe('tryLocalConventionalRepair', () => {
+  it('should normalize a full-width colon', () => {
+    const repaired = tryLocalConventionalRepair('feat：add login page');
+    assert.strictEqual(repaired, 'feat: add login page');
+  });
+
+  it('should insert a space after a missing colon separator space', () => {
+    const repaired = tryLocalConventionalRepair('feat:add login page');
+    assert.strictEqual(repaired, 'feat: add login page');
+  });
+
+  it('should preserve scope and breaking marker', () => {
+    const repaired = tryLocalConventionalRepair('feat(api)!:change response format');
+    assert.strictEqual(repaired, 'feat(api)!: change response format');
+  });
+
+  it('should shorten an over-long subject under the max length', () => {
+    const longSubject = `feat: ${'word '.repeat(30).trim()}`;
+    assert.ok(longSubject.length > CONVENTIONAL_SUBJECT_MAX_LENGTH);
+    const repaired = tryLocalConventionalRepair(longSubject);
+    assert.ok(repaired);
+    assert.ok(repaired!.length <= CONVENTIONAL_SUBJECT_MAX_LENGTH);
+    assert.ok(repaired!.startsWith('feat: '));
+    assert.deepStrictEqual(findConventionalCommitIssues(repaired!), []);
+  });
+
+  it('should return undefined for free-form subjects without a type', () => {
+    assert.strictEqual(tryLocalConventionalRepair('add login page'), undefined);
+  });
+
+  it('should return undefined when the message is already valid', () => {
+    assert.strictEqual(tryLocalConventionalRepair('feat: add login page'), undefined);
+  });
+
+  it('should normalize a loose revert line', () => {
+    const repaired = tryLocalConventionalRepair('revert：add login page');
+    assert.strictEqual(repaired, 'revert: add login page');
   });
 });

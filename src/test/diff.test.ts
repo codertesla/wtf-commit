@@ -5,6 +5,7 @@ import {
   compactDiffSection,
   extractRepresentativeHunk,
   finalizeDiffForLlm,
+  hardCapDiffText,
   splitDiffSections,
 } from '../diff-optimize';
 import { DEFAULT_COMPACT_FILE_THRESHOLD } from '../types';
@@ -255,5 +256,44 @@ describe('finalizeDiffForLlm', () => {
 
     assert.ok(result.diff.includes('[omitted: non-code or generated file omitted]'));
     assert.ok(!result.diff.includes('+new'));
+  });
+
+  it('should hard-cap a summary that still exceeds maxDiffChars', () => {
+    // Many short files: file list alone can exceed a tight budget.
+    const changes = Array.from({ length: 80 }, (_, index) => ({
+      relativePath: `src/very/long/path/to/module/file${index}.ts`,
+    }));
+    const sections = changes.map((change) =>
+      buildSampleSection(change.relativePath, ['-old', '+new', '+more content here'])
+    );
+    const rawDiff = sections.join('\n');
+
+    const maxDiffChars = 1_200;
+    const result = finalizeDiffForLlm(rawDiff, changes, [], {
+      maxDiffChars,
+      maxUntrackedFiles: 30,
+    });
+
+    assert.strictEqual(result.truncated, true);
+    assert.ok(result.diff.length <= maxDiffChars);
+    assert.ok(result.diff.includes('hard truncated') || result.diff.length <= maxDiffChars);
+  });
+});
+
+describe('hardCapDiffText', () => {
+  it('should leave short text unchanged', () => {
+    assert.strictEqual(hardCapDiffText('hello', 100), 'hello');
+  });
+
+  it('should never exceed maxChars and append a marker', () => {
+    const text = 'x'.repeat(500);
+    const capped = hardCapDiffText(text, 100);
+    assert.ok(capped.length <= 100);
+    assert.ok(capped.endsWith('... (hard truncated)'));
+  });
+
+  it('should hard-slice when maxChars is smaller than the marker', () => {
+    const capped = hardCapDiffText('abcdefghij', 5);
+    assert.strictEqual(capped.length, 5);
   });
 });
