@@ -57,6 +57,7 @@ export interface ProviderConfig {
 
 export interface ExtensionConfig {
   provider: ProviderName;
+  /** Resolved commit-message language (Custom already expanded). */
   language: string;
   uiLanguage: 'en' | 'zh';
   autoCommit: boolean;
@@ -64,8 +65,6 @@ export interface ExtensionConfig {
   smartStage: boolean;
   confirmBeforeCommit: boolean;
   confirmAutoPush: boolean;
-  showStatusBarItem: boolean;
-  changelogPopup: boolean;
   warnOnTruncatedDiff: boolean;
   ignorePaths: string[];
   systemPrompt: string;

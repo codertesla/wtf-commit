@@ -5,6 +5,7 @@ import { setUiLanguage, t, asUiLanguage, type UiLanguage } from './i18n';
 import { logInfo, logError, setOutputChannel } from './log';
 import { runGenerate } from './commands/generate';
 import { runSetApiKey } from './commands/set-api-key';
+import { migrateLegacySettings } from './settings-migrate';
 
 export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel('WTF Commit');
@@ -12,6 +13,10 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(outputChannel);
 
   logInfo('Extension activated');
+
+  migrateLegacySettings().catch((error) => {
+    logError('Failed to migrate legacy settings', error);
+  });
 
   // Status bar button for quick access (static icon — keep unobtrusive).
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -53,11 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  if (vscode.workspace.getConfiguration('wtfCommit').get<boolean>('changelogPopup', false)) {
-    checkChangelog(context).catch((error) => {
-      logError('Failed to check changelog', error);
-    });
-  }
+  maybeShowChangelog(context);
 
   checkFirstUseGuidance(context).catch((error) => {
     logError('Failed to check first-use guidance', error);
@@ -105,6 +106,15 @@ async function warnIfAutoPushWithoutAutoCommit(): Promise<void> {
 }
 
 export function deactivate() {}
+
+function maybeShowChangelog(context: vscode.ExtensionContext): void {
+  if (!vscode.workspace.getConfiguration('wtfCommit').get<boolean>('changelogPopup', false)) {
+    return;
+  }
+  checkChangelog(context).catch((error) => {
+    logError('Failed to check changelog', error);
+  });
+}
 
 async function checkChangelog(context: vscode.ExtensionContext): Promise<void> {
   const currentVersion = String(context.extension.packageJSON.version);

@@ -17,10 +17,14 @@ export function resolveProviderConfig(input: ProviderConfigInput): { baseUrl: st
     || (input.provider !== 'Custom' ? PROVIDERS[input.provider].model : '');
 
   if (!baseUrl) {
-    throw new Error(`Base URL is missing for ${input.provider}. Please configure it in Settings → WTF Commit → Base URL (or use Provider Overrides).`);
+    throw new Error(
+      `Base URL is missing for ${input.provider}. For Custom, set Base URL under Settings → WTF Commit › Advanced; for built-ins, use Provider Overrides.`
+    );
   }
   if (!model) {
-    throw new Error(`Model is missing for ${input.provider}. Please configure it in Settings → WTF Commit → Model (or use Provider Overrides).`);
+    throw new Error(
+      `Model is missing for ${input.provider}. For Custom, set Model under Settings → WTF Commit › Advanced; for built-ins, use Provider Overrides.`
+    );
   }
 
   return { baseUrl, model };
