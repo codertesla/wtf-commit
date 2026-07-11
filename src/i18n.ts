@@ -58,6 +58,8 @@ export type MessageKey =
   | 'dontRemindMe'
   | 'openSourceControl'
   | 'openSettings'
+  | 'providerBaseUrlMissing'
+  | 'providerModelMissing'
   | 'cancel'
   | 'readyToCommit'
   | 'commit'
@@ -145,6 +147,10 @@ const en: Dictionary = {
   dontRemindMe: "Don't Remind Me",
   openSourceControl: 'Open Source Control',
   openSettings: 'Open Settings',
+  providerBaseUrlMissing:
+    'Base URL is missing for {provider}. Set it under Settings → WTF Commit › Advanced (Custom Base URL, or Provider Overrides for built-ins).',
+  providerModelMissing:
+    'Model is missing for {provider}. Set it under Settings → WTF Commit › Advanced (Custom Model, or Provider Overrides for built-ins).',
   cancel: 'Cancel',
   readyToCommit: 'Ready to commit',
   commit: 'Commit',
@@ -225,6 +231,10 @@ const zh: Dictionary = {
   dontRemindMe: '不再提醒',
   openSourceControl: '打开源代码管理',
   openSettings: '打开设置',
+  providerBaseUrlMissing:
+    '{provider} 缺少 Base URL。请在设置 → WTF Commit › Advanced 中配置（Custom 用 Base URL；内置服务商用 Provider Overrides）。',
+  providerModelMissing:
+    '{provider} 缺少 Model。请在设置 → WTF Commit › Advanced 中配置（Custom 用 Model；内置服务商用 Provider Overrides）。',
   cancel: '取消',
   readyToCommit: '准备提交',
   commit: '提交',

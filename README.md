@@ -64,11 +64,11 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.14.0)
+## 🆕 Latest (v1.14.1)
 
-- **Simpler settings**: Everyday options live under **WTF Commit**; prompt, endpoints, and diff limits moved to **WTF Commit › Advanced**.
-- **Clearer language names**: **Commit Message Language** (vs UI Language); old `language` / `customLanguage` keys migrate automatically.
-- **One override path**: Built-in provider endpoints use **Provider Overrides** only (legacy per-provider keys migrate on activate).
+- **Smoother settings UX**: Changelog popup reacts without reload; Auto Push misconfig warns on startup.
+- **Clearer Custom setup errors**: Missing Base URL / Model opens Settings instead of a generic failure.
+- **Safer upgrades**: Partial provider overrides merge legacy endpoint fields; generate waits for settings migration.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 

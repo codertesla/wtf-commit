@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.1] - 2026-07-11
+### Fixed
+- **Changelog popup**: Toggling the setting applies without reload; when the popup is off, the last-seen version is still tracked so enabling later does not replay stale update notices.
+- **Custom provider errors**: Missing Base URL / Model shows a localized message with an **Open Settings** action instead of a generic failure.
+- **Legacy override migration**: Partial `providerOverrides` entries now merge missing fields from legacy per-provider keys instead of skipping the whole provider.
+- **Auto Push misconfig**: Warn on activate (not only when the setting changes) if Auto Push is on while Auto Commit is off.
+
+### Changed
+- Generate / Set API Key wait for settings migration to finish so upgrades do not briefly use pre-migration defaults.
+
 ## [1.14.0] - 2026-07-10
 ### Changed
 - **Settings reorganization**: Split into **WTF Commit** (basics) and **WTF Commit › Advanced** so everyday options (provider, languages, auto commit/push, confirms) are not buried under prompt/diff/endpoint knobs.

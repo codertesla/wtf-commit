@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { PROVIDER_NAMES } from './types';
 import { logInfo } from './log';
+import { mergeLegacyProviderOverride } from './settings-resolve';
 
 type ProviderOverride = { baseUrl?: string; model?: string };
 type ConfigTarget = vscode.ConfigurationTarget.Global | vscode.ConfigurationTarget.Workspace | vscode.ConfigurationTarget.WorkspaceFolder;
@@ -62,7 +63,10 @@ async function migrateLegacyProviderKeys(config: vscode.WorkspaceConfiguration):
     if (Object.keys(merged.additions).length === 0) {
       continue;
     }
-    const next = { ...merged.existing, ...merged.additions };
+    const next: Record<string, ProviderOverride> = { ...merged.existing };
+    for (const [provider, entry] of Object.entries(merged.additions)) {
+      next[provider] = entry;
+    }
     await config.update('providerOverrides', next, target);
     logInfo(`Migrated legacy per-provider endpoint settings into providerOverrides (${targetLabel(target)})`);
   }
@@ -77,18 +81,12 @@ function collectLegacyOverridesForTarget(
   const additions: Record<string, ProviderOverride> = {};
 
   for (const provider of PROVIDER_NAMES) {
-    if (existing[provider]?.baseUrl || existing[provider]?.model) {
-      continue;
-    }
     const baseUrl = readScopedString(config, `${provider}.baseUrl`, target);
     const model = readScopedString(config, `${provider}.model`, target);
-    if (!baseUrl && !model) {
-      continue;
+    const merged = mergeLegacyProviderOverride(existing[provider], { baseUrl, model });
+    if (merged) {
+      additions[provider] = merged;
     }
-    additions[provider] = {
-      ...(baseUrl ? { baseUrl } : {}),
-      ...(model ? { model } : {}),
-    };
   }
 
   return { existing, additions };

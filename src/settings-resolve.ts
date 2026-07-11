@@ -33,3 +33,31 @@ export function readProviderOverride(
     model: entry?.model?.trim() || undefined,
   };
 }
+
+/**
+ * Merge legacy per-provider fields into an existing override entry.
+ * Only fills missing fields — never overwrites an explicit override value.
+ * Returns undefined when nothing new would be added.
+ */
+export function mergeLegacyProviderOverride(
+  existing: ProviderOverride | undefined,
+  legacy: { baseUrl?: string; model?: string }
+): ProviderOverride | undefined {
+  const baseUrl = legacy.baseUrl?.trim() || undefined;
+  const model = legacy.model?.trim() || undefined;
+  if (!baseUrl && !model) {
+    return undefined;
+  }
+
+  const next: ProviderOverride = { ...(existing || {}) };
+  let changed = false;
+  if (!next.baseUrl && baseUrl) {
+    next.baseUrl = baseUrl;
+    changed = true;
+  }
+  if (!next.model && model) {
+    next.model = model;
+    changed = true;
+  }
+  return changed ? next : undefined;
+}

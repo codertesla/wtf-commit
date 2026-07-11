@@ -10,6 +10,7 @@ import {
 import { readExtensionConfig, getSecretKeyName } from '../config';
 import { resolveRepository, collectStageablePaths } from '../git';
 import { DiffPreparationError, getOptimizedDiff } from '../diff';
+import { IncompleteProviderConfigError } from '../provider-config';
 import { buildProviderEndpoint, callLLM } from '../llm/provider';
 import { classifyPushFailure, formatPushFailureMessage } from '../push-failure';
 import { createStreamingSink, restoreIntent, restoreIntentOnAbort } from '../ui';
@@ -403,6 +404,19 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
   } catch (error) {
     if (error instanceof DiffPreparationError && error.code === 'NO_STAGED_CHANGES') {
       vscode.window.showErrorMessage(t('noStagedChangesSmartStageOff'));
+      return;
+    }
+
+    if (error instanceof IncompleteProviderConfigError) {
+      const messageKey =
+        error.field === 'baseUrl' ? 'providerBaseUrlMissing' : 'providerModelMissing';
+      const action = await vscode.window.showErrorMessage(
+        t(messageKey, { provider: error.provider }),
+        t('openSettings')
+      );
+      if (action === t('openSettings')) {
+        void vscode.commands.executeCommand('workbench.action.openSettings', 'wtfCommit');
+      }
       return;
     }
 
