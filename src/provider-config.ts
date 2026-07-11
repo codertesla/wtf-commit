@@ -8,6 +8,22 @@ export interface ProviderConfigInput {
   customModel?: string;
 }
 
+export type IncompleteProviderField = 'baseUrl' | 'model';
+
+export class IncompleteProviderConfigError extends Error {
+  constructor(
+    public readonly provider: ProviderName,
+    public readonly field: IncompleteProviderField
+  ) {
+    super(
+      field === 'baseUrl'
+        ? `Base URL is missing for ${provider}.`
+        : `Model is missing for ${provider}.`
+    );
+    this.name = 'IncompleteProviderConfigError';
+  }
+}
+
 export function resolveProviderConfig(input: ProviderConfigInput): { baseUrl: string; model: string } {
   const baseUrl = input.providerBaseUrl?.trim()
     || (input.provider === 'Custom' ? input.customBaseUrl?.trim() : undefined)
@@ -17,14 +33,10 @@ export function resolveProviderConfig(input: ProviderConfigInput): { baseUrl: st
     || (input.provider !== 'Custom' ? PROVIDERS[input.provider].model : '');
 
   if (!baseUrl) {
-    throw new Error(
-      `Base URL is missing for ${input.provider}. For Custom, set Base URL under Settings → WTF Commit › Advanced; for built-ins, use Provider Overrides.`
-    );
+    throw new IncompleteProviderConfigError(input.provider, 'baseUrl');
   }
   if (!model) {
-    throw new Error(
-      `Model is missing for ${input.provider}. For Custom, set Model under Settings → WTF Commit › Advanced; for built-ins, use Provider Overrides.`
-    );
+    throw new IncompleteProviderConfigError(input.provider, 'model');
   }
 
   return { baseUrl, model };

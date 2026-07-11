@@ -1,7 +1,8 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
 import { resolveProviderConfig } from '../provider-config';
-import { readProviderOverride, resolveCommitMessageLanguage } from '../settings-resolve';
+import { readProviderOverride, resolveCommitMessageLanguage, mergeLegacyProviderOverride } from '../settings-resolve';
+import { IncompleteProviderConfigError } from '../provider-config';
 
 describe('resolveProviderConfig', () => {
   it('should ignore Custom global values for built-in providers', () => {
@@ -49,8 +50,34 @@ describe('resolveProviderConfig', () => {
   it('should reject incomplete Custom configuration', () => {
     assert.throws(
       () => resolveProviderConfig({ provider: 'Custom', customBaseUrl: 'http://localhost:11434/v1' }),
-      /Model is missing/
+      (error: unknown) =>
+        error instanceof IncompleteProviderConfigError &&
+        error.provider === 'Custom' &&
+        error.field === 'model'
     );
+  });
+});
+
+describe('mergeLegacyProviderOverride', () => {
+  it('fills missing model when override only has baseUrl', () => {
+    assert.deepStrictEqual(
+      mergeLegacyProviderOverride({ baseUrl: 'https://proxy.example' }, { model: 'deepseek-coder' }),
+      { baseUrl: 'https://proxy.example', model: 'deepseek-coder' }
+    );
+  });
+
+  it('does not overwrite existing override fields', () => {
+    assert.strictEqual(
+      mergeLegacyProviderOverride(
+        { baseUrl: 'https://keep.example', model: 'keep-model' },
+        { baseUrl: 'https://legacy.example', model: 'legacy-model' }
+      ),
+      undefined
+    );
+  });
+
+  it('returns undefined when legacy has nothing useful', () => {
+    assert.strictEqual(mergeLegacyProviderOverride(undefined, {}), undefined);
   });
 });
 

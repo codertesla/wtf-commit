@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   logInfo('Extension activated');
 
-  migrateLegacySettings().catch((error) => {
+  const settingsReady = migrateLegacySettings().catch((error) => {
     logError('Failed to migrate legacy settings', error);
   });
 
@@ -52,13 +52,17 @@ export function activate(context: vscode.ExtensionContext) {
       if (event.affectsConfiguration('wtfCommit.uiLanguage')) {
         syncUiLanguage();
       }
-      if (event.affectsConfiguration('wtfCommit.autoPush')) {
+      if (event.affectsConfiguration('wtfCommit.autoPush') || event.affectsConfiguration('wtfCommit.autoCommit')) {
         void warnIfAutoPushWithoutAutoCommit();
+      }
+      if (event.affectsConfiguration('wtfCommit.changelogPopup')) {
+        void syncChangelogTracking(context);
       }
     })
   );
 
-  maybeShowChangelog(context);
+  void syncChangelogTracking(context);
+  void warnIfAutoPushWithoutAutoCommit();
 
   checkFirstUseGuidance(context).catch((error) => {
     logError('Failed to check first-use guidance', error);
@@ -66,9 +70,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('wtf-commit.setApiKey', async () => {
+      await settingsReady;
       await runSetApiKey(context);
     }),
     vscode.commands.registerCommand('wtf-commit.generate', async () => {
+      await settingsReady;
       await runGenerate(context);
     }),
     vscode.commands.registerCommand('wtf-commit.showOutput', () => {
@@ -107,13 +113,29 @@ async function warnIfAutoPushWithoutAutoCommit(): Promise<void> {
 
 export function deactivate() {}
 
-function maybeShowChangelog(context: vscode.ExtensionContext): void {
-  if (!vscode.workspace.getConfiguration('wtfCommit').get<boolean>('changelogPopup', false)) {
+/**
+ * Track extension version for changelog notices.
+ * When the popup is off, still advance lastVersion so enabling later does not
+ * replay stale update toasts for versions the user already ran.
+ */
+async function syncChangelogTracking(context: vscode.ExtensionContext): Promise<void> {
+  const popupEnabled = vscode.workspace
+    .getConfiguration('wtfCommit')
+    .get<boolean>('changelogPopup', false);
+  if (popupEnabled) {
+    await checkChangelog(context);
     return;
   }
-  checkChangelog(context).catch((error) => {
-    logError('Failed to check changelog', error);
-  });
+  await advanceLastVersionQuietly(context);
+}
+
+async function advanceLastVersionQuietly(context: vscode.ExtensionContext): Promise<void> {
+  const currentVersion = String(context.extension.packageJSON.version);
+  const lastVersion = context.globalState.get<string>('wtfCommit.lastVersion');
+  if (currentVersion === lastVersion) {
+    return;
+  }
+  await context.globalState.update('wtfCommit.lastVersion', currentVersion);
 }
 
 async function checkChangelog(context: vscode.ExtensionContext): Promise<void> {

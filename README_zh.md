@@ -64,11 +64,11 @@
 
 > 只想生成信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.14.0）
+## 🆕 最新更新（v1.14.1）
 
-- **设置更清爽**：日常选项在 **WTF Commit**；Prompt、端点、diff 限制移到 **WTF Commit › Advanced**。
-- **语言命名更清晰**：**Commit Message Language**（与 UI Language 区分）；旧的 `language` / `customLanguage` 会自动迁移。
-- **端点覆盖统一**：内置服务商只走 **Provider Overrides**（遗留的 per-provider key 启动时迁移）。
+- **设置体验更顺**：更新日志弹窗无需重载即可生效；Auto Push 配置不当会在启动时提醒。
+- **Custom 报错更清楚**：缺少 Base URL / Model 时直接引导打开设置，而不是笼统失败。
+- **升级更稳**：部分 Provider Overrides 会补齐遗留端点字段；生成前等待设置迁移完成。
 
 > 更早版本的更新说明请查看 [CHANGELOG](CHANGELOG.md)。
 
