@@ -33,6 +33,8 @@ Thumbs.db
 scripts/*
 !scripts/audit-package-list.mjs
 !scripts/run-with-publisher.mjs
+!scripts/clean-vscode-test.mjs
+!scripts/run-electron-tests.mjs
 
 # Maintainer-only release checklist (keep local, do not publish)
 UPDATEFLOW.md
