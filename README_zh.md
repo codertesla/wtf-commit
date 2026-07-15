@@ -64,11 +64,12 @@
 
 > 只想生成信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.14.1）
+## 🆕 最新更新（v1.15.0）
 
-- **设置体验更顺**：更新日志弹窗无需重载即可生效；Auto Push 配置不当会在启动时提醒。
-- **Custom 报错更清楚**：缺少 Base URL / Model 时直接引导打开设置，而不是笼统失败。
-- **升级更稳**：部分 Provider Overrides 会补齐遗留端点字段；生成前等待设置迁移完成。
+- **提交一致性更可靠**：暂存快照改为读取 Git 权威输出，不再受 VS Code UI 状态刷新时机影响。
+- **Diff 与配置更健壮**：正确解析带空格、UTF-8 转义的 Git 路径，并安全校验异常设置值。
+- **Provider 核心更易维护**：协议适配、有限内存的 HTTP/SSE 传输和统一 Provider manifest 完成解耦。
+- **回归覆盖更完整**：生成 → 修复 → 快照校验 → commit 的完整事务已加入集成测试。
 
 > 更早版本的更新说明请查看 [CHANGELOG](CHANGELOG.md)。
 
@@ -135,6 +136,7 @@
 
 **各服务商默认模型** — 当 **Base URL** 和 **Model** 留空时：
 
+<!-- provider-manifest:start -->
 | 服务商 (Provider) | 默认模型 (Model) | 默认 Base URL |
 |----------|---------------|-----------------|
 | **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
@@ -146,6 +148,7 @@
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | `https://integrate.api.nvidia.com/v1` |
 | **Custom** | - | - |
+<!-- provider-manifest:end -->
 
 ### 获取 API Key
 

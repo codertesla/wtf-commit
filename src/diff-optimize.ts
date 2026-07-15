@@ -264,10 +264,75 @@ export function extractRepresentativeHunk(section: string, maxHunkLines: number)
   return keptLines.join('\n');
 }
 
-function extractDiffPath(section: string): string | null {
+export function extractDiffPath(section: string): string | null {
   const firstLine = section.split('\n', 1)[0] || '';
-  const match = firstLine.match(/^diff --git a\/.+ b\/(.+)$/);
-  return match?.[1] || null;
+  if (!firstLine.startsWith('diff --git ')) {
+    return null;
+  }
+  const tokens = parseGitHeaderTokens(firstLine.slice('diff --git '.length));
+  const target = tokens[1];
+  return target?.startsWith('b/') ? target.slice(2) : null;
+}
+
+function parseGitHeaderTokens(header: string): string[] {
+  if (!header.startsWith('"')) {
+    const separator = header.lastIndexOf(' b/');
+    return separator < 0
+      ? []
+      : [header.slice(0, separator), header.slice(separator + 1)];
+  }
+
+  const tokens: string[] = [];
+  let index = 0;
+  while (index < header.length && tokens.length < 2) {
+    while (header[index] === ' ') {
+      index += 1;
+    }
+    if (header[index] !== '"') {
+      break;
+    }
+    const parsed = parseQuotedGitPath(header, index + 1);
+    tokens.push(parsed.value);
+    index = parsed.nextIndex;
+  }
+  return tokens;
+}
+
+function parseQuotedGitPath(input: string, start: number): { value: string; nextIndex: number } {
+  const bytes: number[] = [];
+  let index = start;
+  while (index < input.length) {
+    const char = input[index];
+    if (char === '"') {
+      return { value: Buffer.from(bytes).toString('utf8'), nextIndex: index + 1 };
+    }
+    if (char !== '\\') {
+      bytes.push(...Buffer.from(char));
+      index += 1;
+      continue;
+    }
+
+    const escaped = input[index + 1];
+    const octal = input.slice(index + 1).match(/^[0-7]{1,3}/)?.[0];
+    if (octal) {
+      bytes.push(Number.parseInt(octal, 8));
+      index += octal.length + 1;
+      continue;
+    }
+    const escapedByte = ({
+      '"': 34,
+      '\\': 92,
+      n: 10,
+      r: 13,
+      t: 9,
+      b: 8,
+      f: 12,
+      v: 11,
+    } as Record<string, number>)[escaped];
+    bytes.push(escapedByte ?? Buffer.from(escaped || '')[0] ?? 0);
+    index += 2;
+  }
+  return { value: Buffer.from(bytes).toString('utf8'), nextIndex: index };
 }
 
 function buildOmittedSection(filePath: string, reason: string): string {

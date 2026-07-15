@@ -4,6 +4,7 @@ import { shouldFilterPath, isLikelyBinary, redactSensitiveContent } from '../fil
 import {
   compactDiffSection,
   extractRepresentativeHunk,
+  extractDiffPath,
   finalizeDiffForLlm,
   hardCapDiffText,
   splitDiffSections,
@@ -172,6 +173,22 @@ describe('splitDiffSections', () => {
     ].join('\n');
 
     assert.strictEqual(splitDiffSections(diff).length, 2);
+  });
+});
+
+describe('extractDiffPath', () => {
+  it('parses unquoted paths containing spaces', () => {
+    assert.strictEqual(
+      extractDiffPath('diff --git a/docs/my guide.md b/docs/my guide.md\nindex 123..456'),
+      'docs/my guide.md'
+    );
+  });
+
+  it('decodes git quoted UTF-8 paths', () => {
+    assert.strictEqual(
+      extractDiffPath('diff --git "a/docs/\\344\\270\\255\\346\\226\\207.md" "b/docs/\\344\\270\\255\\346\\226\\207.md"'),
+      'docs/中文.md'
+    );
   });
 });
 

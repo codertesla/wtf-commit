@@ -1,6 +1,6 @@
 import { type ProviderName } from './types';
 
-type ProviderOverride = { baseUrl?: string; model?: string };
+export type ProviderOverride = { baseUrl?: string; model?: string };
 
 /** Resolve commit-message language with Custom + legacy key fallbacks (pure). */
 export function resolveCommitMessageLanguage(input: {
@@ -24,14 +24,28 @@ export function resolveCommitMessageLanguage(input: {
 }
 
 export function readProviderOverride(
-  overrides: Record<string, ProviderOverride> | undefined,
+  overrides: unknown,
   provider: ProviderName
 ): { baseUrl?: string; model?: string } {
-  const entry = overrides?.[provider];
+  if (!isRecord(overrides)) {
+    return { baseUrl: undefined, model: undefined };
+  }
+  const entry = overrides[provider];
+  if (!isRecord(entry)) {
+    return { baseUrl: undefined, model: undefined };
+  }
   return {
-    baseUrl: entry?.baseUrl?.trim() || undefined,
-    model: entry?.model?.trim() || undefined,
+    baseUrl: asTrimmedString(entry.baseUrl),
+    model: asTrimmedString(entry.model),
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function asTrimmedString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value.trim() || undefined : undefined;
 }
 
 /**

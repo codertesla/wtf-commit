@@ -32,6 +32,17 @@ export function stagedSnapshotsEqual(a: StagedSnapshot, b: StagedSnapshot): bool
   return a.indexSignature === b.indexSignature && a.contentHash === b.contentHash;
 }
 
+/** Build a snapshot from authoritative git command output, independent of VS Code Git UI refresh timing. */
+export function createStagedSnapshotFromGitOutputs(
+  nameStatusZ: string,
+  stagedDiff: string
+): StagedSnapshot {
+  return {
+    indexSignature: hashText(nameStatusZ),
+    contentHash: hashText(stagedDiff),
+  };
+}
+
 export function buildIndexSignature(indexChanges: ReadonlyArray<StagedChangeRef>): string {
   return indexChanges
     .map((change) => `${normalizePath(change.path)}:${change.status}`)

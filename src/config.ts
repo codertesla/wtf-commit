@@ -25,7 +25,7 @@ export function readExtensionConfig(): ExtensionConfig {
     legacyCustomLanguage: readExplicitOrUndefined(config, 'customLanguage'),
   });
 
-  const overrides = config.get<Record<string, { baseUrl?: string; model?: string }>>('providerOverrides') || {};
+  const overrides = config.get<unknown>('providerOverrides');
   const { baseUrl: providerBaseUrl, model: providerModel } = readProviderOverride(overrides, provider);
 
   // Global values are only safe for Custom. Built-in providers may use
@@ -58,9 +58,14 @@ export function readExtensionConfig(): ExtensionConfig {
     systemPrompt,
     baseUrl,
     model,
-    temperature: config.get<number>('temperature') ?? 1.0,
+    temperature: clampNumber(config.get<unknown>('temperature'), 1.0, 0, 2),
     maxDiffChars: clampInt(config.get<number>('maxDiffChars'), DEFAULT_MAX_DIFF_CHARS, 1000),
-    maxUntrackedFiles: Math.max(0, config.get<number>('maxUntrackedFiles') ?? DEFAULT_MAX_UNTRACKED_FILES),
+    maxUntrackedFiles: clampInt(
+      config.get<number>('maxUntrackedFiles'),
+      DEFAULT_MAX_UNTRACKED_FILES,
+      0,
+      1_000
+    ),
   };
 }
 
@@ -74,8 +79,12 @@ function readExplicitOrUndefined(config: vscode.WorkspaceConfiguration, key: str
 }
 
 function readIgnorePaths(config: vscode.WorkspaceConfiguration): string[] {
-  const configured = config.get<string[]>('ignorePaths');
-  const raw = configured === undefined ? [...DEFAULT_IGNORE_PATHS] : configured;
+  const configured = config.get<unknown>('ignorePaths');
+  const raw = configured === undefined
+    ? [...DEFAULT_IGNORE_PATHS]
+    : Array.isArray(configured)
+      ? configured.filter((entry): entry is string => typeof entry === 'string')
+      : [...DEFAULT_IGNORE_PATHS];
   const seen = new Set<string>();
   const result: string[] = [];
   for (const entry of raw) {
@@ -89,11 +98,18 @@ function readIgnorePaths(config: vscode.WorkspaceConfiguration): string[] {
   return result;
 }
 
-function clampInt(value: number | undefined, fallback: number, minimum: number): number {
+function clampInt(value: number | undefined, fallback: number, minimum: number, maximum = 1_000_000): number {
   if (typeof value !== 'number' || Number.isNaN(value)) {
     return fallback;
   }
-  return Math.max(minimum, Math.floor(value));
+  return Math.min(maximum, Math.max(minimum, Math.floor(value)));
+}
+
+function clampNumber(value: unknown, fallback: number, minimum: number, maximum: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.min(maximum, Math.max(minimum, value));
 }
 
 export function asProviderName(rawProvider: string | undefined): ProviderName {

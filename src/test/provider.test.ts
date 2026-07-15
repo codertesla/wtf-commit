@@ -646,10 +646,7 @@ describe('Thinking-capable providers', () => {
   it('should give the non-streaming fallback its own timeout budget', async () => {
     let requestCount = 0;
     const server = http.createServer((request, response) => {
-      let requestBody = '';
-      request.on('data', (chunk: Buffer) => {
-        requestBody += chunk.toString('utf8');
-      });
+      request.resume();
       request.on('end', () => {
         requestCount += 1;
         if (requestCount === 1) {

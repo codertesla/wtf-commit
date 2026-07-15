@@ -1,4 +1,13 @@
 import type * as vscode from 'vscode';
+import type { ProviderName } from './provider-manifest';
+
+export {
+  BUILT_IN_PROVIDER_NAMES,
+  DEFAULT_PROVIDER,
+  PROVIDER_MANIFEST as PROVIDERS,
+  PROVIDER_NAMES,
+} from './provider-manifest';
+export type { BuiltInProviderName, ProviderName } from './provider-manifest';
 
 export interface GitExtension {
   getAPI(version: number): API;
@@ -117,31 +126,6 @@ export interface GeminiInteractionResponse {
   }>;
 }
 
-export const BUILT_IN_PROVIDER_NAMES = [
-  'OpenAI',
-  'DeepSeek',
-  'MiMo',
-  'GLM',
-  'Z.AI',
-  'Gemini',
-  'OpenRouter',
-  'NVIDIA NIM',
-] as const;
-
-export type BuiltInProviderName = typeof BUILT_IN_PROVIDER_NAMES[number];
-
-export const PROVIDERS = {
-  OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
-  DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
-  MiMo: { baseUrl: 'https://api.xiaomimimo.com/v1', model: 'mimo-v2.5' },
-  GLM: { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7-flashx' },
-  'Z.AI': { baseUrl: 'https://api.z.ai/api/paas/v4', model: 'glm-4.7-flashx' },
-  Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.1-flash-lite' },
-  OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
-  'NVIDIA NIM': { baseUrl: 'https://integrate.api.nvidia.com/v1', model: 'nvidia/nemotron-3-super-120b-a12b' },
-} satisfies Record<BuiltInProviderName, ProviderConfig>;
-
-export type ProviderName = BuiltInProviderName | 'Custom';
 export type RequestFailureCode = 'auth' | 'rate_limit' | 'timeout' | 'network' | 'cancelled' | 'invalid_response' | 'api';
 
 export const SECRET_KEY_PREFIX = 'wtfCommit.key.';
@@ -155,7 +139,6 @@ export const DEFAULT_SYSTEM_PROMPT =
 
 export const DEFAULT_IGNORE_PATHS = ['*.snap', '*.min.js', '*.min.css', '.gen.ts', '_generated'] as const;
 
-export const DEFAULT_PROVIDER: ProviderName = 'DeepSeek';
 export const DEFAULT_TIMEOUT_MS = 45_000;
 export const REASONING_TIMEOUT_MS = 90_000; // Extended timeout for deep thinkers
 export const DEFAULT_MAX_DIFF_CHARS = 10_000;
@@ -185,8 +168,6 @@ export const MAX_DIFF_FILE_CHARS = DEFAULT_MAX_DIFF_FILE_CHARS;
 export const GitStatus = {
   UNTRACKED: 7,
 };
-
-export const PROVIDER_NAMES = [...BUILT_IN_PROVIDER_NAMES, 'Custom'] as const satisfies readonly ProviderName[];
 
 export class RequestFailure extends Error {
   public readonly retryAfterMs?: number;

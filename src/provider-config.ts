@@ -1,4 +1,4 @@
-import { type ProviderName, PROVIDERS } from './types';
+import { type ProviderName, PROVIDER_MANIFEST } from './provider-manifest';
 
 export interface ProviderConfigInput {
   provider: ProviderName;
@@ -27,10 +27,10 @@ export class IncompleteProviderConfigError extends Error {
 export function resolveProviderConfig(input: ProviderConfigInput): { baseUrl: string; model: string } {
   const baseUrl = input.providerBaseUrl?.trim()
     || (input.provider === 'Custom' ? input.customBaseUrl?.trim() : undefined)
-    || (input.provider !== 'Custom' ? PROVIDERS[input.provider].baseUrl : '');
+    || (input.provider !== 'Custom' ? PROVIDER_MANIFEST[input.provider].baseUrl : '');
   const model = input.providerModel?.trim()
     || (input.provider === 'Custom' ? input.customModel?.trim() : undefined)
-    || (input.provider !== 'Custom' ? PROVIDERS[input.provider].model : '');
+    || (input.provider !== 'Custom' ? PROVIDER_MANIFEST[input.provider].model : '');
 
   if (!baseUrl) {
     throw new IncompleteProviderConfigError(input.provider, 'baseUrl');

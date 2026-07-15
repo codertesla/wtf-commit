@@ -18,6 +18,7 @@ const allowedFiles = new Set([
   'LICENSE',
   'CHANGELOG.md',
   'out/types.js',
+  'out/provider-manifest.js',
   'out/provider-config.js',
   'out/prompt.js',
   'out/git.js',
@@ -36,10 +37,16 @@ const allowedFiles = new Set([
   'out/errors.js',
   'out/status.js',
   'out/staged-snapshot.js',
+  'out/git-staged-snapshot.js',
   'out/flow/diff-source.js',
+  'out/flow/generation-workflow.js',
+  'out/commands/auto-push.js',
   'out/commands/generate.js',
+  'out/commands/prepare-generation.js',
   'out/commands/set-api-key.js',
+  'out/llm/adapters.js',
   'out/llm/provider.js',
+  'out/llm/transport.js',
 ]);
 
 const unexpectedFiles = packageFiles.filter((file) => !allowedFiles.has(file));

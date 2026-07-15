@@ -64,11 +64,12 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.14.1)
+## 🆕 Latest (v1.15.0)
 
-- **Smoother settings UX**: Changelog popup reacts without reload; Auto Push misconfig warns on startup.
-- **Clearer Custom setup errors**: Missing Base URL / Model opens Settings instead of a generic failure.
-- **Safer upgrades**: Partial provider overrides merge legacy endpoint fields; generate waits for settings migration.
+- **More reliable commits**: Staged snapshots now come from authoritative Git output, independent of VS Code UI refresh timing.
+- **Stronger diff and config handling**: Quoted/UTF-8 paths are parsed correctly, and malformed settings are safely validated.
+- **Maintainable provider core**: Provider adapters, bounded HTTP/SSE transport, and a synchronized provider manifest reduce release drift.
+- **Broader regression coverage**: The complete generate → repair → snapshot check → commit transaction now has integration tests.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -135,6 +136,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 
 **Provider defaults** — when **Base URL** and **Model** are left empty:
 
+<!-- provider-manifest:start -->
 | Provider | Default Model | Default Base URL |
 |----------|---------------|-----------------|
 | **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
@@ -146,6 +148,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | `https://integrate.api.nvidia.com/v1` |
 | **Custom** | - | - |
+<!-- provider-manifest:end -->
 
 ### Get API Keys
 

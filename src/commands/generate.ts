@@ -1,5 +1,3 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
 import * as vscode from 'vscode';
 import {
   type ProviderName,
@@ -8,16 +6,17 @@ import {
   type Repository,
 } from '../types';
 import { readExtensionConfig, getSecretKeyName } from '../config';
-import { resolveRepository, collectStageablePaths } from '../git';
-import { DiffPreparationError, getOptimizedDiff } from '../diff';
+import { resolveRepository } from '../git';
+import { DiffPreparationError } from '../diff';
 import { IncompleteProviderConfigError } from '../provider-config';
 import { buildProviderEndpoint, callLLM } from '../llm/provider';
-import { classifyPushFailure, formatPushFailureMessage } from '../push-failure';
+import { runAutoPush } from './auto-push';
 import { createStreamingSink, restoreIntent, restoreIntentOnAbort } from '../ui';
 import { setUiLanguage, t } from '../i18n';
 import { generateLock } from '../generate-lock';
-import { planDiffSource } from '../flow/diff-source';
-import { createStagedSnapshot, stagedSnapshotsEqual, type StagedSnapshot } from '../staged-snapshot';
+import { readStagedSnapshot } from '../git-staged-snapshot';
+import { executeGenerationWorkflow } from '../flow/generation-workflow';
+import { prepareGeneration } from './prepare-generation';
 import {
   LONG_STATUS_MESSAGE_TIMEOUT_MS,
   STATUS_MESSAGE_TIMEOUT_MS,
@@ -26,17 +25,11 @@ import {
 import {
   normalizeCommitMessage,
   findConventionalCommitIssues,
-  tryLocalConventionalRepair,
-  getGitCommandError,
+  type ConventionalCommitIssue,
   getErrorMessage,
   logInfo,
   logError,
 } from '../prompt';
-
-const execFileAsync = promisify(execFile);
-
-const MIXED_STAGE_DISMISSED_KEY = 'wtfCommit.mixedStageReminderDismissed';
-const WORKING_TREE_DISMISSED_KEY = 'wtfCommit.workingTreeReminderDismissed';
 
 export async function runGenerate(context: vscode.ExtensionContext): Promise<void> {
   if (!generateLock.tryAcquire()) {
@@ -69,232 +62,54 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
     }
     repositoryForRestore = repository;
 
-    let hasStagedChanges = repository.state.indexChanges.length > 0;
-    const hasWorkingTreeChanges =
-      repository.state.workingTreeChanges.length > 0 || repository.state.untrackedChanges.length > 0;
-
-    const plan = planDiffSource({
-      hasStaged: hasStagedChanges,
-      hasWorkingTree: hasWorkingTreeChanges,
-      autoCommit: config.autoCommit,
-      smartStage: config.smartStage,
-      mixedStageReminderDismissed: Boolean(context.globalState.get(MIXED_STAGE_DISMISSED_KEY)),
-      workingTreeReminderDismissed: Boolean(context.globalState.get(WORKING_TREE_DISMISSED_KEY)),
-    });
-
-    let useWorkingTreeDiff = false;
-
-    switch (plan.action) {
-      case 'abort_no_changes':
-        showStatusMessage(`$(circle-slash) ${t('noChangesDetected')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
-        return;
-
-      case 'abort_no_staged':
-        vscode.window.showErrorMessage(t('noStagedChangesSmartStageOff'));
-        return;
-
-      case 'confirm_mixed_then_staged': {
-        const shouldContinue = await confirmStagedOnlyGeneration(context);
-        if (!shouldContinue) {
-          return;
-        }
-        break;
-      }
-
-      case 'use_staged':
-        break;
-
-      case 'auto_stage_working_tree': {
-        const stagePaths = collectStageablePaths(repository.state);
-        if (stagePaths.length === 0) {
-          throw new Error(t('noStageableChanges'));
-        }
-        await repository.add(stagePaths);
-        hasStagedChanges = true;
-        break;
-      }
-
-      case 'confirm_working_tree': {
-        const allowed = await confirmWorkingTreeGeneration(context);
-        if (!allowed) {
-          return;
-        }
-        useWorkingTreeDiff = true;
-        break;
-      }
-
-      case 'use_working_tree':
-        useWorkingTreeDiff = true;
-        break;
-    }
-
-    // Diff inputs for getOptimizedDiff:
-    // - staged path: hasStagedChanges=true
-    // - working tree path: hasStaged=false and smartStage=true (includes untracked)
-    const diffUsesStaged = hasStagedChanges && !useWorkingTreeDiff;
-    const smartStageForDiff = useWorkingTreeDiff ? true : config.smartStage;
-
-    let stagedSnapshot: StagedSnapshot | undefined;
-    if (config.autoCommit && diffUsesStaged) {
-      const stagedDiff = await repository.diff(true);
-      stagedSnapshot = createStagedSnapshot(
-        repository.state.indexChanges.map((change) => ({
-          path: change.uri.fsPath,
-          status: change.status,
-        })),
-        stagedDiff
-      );
-    }
-
-    const diffResult = await getOptimizedDiff(
-      repository,
-      diffUsesStaged,
-      smartStageForDiff,
-      config.ignorePaths,
-      { maxDiffChars: config.maxDiffChars, maxUntrackedFiles: config.maxUntrackedFiles }
-    );
-    if (!diffResult.diff.trim()) {
-      showStatusMessage(`$(circle-slash) ${t('noDiffContent')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
+    const prepared = await prepareGeneration(context, config, repository);
+    if (!prepared) {
       return;
     }
-
-    if (diffResult.truncated && config.warnOnTruncatedDiff) {
-      logInfo(`Diff truncated before sending to AI (length exceeded ${config.maxDiffChars} chars).`);
-      vscode.window.showWarningMessage(t('diffTruncatedWarning'));
-    }
-    if (diffResult.untrackedFilesOmitted > 0 && config.warnOnTruncatedDiff) {
-      vscode.window.showWarningMessage(
-        t('untrackedOmittedWarning', {
-          count: diffResult.untrackedFilesOmitted,
-          cap: diffResult.untrackedFileCap,
-        })
-      );
-    }
-
-    const diff = diffResult.diff;
-    const intent = repository.inputBox.value.trim();
+    const { diff, intent, stagedSnapshot } = prepared;
     intentForRestore = intent;
 
     // Clear the input box so the streaming preview starts from a clean slate.
     repository.inputBox.value = '';
 
-    let commitMessage: string | undefined;
-    try {
-      commitMessage = await generateCommitMessage(
-        {
-          provider: config.provider,
-          endpoint,
-          apiKey,
-          model: config.model,
-          systemPrompt: config.systemPrompt,
-          diff,
-          intent,
-          temperature: config.temperature,
-        },
-        repository.inputBox
-      );
-    } catch (error) {
-      if (error instanceof RequestFailure && error.code === 'cancelled') {
-        restoreIntentOnAbort(repository.inputBox, intent);
-        await handleRequestFailure(error);
-        return;
+    const workflowResult = await executeGenerationWorkflow(
+      { diff, intent, autoCommit: config.autoCommit, expectedSnapshot: stagedSnapshot },
+      {
+        generate: () => generateCommitMessage(
+          {
+            provider: config.provider,
+            endpoint,
+            apiKey,
+            model: config.model,
+            systemPrompt: config.systemPrompt,
+            diff,
+            intent,
+            temperature: config.temperature,
+          },
+          repository.inputBox
+        ),
+        resolveIssues: (message, issues) => resolveCommitIssues(
+          { message, issues, provider: config.provider, endpoint, apiKey, model: config.model,
+            systemPrompt: config.systemPrompt, diff, intent, temperature: config.temperature },
+          repository.inputBox
+        ),
+        setMessage: (message) => { repository.inputBox.value = message; },
+        confirmCommit: (message) => confirmCommitIfNeeded(config.confirmBeforeCommit, config.provider, message),
+        readSnapshot: () => readStagedSnapshot(repository.rootUri.fsPath),
+        commit: (message) => repository.commit(message),
+        onLocalRepair: () => logInfo('Applied local Conventional Commits repair.'),
       }
-      throw error;
-    }
+    );
 
-    if (!commitMessage) {
-      restoreIntentOnAbort(repository.inputBox, intent);
-      return;
-    }
-
-    let normalizedCommitMessage = normalizeCommitMessage(commitMessage);
-    if (!normalizedCommitMessage) {
+    if (workflowResult.status === 'empty') {
       vscode.window.showErrorMessage(t('generatedEmpty'));
       restoreIntentOnAbort(repository.inputBox, intent);
       return;
     }
-
-    repository.inputBox.value = normalizedCommitMessage;
-
-    let issues = findConventionalCommitIssues(normalizedCommitMessage);
-    if (issues.length > 0) {
-      const localRepaired = tryLocalConventionalRepair(normalizedCommitMessage);
-      if (localRepaired) {
-        normalizedCommitMessage = localRepaired;
-        repository.inputBox.value = normalizedCommitMessage;
-        issues = findConventionalCommitIssues(normalizedCommitMessage);
-        logInfo('Applied local Conventional Commits repair.');
-      }
+    if (workflowResult.status === 'cancelled') {
+      return;
     }
-
-    if (issues.length > 0) {
-      const issueSummary = issues.map((issue) => issue.message).join(' ');
-      const preRepairMessage = normalizedCommitMessage;
-      const action = await vscode.window.showWarningMessage(
-        t('needsAdjustment', { detail: issueSummary }),
-        t('aiRepair'),
-        t('keepOriginal')
-      );
-
-      if (action === t('aiRepair')) {
-        const repairReason = issues.map((issue) => issue.repairReason).join('\n');
-        let repairedMessage: string | undefined;
-        try {
-          repairedMessage = await repairCommitMessage(
-            {
-              provider: config.provider,
-              endpoint,
-              apiKey,
-              model: config.model,
-              systemPrompt: config.systemPrompt,
-              diff,
-              intent,
-              repairMessage: normalizedCommitMessage,
-              repairReason,
-              temperature: config.temperature,
-            },
-            repository.inputBox
-          );
-        } catch (error) {
-          if (error instanceof RequestFailure) {
-            repository.inputBox.value = preRepairMessage;
-            await handleRequestFailure(error);
-            await vscode.commands.executeCommand('workbench.view.scm');
-            showStatusMessage(`$(warning) ${t('repairFailedOriginalKept')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
-            return;
-          }
-
-          throw error;
-        }
-
-        if (!repairedMessage) {
-          repository.inputBox.value = preRepairMessage;
-          return;
-        }
-
-        const normalizedRepairedMessage = normalizeCommitMessage(repairedMessage);
-        if (!normalizedRepairedMessage) {
-          repository.inputBox.value = preRepairMessage;
-          vscode.window.showErrorMessage(t('repairEmpty'));
-          return;
-        }
-
-        normalizedCommitMessage = normalizedRepairedMessage;
-        repository.inputBox.value = normalizedCommitMessage;
-
-        const remainingIssues = findConventionalCommitIssues(normalizedCommitMessage);
-        if (remainingIssues.length > 0) {
-          vscode.window.showWarningMessage(
-            t('repairRemainingIssues', {
-              count: remainingIssues.length,
-              detail: remainingIssues.map((issue) => issue.message).join(' '),
-            })
-          );
-        }
-      }
-    }
-
-    if (!config.autoCommit) {
+    if (workflowResult.status === 'message_ready') {
       await vscode.commands.executeCommand('workbench.view.scm');
       if (config.autoPush) {
         const fixAction = await vscode.window.showWarningMessage(
@@ -313,93 +128,16 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
       );
       return;
     }
-
-    let shouldCommit = true;
-    if (config.confirmBeforeCommit) {
-      const response = await vscode.window.showInformationMessage(
-        `[${config.provider}] ${t('readyToCommit')}`,
-        {
-          modal: true,
-          detail: normalizedCommitMessage,
-        },
-        t('commit'),
-        t('editInSourceControl'),
-        t('cancel')
-      );
-
-      if (response === t('editInSourceControl')) {
-        await vscode.commands.executeCommand('workbench.view.scm');
-        return;
-      }
-
-      shouldCommit = response === t('commit');
-    }
-
-    if (!shouldCommit) {
-      return;
-    }
-
-    if (!stagedSnapshot) {
-      throw new Error(t('noStagedSnapshot'));
-    }
-
-    const currentStagedDiff = await repository.diff(true);
-    const currentSnapshot = createStagedSnapshot(
-      repository.state.indexChanges.map((change) => ({
-        path: change.uri.fsPath,
-        status: change.status,
-      })),
-      currentStagedDiff
-    );
-    if (!stagedSnapshotsEqual(stagedSnapshot, currentSnapshot)) {
+    if (workflowResult.status === 'snapshot_changed') {
       await vscode.commands.executeCommand('workbench.view.scm');
       vscode.window.showWarningMessage(t('stagedSnapshotChanged'));
       return;
     }
-
-    await repository.commit(normalizedCommitMessage);
+    const normalizedCommitMessage = workflowResult.message;
     showStatusMessage(`$(check) ${t('commitSuccessful')}`, STATUS_MESSAGE_TIMEOUT_MS);
 
     if (config.autoPush) {
-      let proceedWithPush = true;
-      if (config.confirmAutoPush) {
-        const pushResponse = await vscode.window.showWarningMessage(
-          t('pushNowConfirm'),
-          { modal: true, detail: normalizedCommitMessage },
-          t('push'),
-          t('cancel')
-        );
-        proceedWithPush = pushResponse === t('push');
-      }
-
-      if (!proceedWithPush) {
-        showStatusMessage(`$(debug-pause) ${t('autoPushSkipped')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
-        return;
-      }
-
-      try {
-        const upstream = repository.state.upstream;
-        const pushTitle = upstream
-          ? `${t('pushingProgress')} (${upstream.remote}/${upstream.name})`
-          : t('pushingProgress');
-        await vscode.window.withProgress(
-          {
-            location: vscode.ProgressLocation.Notification,
-            title: pushTitle,
-          },
-          async () => {
-            await repository.push();
-          }
-        );
-        showStatusMessage(
-          upstream
-            ? `$(cloud-upload) ${t('pushSuccessful')} (${upstream.remote}/${upstream.name})`
-            : `$(cloud-upload) ${t('pushSuccessful')}`,
-          LONG_STATUS_MESSAGE_TIMEOUT_MS
-        );
-      } catch (error) {
-        await handlePushFailure(repository, error);
-      }
+      await runAutoPush(repository, normalizedCommitMessage, config.confirmAutoPush);
     }
   } catch (error) {
     if (error instanceof DiffPreparationError && error.code === 'NO_STAGED_CHANGES') {
@@ -438,68 +176,95 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
   }
 }
 
-async function confirmStagedOnlyGeneration(context: vscode.ExtensionContext): Promise<boolean> {
-  if (context.globalState.get<boolean>(MIXED_STAGE_DISMISSED_KEY)) {
+async function confirmCommitIfNeeded(
+  confirmBeforeCommit: boolean,
+  provider: ProviderName,
+  message: string
+): Promise<boolean> {
+  if (!confirmBeforeCommit) {
     return true;
   }
-
-  const useStagedLabel = t('useStagedChanges');
-  const dontRemindLabel = t('dontRemindMe');
-  const openScmLabel = t('openSourceControl');
-
-  const action = await vscode.window.showWarningMessage(
-    t('mixedStageWarning'),
-    useStagedLabel,
-    dontRemindLabel,
-    openScmLabel,
+  const response = await vscode.window.showInformationMessage(
+    `[${provider}] ${t('readyToCommit')}`,
+    { modal: true, detail: message },
+    t('commit'),
+    t('editInSourceControl'),
     t('cancel')
   );
-
-  if (action === dontRemindLabel) {
-    await context.globalState.update(MIXED_STAGE_DISMISSED_KEY, true);
-    return true;
-  }
-
-  if (action === openScmLabel) {
+  if (response === t('editInSourceControl')) {
     await vscode.commands.executeCommand('workbench.view.scm');
-    return false;
   }
-
-  return action === useStagedLabel;
+  return response === t('commit');
 }
 
-/**
- * Non-autoCommit + working tree only: make the user acknowledge that generation
- * is from the working tree and they still need to stage before commit.
- */
-async function confirmWorkingTreeGeneration(context: vscode.ExtensionContext): Promise<boolean> {
-  if (context.globalState.get<boolean>(WORKING_TREE_DISMISSED_KEY)) {
-    return true;
-  }
-
-  const useWorkingTreeLabel = t('useWorkingTreeChanges');
-  const dontRemindLabel = t('dontRemindMe');
-  const openScmLabel = t('openSourceControl');
-
+async function resolveCommitIssues(
+  input: {
+    message: string;
+    issues: ConventionalCommitIssue[];
+    provider: ProviderName;
+    endpoint: string;
+    apiKey: string;
+    model: string;
+    systemPrompt: string;
+    diff: string;
+    intent: string;
+    temperature: number;
+  },
+  inputBox?: { value: string }
+): Promise<string | undefined> {
+  const issueSummary = input.issues.map((issue) => issue.message).join(' ');
   const action = await vscode.window.showWarningMessage(
-    t('workingTreeOnlyWarning'),
-    useWorkingTreeLabel,
-    dontRemindLabel,
-    openScmLabel,
-    t('cancel')
+    t('needsAdjustment', { detail: issueSummary }),
+    t('aiRepair'),
+    t('keepOriginal')
   );
-
-  if (action === dontRemindLabel) {
-    await context.globalState.update(WORKING_TREE_DISMISSED_KEY, true);
-    return true;
+  if (action !== t('aiRepair')) {
+    return input.message;
   }
 
-  if (action === openScmLabel) {
+  try {
+    const repaired = await repairCommitMessage(
+      {
+        provider: input.provider,
+        endpoint: input.endpoint,
+        apiKey: input.apiKey,
+        model: input.model,
+        systemPrompt: input.systemPrompt,
+        diff: input.diff,
+        intent: input.intent,
+        repairMessage: input.message,
+        repairReason: input.issues.map((issue) => issue.repairReason).join('\n'),
+        temperature: input.temperature,
+      },
+      inputBox
+    );
+    if (!repaired || !normalizeCommitMessage(repaired)) {
+      if (inputBox) {
+        inputBox.value = input.message;
+      }
+      vscode.window.showErrorMessage(t('repairEmpty'));
+      return undefined;
+    }
+    const remainingIssues = findConventionalCommitIssues(normalizeCommitMessage(repaired));
+    if (remainingIssues.length > 0) {
+      vscode.window.showWarningMessage(t('repairRemainingIssues', {
+        count: remainingIssues.length,
+        detail: remainingIssues.map((issue) => issue.message).join(' '),
+      }));
+    }
+    return repaired;
+  } catch (error) {
+    if (!(error instanceof RequestFailure)) {
+      throw error;
+    }
+    if (inputBox) {
+      inputBox.value = input.message;
+    }
+    await handleRequestFailure(error);
     await vscode.commands.executeCommand('workbench.view.scm');
-    return false;
+    showStatusMessage(`$(warning) ${t('repairFailedOriginalKept')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
+    return undefined;
   }
-
-  return action === useWorkingTreeLabel;
 }
 
 async function generateCommitMessage(
@@ -593,64 +358,4 @@ async function handleRequestFailure(error: RequestFailure): Promise<void> {
   }
 
   vscode.window.showErrorMessage(error.message);
-}
-
-async function handlePushFailure(repository: Repository, error: unknown): Promise<void> {
-  logError('Push failed after commit', error);
-
-  const gitError = getGitCommandError(error);
-  const command = gitError?.gitCommand;
-  let pushVerified = false;
-  if (command && command !== 'push') {
-    pushVerified = await verifyUpstreamMatchesHead(repository.rootUri.fsPath);
-  }
-
-  const classification = classifyPushFailure(error, pushVerified);
-  const message = formatPushFailureMessage(classification);
-
-  if (classification.kind === 'push_succeeded_with_followup_warning') {
-    logInfo(`Push verified after ${classification.commandLabel} failed; HEAD matches upstream.`);
-    showStatusMessage(`$(cloud-upload) ${t('pushCompletedWithRefreshWarning')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
-    vscode.window.showWarningMessage(message);
-    return;
-  }
-
-  if (classification.kind === 'push_may_have_succeeded') {
-    vscode.window.showWarningMessage(message);
-    return;
-  }
-
-  const undoLabel = t('undoCommit');
-  const action = await vscode.window.showErrorMessage(message, undoLabel);
-  if (action === undoLabel) {
-    await vscode.commands.executeCommand('git.undoCommit');
-  }
-}
-
-async function verifyUpstreamMatchesHead(repositoryPath: string): Promise<boolean> {
-  const head = await runGitCommand(repositoryPath, ['rev-parse', 'HEAD']);
-  if (!head) {
-    return false;
-  }
-
-  const upstream = await runGitCommand(repositoryPath, ['rev-parse', '@{upstream}']);
-  if (!upstream) {
-    return false;
-  }
-
-  return head === upstream;
-}
-
-async function runGitCommand(repositoryPath: string, args: string[]): Promise<string | undefined> {
-  try {
-    const { stdout } = await execFileAsync('git', args, {
-      cwd: repositoryPath,
-      encoding: 'utf8',
-      windowsHide: true,
-    });
-    return stdout.trim();
-  } catch (error) {
-    logError(`Failed to run git ${args.join(' ')} during push verification`, error);
-    return undefined;
-  }
 }

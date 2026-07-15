@@ -1,8 +1,7 @@
 import * as assert from 'node:assert';
 import { describe, it } from 'mocha';
-import { resolveProviderConfig } from '../provider-config';
+import { IncompleteProviderConfigError, resolveProviderConfig } from '../provider-config';
 import { readProviderOverride, resolveCommitMessageLanguage, mergeLegacyProviderOverride } from '../settings-resolve';
-import { IncompleteProviderConfigError } from '../provider-config';
 
 describe('resolveProviderConfig', () => {
   it('should ignore Custom global values for built-in providers', () => {
@@ -130,6 +129,13 @@ describe('readProviderOverride', () => {
       ),
       { baseUrl: 'https://proxy.example/', model: 'deepseek-coder' }
     );
+  });
+
+  it('ignores malformed runtime configuration values', () => {
+    const emptyOverride = { baseUrl: undefined, model: undefined };
+    assert.deepStrictEqual(readProviderOverride({ DeepSeek: { baseUrl: 42, model: false } }, 'DeepSeek'), emptyOverride);
+    assert.deepStrictEqual(readProviderOverride({ DeepSeek: 'invalid' }, 'DeepSeek'), emptyOverride);
+    assert.deepStrictEqual(readProviderOverride(null, 'DeepSeek'), emptyOverride);
   });
 
   it('returns empty fields when missing', () => {

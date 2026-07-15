@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-07-15
+### Added
+- **Generation workflow integration tests**: Cover generation, local/AI repair, staged-snapshot verification, commit, and manual-message mode through injectable Git/LLM ports.
+- **Provider manifest synchronization**: Built-in provider defaults now live in one manifest, with release-time checks that keep `package.json` and both README provider tables aligned.
+
+### Changed
+- **Generate flow architecture**: Split Git/diff preparation, generation/commit state transitions, and auto-push handling out of `runGenerate` for clearer ownership and testability.
+- **Provider architecture**: Separate provider protocol adapters from the bounded HTTP/SSE transport while preserving existing endpoint and streaming compatibility.
+- **Authoritative staged snapshots**: Compare `git diff --cached --name-status -z` plus the staged diff instead of depending on asynchronously refreshed VS Code Git state.
+- **Strict test linting**: Test sources are explicitly linted and warnings now fail the lint command.
+
+### Fixed
+- **Quoted diff paths**: Correctly parse paths containing spaces and Git C-style quoted UTF-8 escapes, so filtering and diff compaction still apply.
+- **Malformed settings**: Invalid runtime values in provider overrides, ignore paths, temperature, and diff limits are safely ignored or clamped instead of throwing.
+- **Bounded provider responses**: HTTP bodies, SSE streams, error bodies, and individual SSE events now have memory limits.
+
 ## [1.14.1] - 2026-07-11
 ### Fixed
 - **Changelog popup**: Toggling the setting applies without reload; when the popup is off, the last-seen version is still tracked so enabling later does not replay stale update notices.
