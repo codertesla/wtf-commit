@@ -1,7 +1,15 @@
 import * as vscode from 'vscode';
-import { PROVIDER_NAMES } from './types';
+import {
+  LEGACY_PROVIDER_NAMES,
+  PROVIDER_NAMES,
+  isLegacyProviderName,
+  type LegacyProviderName,
+} from './provider-manifest';
+import { planLegacyProviderToCustom } from './legacy-provider-migrate';
+import { getSecretKeyName } from './config';
 import { logInfo } from './log';
 import { mergeLegacyProviderOverride } from './settings-resolve';
+import { t } from './i18n';
 
 type ProviderOverride = { baseUrl?: string; model?: string };
 type ConfigTarget = vscode.ConfigurationTarget.Global | vscode.ConfigurationTarget.Workspace | vscode.ConfigurationTarget.WorkspaceFolder;
@@ -10,10 +18,11 @@ type ConfigTarget = vscode.ConfigurationTarget.Global | vscode.ConfigurationTarg
  * One-time migrations for renamed / consolidated settings.
  * Safe to call on every activate — no-ops when already migrated.
  */
-export async function migrateLegacySettings(): Promise<void> {
+export async function migrateLegacySettings(context: vscode.ExtensionContext): Promise<void> {
   const config = vscode.workspace.getConfiguration('wtfCommit');
   await migrateCommitMessageLanguage(config);
   await migrateLegacyProviderKeys(config);
+  await migrateRemovedProvidersToCustom(config, context);
 }
 
 async function migrateCommitMessageLanguage(config: vscode.WorkspaceConfiguration): Promise<void> {
@@ -79,8 +88,9 @@ function collectLegacyOverridesForTarget(
   const overridesInspect = config.inspect<Record<string, ProviderOverride>>('providerOverrides');
   const existing = readOverridesAtTarget(overridesInspect, target);
   const additions: Record<string, ProviderOverride> = {};
+  const providerKeys = new Set<string>([...PROVIDER_NAMES, ...LEGACY_PROVIDER_NAMES]);
 
-  for (const provider of PROVIDER_NAMES) {
+  for (const provider of providerKeys) {
     const baseUrl = readScopedString(config, `${provider}.baseUrl`, target);
     const model = readScopedString(config, `${provider}.model`, target);
     const merged = mergeLegacyProviderOverride(existing[provider], { baseUrl, model });
@@ -90,6 +100,68 @@ function collectLegacyOverridesForTarget(
   }
 
   return { existing, additions };
+}
+
+async function migrateRemovedProvidersToCustom(
+  config: vscode.WorkspaceConfiguration,
+  context: vscode.ExtensionContext
+): Promise<void> {
+  const targets: ConfigTarget[] = [
+    vscode.ConfigurationTarget.WorkspaceFolder,
+    vscode.ConfigurationTarget.Workspace,
+    vscode.ConfigurationTarget.Global,
+  ];
+
+  const migratedNames = new Set<LegacyProviderName>();
+
+  for (const target of targets) {
+    const provider = readScopedString(config, 'provider', target);
+    const overrides = readOverridesAtTarget(config.inspect<Record<string, ProviderOverride>>('providerOverrides'), target);
+    const plan = planLegacyProviderToCustom({
+      provider,
+      baseUrl: readScopedString(config, 'baseUrl', target),
+      model: readScopedString(config, 'model', target),
+      override: provider && isLegacyProviderName(provider) ? overrides[provider] : undefined,
+    });
+    if (!plan) {
+      continue;
+    }
+
+    if (plan.baseUrl) {
+      await config.update('baseUrl', plan.baseUrl, target);
+    }
+    if (plan.model) {
+      await config.update('model', plan.model, target);
+    }
+    await config.update('provider', 'Custom', target);
+    migratedNames.add(plan.legacyProvider);
+    logInfo(
+      `Migrated provider ${plan.legacyProvider} → Custom (${targetLabel(target)})`
+    );
+
+    await copyLegacySecretIfNeeded(context, plan.legacyProvider);
+  }
+
+  if (migratedNames.size > 0) {
+    const list = [...migratedNames].join(', ');
+    void vscode.window.showInformationMessage(t('legacyProviderMigrated', { providers: list }));
+  }
+}
+
+async function copyLegacySecretIfNeeded(
+  context: vscode.ExtensionContext,
+  legacyProvider: LegacyProviderName
+): Promise<void> {
+  const legacyKey = await context.secrets.get(getSecretKeyName(legacyProvider));
+  if (!legacyKey) {
+    return;
+  }
+  const customKey = await context.secrets.get(getSecretKeyName('Custom'));
+  if (customKey) {
+    return;
+  }
+  await context.secrets.store(getSecretKeyName('Custom'), legacyKey);
+  logInfo(`Copied API key from ${legacyProvider} → Custom`);
 }
 
 function readOverridesAtTarget(

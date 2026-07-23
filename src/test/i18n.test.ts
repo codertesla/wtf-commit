@@ -34,8 +34,8 @@ describe('i18n', () => {
   it('t replaces multiple occurrences of the same param', () => {
     setUiLanguage('en');
     assert.strictEqual(
-      t('apiKeySwitchedTo', { provider: 'GLM' }),
-      'API Key for GLM saved. Active provider is now GLM.'
+      t('apiKeySwitchedTo', { provider: 'OpenAI' }),
+      'API Key for OpenAI saved. Active provider is now OpenAI.'
     );
   });
 
@@ -56,7 +56,7 @@ describe('i18n', () => {
       'pushingProgress',
       'commitSuccessful',
       'welcomeTitle',
-      'mixedStageWarning',
+      'mixedStageStatusTip',
       'pushSuccessful',
     ] as const;
     for (const key of keys) {

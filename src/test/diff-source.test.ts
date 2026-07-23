@@ -7,7 +7,6 @@ function base(overrides: Partial<DiffSourceInput> = {}): DiffSourceInput {
     hasStaged: false,
     hasWorkingTree: false,
     autoCommit: false,
-    mixedStageReminderDismissed: false,
     workingTreeReminderDismissed: false,
     ...overrides,
   };
@@ -25,16 +24,10 @@ describe('planDiffSource', () => {
     );
   });
 
-  it('asks to confirm mixed staged/unstaged unless dismissed', () => {
+  it('uses staged with mixed tip when staged and unstaged both exist', () => {
     assert.deepStrictEqual(
       planDiffSource(base({ hasStaged: true, hasWorkingTree: true })),
-      { action: 'confirm_mixed_then_staged' }
-    );
-    assert.deepStrictEqual(
-      planDiffSource(
-        base({ hasStaged: true, hasWorkingTree: true, mixedStageReminderDismissed: true })
-      ),
-      { action: 'use_staged' }
+      { action: 'use_staged_mixed' }
     );
   });
 

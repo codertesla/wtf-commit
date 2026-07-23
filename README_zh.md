@@ -33,22 +33,21 @@
 
 ## ① 配置 AI（只需一次）
 
-你只需要「服务商 + Key」，其它都可以保持默认。
+默认即可：**Provider = DeepSeek**。你只需要一把 Key。
 
 1. **安装** — 在编辑器扩展视图搜索 **`WTF Commit`**（VS Code 或 Cursor）。
-2. **设置 API Key** — 命令面板 → **`WTF Commit: Set API Key`**。
-3. **在列表里选服务商** — 插件默认是 **DeepSeek**（**Gemini** 同样推荐）。**Model** 留空即用内置默认。
-4. **粘贴 Key**。若你选的不是 DeepSeek，提示切换时选 **切换 Provider**，让当前服务商与 Key 一致。
+2. **设置 API Key** — 命令面板 → **`WTF Commit: Set API Key`** → 接受 DeepSeek 默认 → 粘贴 Key。
+3. 还没有 Key？[DeepSeek API keys](https://platform.deepseek.com/api_keys)（扩展内也可一键打开）。
 
-申请 Key：[DeepSeek](https://platform.deepseek.com/api_keys) · [Gemini](https://aistudio.google.com/api-keys) · 更多见[支持的服务商](#ℹ️-支持的服务商与模型)。
-
-> 也可以先在设置 → WTF Commit 里改 **Provider**，再为该服务商执行 **Set API Key**，效果相同。
+> 以后要用别的服务商：在 Set API Key 里选 **选择其他服务商…**，或在设置里改 **Provider**。内置服务商请把 **Model** 留空。
 
 ## ② 日常使用（每次提交）
 
-1. 改完代码（尽量先 stage；开启 Auto Commit 时，未暂存变更会自动 stage）。
-2. 按下生成快捷键 — 信息流式写入，并在默认配置下 **直接 commit**（不再多弹「确认提交」）。
-3. 需要推远程时再 push — **Auto Push 默认关闭**，避免新用户误推。
+**快捷键会做什么：** 优先用**已暂存**变更 → 若暂存区为空且开启 Auto Commit，则**自动 stage 工作区** → 生成约定式提交信息 → **自动 commit**（默认）→ **不 push**（Auto Push 默认关）。
+
+1. 改完代码（尽量先 stage）。
+2. 按下生成快捷键 — 信息流式写入，并在默认配置下 **直接 commit**。
+3. 需要推远程时再 push — **Auto Push 默认关闭**。
 
 **默认快捷键：** `Cmd+Alt+G`（Mac）/ `Ctrl+Alt+G`（Windows/Linux）。
 
@@ -64,20 +63,21 @@
 
 > 只想生成信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.16.1）
+## 🆕 最新更新（v1.17.0）
 
-- **界面语言跟随 VS Code**：按 `vscode.env.language` 选择中/英（`zh*` → 中文，其余英文）；已移除 `wtfCommit.uiLanguage`。
-- **Prompt 不再出现在设置 UI**：需要自定义系统提示时，在 `settings.json` 写 `wtfCommit.prompt` 即可。
+- **仅保留五个服务商**：DeepSeek、Gemini、OpenAI、OpenRouter、Custom；原 MiMo / GLM / Z.AI / NVIDIA NIM 会自动迁移为 Custom。
+- **DeepSeek 优先**：Set API Key 默认 DeepSeek，并提供申请 Key 链接，减少首次选择。
+- **更少打断**：混合暂存改为状态栏提示；AI 修复自动执行；提交后若仍有未暂存变更会提示。
 
-> 更早版本的更新说明请查看 [CHANGELOG](CHANGELOG.md)。
+> 完整历史见 [CHANGELOG](CHANGELOG.md)。
 
 ## 功能特性
 
-- **约定式提交** — `feat` / `fix` / `docs` / …，支持本地格式修复 + **AI Repair**。
-- **智能 diff** — 优先暂存区；混合状态或仅工作区时会确认，避免「生成依据」和「实际提交」对不上。
+- **约定式提交** — `feat` / `fix` / `docs` / …，支持本地格式修复 + 自动 AI 修复。
+- **智能 diff** — 优先暂存区；开启 Auto Commit 且暂存区为空时自动 stage 工作区。
 - **意图感知** — 复用你已写在 SCM 输入框里的文字作为提示（无需额外表单）。
 - **流式预览** — 生成过程实时显示。
-- **自动提交与推送** — 可选一键流水线，并带确认开关。
+- **自动提交与推送** — 可选一键流水线，推送前可确认。
 - **多语言提交信息** — 英文、简/繁中文、日语、文言文或 **Custom**。
 - **自定义端点** — 内置多家服务商 + **Custom**（Ollama、中转等）。
 - **快捷键** — 默认 `Cmd+Alt+G` / `Ctrl+Alt+G`，可改成自己的习惯（例如连按两次 `Cmd+G`）。
@@ -94,7 +94,6 @@
 | 设置项目 | 描述 |
 |---------|-------------|
 | **Commit Message Language** | 生成的提交信息语言。 |
-| **Custom Commit Message Language** | 仅当 Commit Message Language 为 `Custom` 时生效。 |
 | **Provider** | AI 服务商（默认 DeepSeek）。 |
 | **Auto Commit** | **默认开启** — 生成后自动 commit。关闭则只写入 SCM，自行提交。 |
 | **Auto Push** | **默认关闭** — 开启后自动推送。需同时开启 Auto Commit。 |
@@ -102,7 +101,7 @@
 
 **高级** — Custom 的 Base URL/Model、Provider Overrides、ignore paths、状态栏开关等。
 
-> 插件界面语言跟随 VS Code（`vscode.env.language`）：`zh*` → 中文，其余回退英文。系统 Prompt 可在 `settings.json` 用 `wtfCommit.prompt` 覆盖（不在设置 UI 中展示）。
+> 插件界面语言跟随 VS Code（`vscode.env.language`）：`zh*` → 中文，其余回退英文。仅在 `settings.json` 覆盖的进阶项：`wtfCommit.prompt`；以及当 Commit Message Language 为 `Custom` 时的 `wtfCommit.customCommitMessageLanguage`。
 
 ### 2. 自定义模型与端点 (Custom Model)
 使用任意 OpenAI 兼容模型（如本地 Ollama）：
@@ -117,7 +116,14 @@
 如果您想让 AI 使用特定的语言（如粤语、法语或仅使用 Emoji）生成提交信息：
 
 1. 将 **Commit Message Language** 设为 `Custom`。
-2. 在 **Custom Commit Message Language** 中输入语言名称或规则（例如 `Emoji only`）。
+2. 在 `settings.json` 中填写目标语言，例如：
+
+```json
+{
+  "wtfCommit.commitMessageLanguage": "Custom",
+  "wtfCommit.customCommitMessageLanguage": "Emoji only"
+}
+```
 
 ---
 
@@ -136,14 +142,10 @@
 <!-- provider-manifest:start -->
 | 服务商 (Provider) | 默认模型 (Model) | 默认 Base URL |
 |----------|---------------|-----------------|
-| **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
-| **MiMo** | `mimo-v2.5` | `https://api.xiaomimimo.com/v1` |
-| **GLM** | `glm-4.7-flashx` | `https://open.bigmodel.cn/api/paas/v4` |
-| **Z.AI** | `glm-4.7-flashx` | `https://api.z.ai/api/paas/v4` |
 | **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
+| **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
-| **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | `https://integrate.api.nvidia.com/v1` |
 | **Custom** | - | - |
 <!-- provider-manifest:end -->
 
@@ -151,22 +153,22 @@
 
 | 服务商 | 获取 API Key |
 |--------|-------------|
-| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **DeepSeek** | [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) |
-| **MiMo** | [platform.xiaomimimo.com/console/api-keys](https://platform.xiaomimimo.com/console/api-keys) |
-| **GLM**（国内） | [open.bigmodel.cn/apikey/platform](https://open.bigmodel.cn/apikey/platform) |
-| **Z.AI**（国际） | [z.ai/manage-apikey/apikey-list](https://z.ai/manage-apikey/apikey-list) |
 | **Gemini** | [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys) |
+| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **OpenRouter** | [openrouter.ai/keys](https://openrouter.ai/keys) |
-| **NVIDIA NIM** | [build.nvidia.com](https://build.nvidia.com/) |
 
-> **GLM** 与 **Z.AI** 的 API Key 不通用 — 请在与你所选服务商对应的平台创建密钥。
+> 其它 OpenAI 兼容 API（MiMo、GLM、Z.AI、NVIDIA NIM、中转）：将 **Provider** 设为 **Custom**，在 Advanced 填写 **Base URL** 与 **Model**；或走 **OpenRouter**。
 
 ### 提交信息场景如何选型
 
 生成 Git 提交信息对模型智能要求不高，不必使用前沿大模型。按 **成本**、**延迟** 和是否已有 API Key 选择即可。
 
-以下为 **使用推荐** — 在设置中修改 **Provider** 即可切换（例如将 **Provider** 设为 **DeepSeek**，**Model** 留空即使用 `deepseek-v4-flash`）。
+**优先用默认**，除非你已有别家 Key：
+
+1. **DeepSeek V4 Flash** — **默认服务商**；**Model** 留空 → `deepseek-v4-flash`。快、便宜、质量好。扩展已自动关闭思考模式。
+2. **Gemini 3.5 Flash Lite** — 可选备选（免费额度）；**Provider** 选 **Gemini**。
+3. **OpenAI / OpenRouter / Custom** — 已有 Key 或中转端点时使用。
 
 **价格对比**（美元 / 百万 tokens，输入按未命中缓存计价；来源见文末链接）：
 
@@ -174,35 +176,18 @@
 |--------|------|-----:|-----:|------------:|------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | 零成本试用；质量与延迟不稳定 |
 | **OpenAI** | `gpt-5-nano` | $0.05 | $0.40 | ~$0.0003 | OpenAI 服务商默认 |
-| **Z.AI** | `glm-4.7-flashx` | $0.07 | $0.40 | ~$0.0004 | **Z.AI** 服务商默认；通常较慢 |
-| **GLM** | `glm-4.7-flashx` | ¥0.5 | ¥3 | ~¥0.003 | **GLM** 服务商默认；通常较慢 |
-| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **默认服务商** — 快、便宜、质量好 |
-| **MiMo** | `mimo-v2.5` | $0.14 | $0.28 | ~$0.0007 | 与 DeepSeek 同档；OpenAI 兼容 |
-| **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | **推荐** — 快；[免费额度](https://ai.google.dev/gemini-api/docs/pricing) 慷慨 |
-| **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | $0 | $0 | ~$0 | 免费开发端点；限流与可用性可能变化 |
+| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **默认 — 就用这个** |
+| **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | 备选；[免费额度](https://ai.google.dev/gemini-api/docs/pricing) 慷慨 |
 
-† 按 **约 5K 输入 + 150 输出 tokens** 估算。`glm-4.7-flashx` 国内单次约 **¥0.003**。美元行按未命中缓存计价。
+† 按 **约 5K 输入 + 150 输出 tokens** 估算。实际成本取决于 diff 大小与模型输出长度。
 
-> **GLM 与 Z.AI**：同一模型家族、不同平台 — **GLM** 走国内端点（`open.bigmodel.cn`），**Z.AI** 走国际端点（`api.z.ai`）。API Key 不通用。两者的**服务商默认**均为付费模型 **`glm-4.7-flashx`**。免费档 `glm-4.7-flash` 限流严重，不推荐使用。
-
-MiMo 国内按量（`mimo-v2.5`）：输入 ¥1.00 / 百万 tokens，输出 ¥2.00 / 百万 tokens（[官方定价](https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go)）。
-
-**使用推荐**（速度 + 性价比）— 在设置中将 **Provider** 改为对应项：
-
-1. **DeepSeek V4 Flash** — **默认服务商**；**Model** 留空 → `deepseek-v4-flash`。**综合首选**：快、便宜、质量好。扩展已自动关闭思考模式。
-2. **Gemini 3.5 Flash Lite** — **Provider** 选 **Gemini**，**Model** 留空 → `gemini-3.5-flash-lite`。**同样推荐**：速度快，免费额度慷慨；使用 `thinking_level: minimal`。
-3. **MiMo V2.5** — **Provider** 选 **MiMo**，**Model** 留空 → `mimo-v2.5`。与 DeepSeek 同美元价位。
-4. **GLM / Z.AI** — **Provider** 选 **GLM**（国内）或 **Z.AI**（国际），**Model** 留空 → `glm-4.7-flashx`。可用但通常**比 DeepSeek / Gemini Flash Lite 慢**，需账户余额。
-5. **`openrouter/free`** — **Provider** 选 **OpenRouter**；适合尝鲜。
-6. **NVIDIA NIM** — **Provider** 选 **NVIDIA NIM**，**Model** 留空 → `nvidia/nemotron-3-super-120b-a12b`。适合免费开发测试和跨 NVIDIA 托管模型目录试用；限流较低，且没有生产 SLA。
-
-官方定价：[DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [MiMo](https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [智谱 GLM](https://bigmodel.cn/pricing) · [Z.AI](https://docs.z.ai/guides/overview/pricing) · [OpenRouter](https://openrouter.ai/models) · [NVIDIA NIM](https://build.nvidia.com/explore/discover)
+官方定价：[DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [OpenRouter](https://openrouter.ai/models)
 
 > OpenRouter 的**服务商默认**为 `openrouter/free`。
 
-> NVIDIA NIM 的**服务商默认**为 `nvidia/nemotron-3-super-120b-a12b`。建议将 NVIDIA NIM 视为免费开发/测试端点，而不是稳定生产后端。
-
 > Gemini 使用 Google 原生 Interactions REST API（`/v1beta/interactions`），通过 `x-goog-api-key` 请求头认证，并将思考等级设为 `minimal`，以降低生成提交信息时的延迟。
+
+> 若你从仍包含 MiMo / GLM / Z.AI / NVIDIA NIM 的旧版升级：扩展会把对应 Provider 迁移为 **Custom**，并自动填入 Base URL / Model。
 
 > [!IMPORTANT]
 > **关于 Claude**: 目前**暂不支持** Claude 原生格式。请使用支持 OpenAI 兼容端点的中转服务。

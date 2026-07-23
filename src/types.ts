@@ -4,10 +4,14 @@ import type { ProviderName } from './provider-manifest';
 export {
   BUILT_IN_PROVIDER_NAMES,
   DEFAULT_PROVIDER,
+  isLegacyProviderName,
+  LEGACY_PROVIDER_MANIFEST,
+  LEGACY_PROVIDER_NAMES,
+  PROVIDER_API_KEY_URLS,
   PROVIDER_MANIFEST as PROVIDERS,
   PROVIDER_NAMES,
 } from './provider-manifest';
-export type { BuiltInProviderName, ProviderName } from './provider-manifest';
+export type { BuiltInProviderName, LegacyProviderName, ProviderName } from './provider-manifest';
 
 export interface GitExtension {
   getAPI(version: number): API;

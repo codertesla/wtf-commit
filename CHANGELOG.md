@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-07-23
+### Changed
+- **Slimmer provider list**: Built-in providers are now **DeepSeek**, **Gemini**, **OpenAI**, **OpenRouter**, and **Custom**. MiMo, GLM, Z.AI, and NVIDIA NIM were removed from Settings.
+- **Legacy provider auto-migration**: If Provider was MiMo / GLM / Z.AI / NVIDIA NIM, activation migrates that scope to **Custom**, fills Base URL + Model from the old defaults (or Provider Overrides), and copies the API key to Custom when Custom has no key yet.
+- **Thinking disable by host**: Custom endpoints on DeepSeek / GLM / Z.AI hosts still send `thinking: { type: "disabled" }` so migrated users keep fast responses.
+- **Custom commit language off Settings UI**: `wtfCommit.customCommitMessageLanguage` is no longer shown in Settings; set it in `settings.json` when Commit Message Language is `Custom`.
+- **Faster happy path**: Set API Key defaults to the current/DeepSeek provider with a Get API Key link; mixed staged/unstaged no longer blocks (status tip once); AI repair runs automatically without a modal; post-commit tip when unstaged files remain; snapshot-changed offers Generate Again.
+- **DeepSeek-first guidance**: Provider list and docs push DeepSeek as the single default path to reduce choice overload.
+
 ## [1.16.1] - 2026-07-23
 ### Changed
 - **UI language follows VS Code**: Removed `wtfCommit.uiLanguage`. The extension UI now tracks `vscode.env.language` (`zh*` → Chinese, otherwise English).

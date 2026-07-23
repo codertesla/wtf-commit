@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, Gemini, OpenAI, and more.",
-  "version": "1.16.1",
+  "version": "1.17.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -91,48 +91,38 @@
               "Custom"
             ],
             "default": "English",
-            "markdownDescription": "**Commit Message Language** — Language for the generated commit message (not the extension UI).",
+            "markdownDescription": "**Commit Message Language** — Language for the generated commit message (not the extension UI). When set to `Custom`, also set `wtfCommit.customCommitMessageLanguage` in `settings.json` (e.g. `French`, `Emoji only`).",
             "order": 0
-          },
-          "wtfCommit.customCommitMessageLanguage": {
-            "type": "string",
-            "default": "English",
-            "markdownDescription": "Used only when **Commit Message Language** is `Custom`. e.g. `French`, `Emoji only`, `Cantonese`.",
-            "order": 1
           },
           "wtfCommit.provider": {
             "type": "string",
             "enum": [
-              "OpenAI",
               "DeepSeek",
-              "MiMo",
-              "GLM",
-              "Z.AI",
               "Gemini",
+              "OpenAI",
               "OpenRouter",
-              "NVIDIA NIM",
               "Custom"
             ],
             "default": "DeepSeek",
-            "description": "Select an AI provider. Default is DeepSeek (deepseek-v4-flash) — fast and low-cost for commit messages.",
-            "order": 2
+            "markdownDescription": "**Provider** — Default is **DeepSeek** (`deepseek-v4-flash`). Use **OpenRouter** or **Custom** for other OpenAI-compatible endpoints (MiMo, GLM, Z.AI, NVIDIA NIM, proxies). Leave Model empty for built-in defaults.",
+            "order": 1
           },
           "wtfCommit.autoCommit": {
             "type": "boolean",
             "default": true,
-            "markdownDescription": "**Automation — Auto Commit** (default on): After generating, commit automatically. Turn off if you only want the message in Source Control for manual review.",
+            "markdownDescription": "**Auto Commit** (default on): Commit after generate. Turn off to only fill Source Control. **Auto Push** only runs when this is on.",
             "order": 10
           },
           "wtfCommit.autoPush": {
             "type": "boolean",
             "default": false,
-            "markdownDescription": "**Automation — Auto Push** (default off): After auto-commit, push to the remote. Keep off for new users; enable when you want a full local generate → commit → push shortcut. ⚠️ Requires **Auto Commit**.",
+            "markdownDescription": "**Auto Push** (default off): After auto-commit, push to the remote. Requires **Auto Commit**. Use **Confirm Before Push** as a safety gate.",
             "order": 11
           },
           "wtfCommit.confirmAutoPush": {
             "type": "boolean",
             "default": true,
-            "markdownDescription": "**Safety — Confirm Before Push** (default on): Ask before pushing when Auto Push is enabled. New users should keep this on; experienced users can turn it off for a fully unattended generate → commit → push shortcut.",
+            "markdownDescription": "**Confirm Before Push** (default on): Ask before pushing when Auto Push is enabled. Only applies when Auto Push is on.",
             "order": 20
           }
         }
@@ -149,15 +139,15 @@
           "wtfCommit.baseUrl": {
             "type": "string",
             "default": "",
-            "description": "API Base URL for the Custom provider. Built-in providers use their defaults or Provider Overrides.",
-            "markdownDescription": "API Base URL for the **Custom** provider only. Built-in providers use their own defaults unless configured in **Provider Overrides**.",
+            "description": "API Base URL for the Custom provider only.",
+            "markdownDescription": "**Custom only.** API Base URL when **Provider** is `Custom`. Built-in providers ignore this — use **Provider Overrides** to change their endpoint/model.",
             "order": 20
           },
           "wtfCommit.model": {
             "type": "string",
             "default": "",
-            "description": "Model name for the Custom provider. Built-in providers use their defaults or Provider Overrides.",
-            "markdownDescription": "Model name for the **Custom** provider only. Built-in providers use their own defaults unless configured in **Provider Overrides**.",
+            "description": "Model name for the Custom provider only.",
+            "markdownDescription": "**Custom only.** Model name when **Provider** is `Custom`. Built-in providers ignore this — leave empty for the provider default, or use **Provider Overrides**.",
             "order": 21
           },
           "wtfCommit.providerOverrides": {

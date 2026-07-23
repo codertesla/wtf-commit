@@ -95,6 +95,6 @@ export function asProviderName(rawProvider: string | undefined): ProviderName {
   return DEFAULT_PROVIDER;
 }
 
-export function getSecretKeyName(provider: ProviderName): string {
+export function getSecretKeyName(provider: string): string {
   return `${SECRET_KEY_PREFIX}${provider}`;
 }

@@ -54,7 +54,7 @@ describe('formatPushFailureMessage', () => {
         commandLabel: 'git status',
         detail: 'x',
         needsUndoPrompt: false,
-      }).startsWith('Push succeeded, but git status failed afterward')
+      }).includes('git status')
     );
     assert.ok(
       formatPushFailureMessage({
@@ -62,7 +62,7 @@ describe('formatPushFailureMessage', () => {
         commandLabel: 'git status',
         detail: 'x',
         needsUndoPrompt: false,
-      }).startsWith('Push may have succeeded')
+      }).includes('may have succeeded')
     );
     assert.ok(
       formatPushFailureMessage({
@@ -70,7 +70,7 @@ describe('formatPushFailureMessage', () => {
         commandLabel: 'git push',
         detail: 'x',
         needsUndoPrompt: true,
-      }).startsWith('Commit successful, but push failed')
+      }).includes('push failed')
     );
   });
 });

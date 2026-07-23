@@ -16,6 +16,7 @@ import { generateLock } from '../generate-lock';
 import { readStagedSnapshot } from '../git-staged-snapshot';
 import { executeGenerationWorkflow } from '../flow/generation-workflow';
 import { prepareGeneration } from './prepare-generation';
+import { offerMissingApiKeyActions } from './set-api-key';
 import {
   LONG_STATUS_MESSAGE_TIMEOUT_MS,
   STATUS_MESSAGE_TIMEOUT_MS,
@@ -44,13 +45,7 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
     const apiKey = await context.secrets.get(getSecretKeyName(config.provider));
 
     if (!apiKey) {
-      const action = await vscode.window.showErrorMessage(
-        t('apiKeyNotSet', { provider: config.provider }),
-        t('setApiKey')
-      );
-      if (action === t('setApiKey')) {
-        void vscode.commands.executeCommand('wtf-commit.setApiKey');
-      }
+      await offerMissingApiKeyActions(config.provider);
       return;
     }
 
@@ -65,7 +60,7 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
     if (!prepared) {
       return;
     }
-    const { diff, intent, stagedSnapshot } = prepared;
+    const { diff, intent, stagedSnapshot, remainingUnstagedCount } = prepared;
     intentForRestore = intent;
 
     // Clear the input box so the streaming preview starts from a clean slate.
@@ -111,10 +106,14 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
       await vscode.commands.executeCommand('workbench.view.scm');
       if (config.autoPush) {
         const fixAction = await vscode.window.showWarningMessage(
-          t('autoPushRequiresAutoCommit'),
+          t('autoPushNeedsAutoCommit'),
+          t('enableAutoCommit'),
           t('openSettings')
         );
-        if (fixAction === t('openSettings')) {
+        if (fixAction === t('enableAutoCommit')) {
+          await vscode.workspace.getConfiguration('wtfCommit')
+            .update('autoCommit', true, vscode.ConfigurationTarget.Global);
+        } else if (fixAction === t('openSettings')) {
           void vscode.commands.executeCommand('workbench.action.openSettings', 'wtfCommit');
         }
         return;
@@ -128,11 +127,22 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
     }
     if (workflowResult.status === 'snapshot_changed') {
       await vscode.commands.executeCommand('workbench.view.scm');
-      vscode.window.showWarningMessage(t('stagedSnapshotChanged'));
+      const again = t('generateAgain');
+      const action = await vscode.window.showWarningMessage(t('stagedSnapshotChanged'), again);
+      if (action === again) {
+        void vscode.commands.executeCommand('wtf-commit.generate');
+      }
       return;
     }
     const normalizedCommitMessage = workflowResult.message;
-    showStatusMessage(`$(check) ${t('commitSuccessful')}`, STATUS_MESSAGE_TIMEOUT_MS);
+    if (remainingUnstagedCount > 0) {
+      showStatusMessage(
+        `$(check) ${t('commitSuccessfulUnstagedRemain', { count: remainingUnstagedCount })}`,
+        LONG_STATUS_MESSAGE_TIMEOUT_MS
+      );
+    } else {
+      showStatusMessage(`$(check) ${t('commitSuccessful')}`, STATUS_MESSAGE_TIMEOUT_MS);
+    }
 
     if (config.autoPush) {
       await runAutoPush(repository, normalizedCommitMessage, config.confirmAutoPush);
@@ -184,14 +194,8 @@ async function resolveCommitIssues(
   inputBox?: { value: string }
 ): Promise<string | undefined> {
   const issueSummary = input.issues.map((issue) => issue.message).join(' ');
-  const action = await vscode.window.showWarningMessage(
-    t('needsAdjustment', { detail: issueSummary }),
-    t('aiRepair'),
-    t('keepOriginal')
-  );
-  if (action !== t('aiRepair')) {
-    return input.message;
-  }
+  logInfo(`Commit message needs adjustment (${issueSummary}); attempting AI repair.`);
+  showStatusMessage(`$(tools) ${t('autoRepairing')}`, STATUS_MESSAGE_TIMEOUT_MS);
 
   try {
     const repaired = await repairCommitMessage(
@@ -212,15 +216,18 @@ async function resolveCommitIssues(
       if (inputBox) {
         inputBox.value = input.message;
       }
-      vscode.window.showErrorMessage(t('repairEmpty'));
-      return undefined;
+      showStatusMessage(`$(warning) ${t('repairFailedOriginalKept')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
+      return input.message;
     }
     const remainingIssues = findConventionalCommitIssues(normalizeCommitMessage(repaired));
     if (remainingIssues.length > 0) {
-      vscode.window.showWarningMessage(t('repairRemainingIssues', {
-        count: remainingIssues.length,
-        detail: remainingIssues.map((issue) => issue.message).join(' '),
-      }));
+      showStatusMessage(
+        `$(warning) ${t('repairRemainingIssues', {
+          count: remainingIssues.length,
+          detail: remainingIssues.map((issue) => issue.message).join(' '),
+        })}`,
+        LONG_STATUS_MESSAGE_TIMEOUT_MS
+      );
     }
     return repaired;
   } catch (error) {
@@ -230,10 +237,11 @@ async function resolveCommitIssues(
     if (inputBox) {
       inputBox.value = input.message;
     }
-    await handleRequestFailure(error);
-    await vscode.commands.executeCommand('workbench.view.scm');
+    if (error.code !== 'cancelled') {
+      await handleRequestFailure(error);
+    }
     showStatusMessage(`$(warning) ${t('repairFailedOriginalKept')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
-    return undefined;
+    return input.message;
   }
 }
 

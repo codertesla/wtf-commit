@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { PROVIDER_NAMES } from './types';
+import { PROVIDER_NAMES, PROVIDER_API_KEY_URLS, DEFAULT_PROVIDER } from './types';
 import { getSecretKeyName } from './config';
 import { setUiLanguage, t, asUiLanguage, type UiLanguage } from './i18n';
 import { logInfo, logError, setOutputChannel } from './log';
@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   logInfo('Extension activated');
 
-  const settingsReady = migrateLegacySettings().catch((error) => {
+  const settingsReady = migrateLegacySettings(context).catch((error) => {
     logError('Failed to migrate legacy settings', error);
   });
 
@@ -117,15 +117,23 @@ async function checkFirstUseGuidance(context: vscode.ExtensionContext): Promise<
   }
 
   const setKeyLabel = t('setApiKey');
+  const getKeyLabel = t('getApiKey');
+  const deepSeekKeyUrl = PROVIDER_API_KEY_URLS[DEFAULT_PROVIDER];
   const action = await vscode.window.showInformationMessage(
     t('welcomeTitle'),
     setKeyLabel,
+    ...(deepSeekKeyUrl ? [getKeyLabel] : []),
     t('remindMeLater'),
     t('dontShowAgain')
   );
 
   if (action === setKeyLabel) {
     void vscode.commands.executeCommand('wtf-commit.setApiKey');
+    return;
+  }
+
+  if (action === getKeyLabel && deepSeekKeyUrl) {
+    await vscode.env.openExternal(vscode.Uri.parse(deepSeekKeyUrl));
     return;
   }
 

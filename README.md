@@ -33,22 +33,21 @@ Onboarding is intentionally **two phases**. You only configure AI once; after th
 
 ## ① Configure AI (once)
 
-You need a provider and a key. Everything else can stay on defaults.
+Defaults are enough: **Provider = DeepSeek**. You only need a key.
 
 1. **Install** — search **`WTF Commit`** in your editor’s Extensions view (VS Code or Cursor).
-2. **Set API Key** — Command Palette → **`WTF Commit: Set API Key`**.
-3. **Choose a provider** in the picker — the extension default is **DeepSeek** (also great: **Gemini**). Leave **Model** empty for the built-in default.
-4. **Paste the key**. If you picked someone other than DeepSeek, choose **Switch Provider** when prompted so the active provider matches the key.
+2. **Set API Key** — Command Palette → **`WTF Commit: Set API Key`** → accept the DeepSeek default → paste the key.
+3. Need a key? [DeepSeek API keys](https://platform.deepseek.com/api_keys) (linked from the extension too).
 
-Need a key? [DeepSeek](https://platform.deepseek.com/api_keys) · [Gemini](https://aistudio.google.com/api-keys) · more in [Supported providers](#ℹ️-supported-providers--models).
-
-> You can also set **Provider** under Settings → WTF Commit, then run **Set API Key** for that provider. Same result.
+> Want another provider later? In Set API Key choose **Choose another provider…**, or change **Provider** in Settings. Leave **Model** empty for built-in defaults.
 
 ## ② Daily use (every commit)
 
-1. Make your code changes (stage when you can; with Auto Commit on, unstaged work is staged for you).
-2. Press the generate shortcut — the message streams in, then **commits by default** (no extra “confirm commit” dialog).
-3. Push yourself when ready — **Auto Push is off by default** so new users never surprise-push.
+**What the shortcut does:** prefers **staged** changes → if nothing is staged and Auto Commit is on, **stages your working tree** → generates a Conventional Commit → **commits** (default) → does **not** push (Auto Push off).
+
+1. Make your code changes (stage when you can).
+2. Press the generate shortcut — the message streams in, then **commits by default**.
+3. Push yourself when ready — **Auto Push is off by default**.
 
 **Default shortcut:** `Cmd+Alt+G` (Mac) / `Ctrl+Alt+G` (Windows/Linux).
 
@@ -64,20 +63,21 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.16.1)
+## 🆕 Latest (v1.17.0)
 
-- **UI follows VS Code**: Extension UI language tracks `vscode.env.language` (`zh*` → 中文, otherwise English); `wtfCommit.uiLanguage` removed.
-- **Prompt off Settings UI**: Override `wtfCommit.prompt` in `settings.json` only when you need a custom system prompt.
+- **Five providers only**: DeepSeek, Gemini, OpenAI, OpenRouter, Custom — former MiMo/GLM/Z.AI/NVIDIA NIM settings migrate to Custom automatically.
+- **DeepSeek-first setup**: Set API Key defaults to DeepSeek with a Get API Key link; fewer choices on first run.
+- **Fewer interruptions**: Mixed staged/unstaged is a status tip (not a modal); AI repair runs automatically; post-commit tip when unstaged files remain.
 
-> See [CHANGELOG](CHANGELOG.md) for earlier releases.
+> See [CHANGELOG](CHANGELOG.md) for full history.
 
 ## 🚀 Features
 
-- **Conventional Commits** — `feat` / `fix` / `docs` / … with optional local format fix + **AI Repair**.
-- **Smart diffing** — Prefers staged changes; confirms mixed or working-tree-only cases so the message matches what you intend to commit.
+- **Conventional Commits** — `feat` / `fix` / `docs` / … with optional local format fix + automatic AI repair.
+- **Smart diffing** — Prefers staged changes; with Auto Commit, stages the working tree when nothing is staged.
 - **Intent-aware** — Text already in the SCM input is used as a generation hint (no extra prompt UI).
 - **Streaming preview** — Watch the message appear live while the model runs.
-- **Auto Commit & Push** — Optional one-keystroke pipeline with confirmations.
+- **Auto Commit & Push** — Optional one-keystroke pipeline with a push confirmation.
 - **Multi-language messages** — English, 简体/繁体中文, Japanese, Classical Chinese, or **Custom**.
 - **Bring your own endpoint** — Built-in providers plus **Custom** (Ollama, proxies, etc.).
 - **Keyboard shortcut** — Default `Cmd+Alt+G` / `Ctrl+Alt+G`; rebind freely (e.g. double `Cmd+G`).
@@ -94,7 +94,6 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit`. Settings are sp
 | Setting | Description |
 |---------|-------------|
 | **Commit Message Language** | Language for generated commit messages. |
-| **Custom Commit Message Language** | Used only when Commit Message Language is `Custom`. |
 | **Provider** | AI backend (default DeepSeek). |
 | **Auto Commit** | **Default on** — commit after generate. Off = message only in Source Control. |
 | **Auto Push** | **Default off** — enable for push after commit. Requires Auto Commit. |
@@ -102,7 +101,7 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit`. Settings are sp
 
 **Advanced** — Custom Base URL/Model, Provider Overrides, ignore paths, status bar toggle.
 
-> Extension UI language follows VS Code (`vscode.env.language`): `zh*` → 中文, otherwise English. System prompt can be overridden in `settings.json` via `wtfCommit.prompt` (not shown in the Settings UI).
+> Extension UI language follows VS Code (`vscode.env.language`): `zh*` → 中文, otherwise English. Power-user overrides in `settings.json` only: `wtfCommit.prompt`, and when Commit Message Language is `Custom`, `wtfCommit.customCommitMessageLanguage`.
 
 ### 2. Custom Model & Endpoints
 You can use any OpenAI-compatible model (like local models via Ollama):
@@ -117,7 +116,14 @@ To override a built-in provider's endpoint/model, use **Provider Overrides** (no
 If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji-only):
 
 1. Set **Commit Message Language** to `Custom`.
-2. Enter your target language in **Custom Commit Message Language** (e.g., `Emoji only`).
+2. In `settings.json`, set the target language, for example:
+
+```json
+{
+  "wtfCommit.commitMessageLanguage": "Custom",
+  "wtfCommit.customCommitMessageLanguage": "Emoji only"
+}
+```
 
 ---
 
@@ -136,14 +142,10 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 <!-- provider-manifest:start -->
 | Provider | Default Model | Default Base URL |
 |----------|---------------|-----------------|
-| **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
-| **MiMo** | `mimo-v2.5` | `https://api.xiaomimimo.com/v1` |
-| **GLM** | `glm-4.7-flashx` | `https://open.bigmodel.cn/api/paas/v4` |
-| **Z.AI** | `glm-4.7-flashx` | `https://api.z.ai/api/paas/v4` |
 | **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
+| **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
-| **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | `https://integrate.api.nvidia.com/v1` |
 | **Custom** | - | - |
 <!-- provider-manifest:end -->
 
@@ -151,22 +153,22 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 
 | Provider | Get API Key |
 |----------|-------------|
-| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **DeepSeek** | [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) |
-| **MiMo** | [platform.xiaomimimo.com/console/api-keys](https://platform.xiaomimimo.com/console/api-keys) |
-| **GLM** (China) | [open.bigmodel.cn/apikey/platform](https://open.bigmodel.cn/apikey/platform) |
-| **Z.AI** (International) | [z.ai/manage-apikey/apikey-list](https://z.ai/manage-apikey/apikey-list) |
 | **Gemini** | [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys) |
+| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **OpenRouter** | [openrouter.ai/keys](https://openrouter.ai/keys) |
-| **NVIDIA NIM** | [build.nvidia.com](https://build.nvidia.com/) |
 
-> **GLM** and **Z.AI** keys are not interchangeable — create a key on the platform that matches your provider.
+> Other OpenAI-compatible APIs (MiMo, GLM, Z.AI, NVIDIA NIM, proxies): set **Provider** to **Custom** and fill **Base URL** + **Model** under Advanced — or route through **OpenRouter**.
 
 ### Choosing a model for commit messages
 
 Generating a commit message is a lightweight task — you don't need a frontier model. Pick based on **cost**, **latency**, and whether you already have an API key.
 
-The list below is **our recommendation** — change **Provider** in settings to use a different service (e.g. set **Provider** to **DeepSeek** and leave **Model** empty for `deepseek-v4-flash`).
+**Stick with the default** unless you already have another key:
+
+1. **DeepSeek V4 Flash** — **Default Provider**; leave **Model** empty → `deepseek-v4-flash`. Fast, cheap, high quality. Thinking mode is disabled automatically.
+2. **Gemini 3.5 Flash Lite** — optional alternative with a free tier; set **Provider** to **Gemini**.
+3. **OpenAI / OpenRouter / Custom** — use these if you already have keys or a proxy endpoint.
 
 **Pricing comparison** (USD per 1M tokens, cache-miss input; sources linked below):
 
@@ -174,33 +176,18 @@ The list below is **our recommendation** — change **Provider** in settings to 
 |----------|-------|------:|-------:|--------------------:|-------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | Zero-cost trials; quality/latency vary |
 | **OpenAI** | `gpt-5-nano` | $0.05 | $0.40 | ~$0.0003 | OpenAI provider default |
-| **Z.AI** | `glm-4.7-flashx` | $0.07 | $0.40 | ~$0.0004 | **Z.AI** provider default; often slower |
-| **GLM** | `glm-4.7-flashx` | ¥0.5 (~$0.07) | ¥3 (~$0.42) | ~$0.0004 | **GLM** provider default; often slower |
-| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Default Provider** — fast, cheap, great quality |
-| **MiMo** | `mimo-v2.5` | $0.14 | $0.28 | ~$0.0007 | Same price tier as DeepSeek; OpenAI-compatible |
-| **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | **Recommended** — fast; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
-| **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | $0 | $0 | ~$0 | Free development endpoint; rate limits and availability vary |
+| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Default — use this** |
+| **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | Alternative; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
 
-† Rough estimate for **~5K input + 150 output tokens** (typical diff + commit message), no prompt cache. GLM CNY prices converted at ~¥7.2/$ for comparison. Actual cost depends on diff size and model verbosity.
+† Rough estimate for **~5K input + 150 output tokens** (typical diff + commit message), no prompt cache. Actual cost depends on diff size and model verbosity.
 
-> **GLM vs Z.AI**: Same model family, different platforms — **GLM** uses the China endpoint (`open.bigmodel.cn`); **Z.AI** uses the international endpoint (`api.z.ai`). API keys are not interchangeable. Each uses **`glm-4.7-flashx`** as its **provider default** (paid). The free `glm-4.7-flash` tier is heavily rate-limited and not recommended.
-
-**Our recommendation** (speed + value) — set **Provider** in settings to match your pick:
-
-1. **DeepSeek V4 Flash** — **Default Provider**; leave **Model** empty → `deepseek-v4-flash`. **Best overall**: fast, cheap, high quality. Thinking mode is disabled automatically.
-2. **Gemini 3.5 Flash Lite** — set **Provider** to **Gemini**; leave **Model** empty → `gemini-3.5-flash-lite`. **Also excellent**: fast with a generous free tier; uses `thinking_level: minimal`.
-3. **MiMo V2.5** — set **Provider** to **MiMo**; leave **Model** empty → `mimo-v2.5`. Same USD price band as DeepSeek.
-4. **GLM / Z.AI** — set **Provider** to **GLM** (China) or **Z.AI** (international); leave **Model** empty → `glm-4.7-flashx`. Works reliably but is often **slower** than DeepSeek or Gemini Flash Lite. Requires a paid balance.
-5. **`openrouter/free`** — set **Provider** to **OpenRouter**; fine for experimenting.
-6. **NVIDIA NIM** — set **Provider** to **NVIDIA NIM**; leave **Model** empty → `nvidia/nemotron-3-super-120b-a12b`. Good for free development testing across NVIDIA's hosted model catalog; expect lower rate limits and no production SLA.
-
-Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [MiMo](https://mimo.mi.com/docs/zh-CN/price/pay-as-you-go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [Zhipu GLM](https://bigmodel.cn/pricing) · [Z.AI](https://docs.z.ai/guides/overview/pricing) · [OpenRouter](https://openrouter.ai/models) · [NVIDIA NIM](https://build.nvidia.com/explore/discover)
+Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [OpenRouter](https://openrouter.ai/models)
 
 > OpenRouter **provider default** is `openrouter/free`.
 
-> NVIDIA NIM **provider default** is `nvidia/nemotron-3-super-120b-a12b`. NVIDIA NIM is best treated as a free development/testing endpoint, not a guaranteed production backend.
-
 > Gemini uses Google's native Interactions REST API (`/v1beta/interactions`), authenticates with the `x-goog-api-key` header, and uses the `minimal` thinking level to reduce latency for commit-message generation.
+
+> Upgrading from an older build that used MiMo / GLM / Z.AI / NVIDIA NIM: the extension migrates that Provider setting to **Custom** and fills Base URL / Model automatically.
 
 > [!IMPORTANT]
 > **Claude Support**: Native Claude format is not supported yet. Please use a proxy service that provides an OpenAI-compatible endpoint.

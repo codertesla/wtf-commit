@@ -1,4 +1,5 @@
 import { getGitCommandError, getErrorMessage } from './errors';
+import { t } from './i18n';
 
 export type PushFailureKind =
   | 'push_succeeded_with_followup_warning'
@@ -27,7 +28,7 @@ export function classifyPushFailure(
 ): PushFailureClassification {
   const gitError = getGitCommandError(error);
   const command = gitError?.gitCommand;
-  const commandLabel = command ? `git ${command}` : 'Git repository refresh';
+  const commandLabel = command ? `git ${command}` : t('gitRefreshLabel');
   const detail = gitError?.stderr?.trim() || getErrorMessage(error);
 
   if (command && command !== 'push') {
@@ -58,10 +59,16 @@ export function classifyPushFailure(
 export function formatPushFailureMessage(classification: PushFailureClassification): string {
   switch (classification.kind) {
     case 'push_succeeded_with_followup_warning':
-      return `Push succeeded, but ${classification.commandLabel} failed afterward: ${classification.detail}`;
+      return t('pushSucceededWithFollowup', {
+        command: classification.commandLabel,
+        detail: classification.detail,
+      });
     case 'push_may_have_succeeded':
-      return `Push may have succeeded, but ${classification.commandLabel} failed afterward: ${classification.detail}`;
+      return t('pushMayHaveSucceeded', {
+        command: classification.commandLabel,
+        detail: classification.detail,
+      });
     case 'push_failed':
-      return `Commit successful, but push failed: ${classification.detail}`;
+      return t('pushFailedAfterCommit', { detail: classification.detail });
   }
 }

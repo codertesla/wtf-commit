@@ -1,6 +1,6 @@
 /**
  * Pure planner for which git diff source the generate flow should use.
- * UI confirmation is left to the caller; this only decides the next step.
+ * UI tips are left to the caller; this only decides the next step.
  *
  * Smart Stage is always on: Auto Commit stages the working tree when needed;
  * review-only mode can generate from the working tree after a confirm.
@@ -9,7 +9,7 @@
 export type DiffSourcePlan =
   | { action: 'abort_no_changes' }
   | { action: 'use_staged' }
-  | { action: 'confirm_mixed_then_staged' }
+  | { action: 'use_staged_mixed' }
   | { action: 'auto_stage_working_tree' }
   | { action: 'confirm_working_tree' }
   | { action: 'use_working_tree' };
@@ -18,8 +18,6 @@ export interface DiffSourceInput {
   hasStaged: boolean;
   hasWorkingTree: boolean;
   autoCommit: boolean;
-  /** User chose "Don't Remind Me" on mixed staged/unstaged warning. */
-  mixedStageReminderDismissed: boolean;
   /** User chose "Don't Remind Me" on working-tree-only generation (non-autoCommit). */
   workingTreeReminderDismissed: boolean;
 }
@@ -28,7 +26,7 @@ export interface DiffSourceInput {
  * Decide how generate should obtain the diff.
  *
  * Rules:
- * - Staged present (optionally with unstaged): prefer staged only.
+ * - Staged present (optionally with unstaged): prefer staged only (mixed is non-blocking).
  * - Working tree only + Auto Commit: stage then use index.
  * - Working tree only + non-AutoCommit: confirm (or use after dismiss).
  */
@@ -40,10 +38,7 @@ export function planDiffSource(input: DiffSourceInput): DiffSourcePlan {
   }
 
   if (hasStaged && hasWorkingTree) {
-    if (input.mixedStageReminderDismissed) {
-      return { action: 'use_staged' };
-    }
-    return { action: 'confirm_mixed_then_staged' };
+    return { action: 'use_staged_mixed' };
   }
 
   if (hasStaged) {

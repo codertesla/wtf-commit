@@ -9,6 +9,7 @@ import {
   extractResponseContent,
   REPAIR_DIFF_MAX_CHARS,
 } from '../llm/provider';
+import { shouldDisableThinking } from '../llm/adapters';
 import { RequestFailure } from '../types';
 
 const cancellationToken = {
@@ -120,23 +121,17 @@ describe('buildProviderEndpoint', () => {
     );
   });
 
-  it('should handle MiMo provider', () => {
+  it('should handle Custom OpenAI-compatible endpoints', () => {
     assert.strictEqual(
-      buildProviderEndpoint('https://api.xiaomimimo.com/v1', 'MiMo'),
+      buildProviderEndpoint('https://api.xiaomimimo.com/v1', 'Custom'),
       'https://api.xiaomimimo.com/v1/chat/completions'
     );
-  });
-
-  it('should handle Z.AI provider', () => {
     assert.strictEqual(
-      buildProviderEndpoint('https://api.z.ai/api/paas/v4', 'Z.AI'),
+      buildProviderEndpoint('https://api.z.ai/api/paas/v4', 'Custom'),
       'https://api.z.ai/api/paas/v4/chat/completions'
     );
-  });
-
-  it('should handle NVIDIA NIM provider', () => {
     assert.strictEqual(
-      buildProviderEndpoint('https://integrate.api.nvidia.com/v1', 'NVIDIA NIM'),
+      buildProviderEndpoint('https://integrate.api.nvidia.com/v1', 'Custom'),
       'https://integrate.api.nvidia.com/v1/chat/completions'
     );
   });
@@ -372,7 +367,30 @@ describe('Gemini Interactions API', () => {
 });
 
 describe('Thinking-capable providers', () => {
-  it('should disable thinking for GLM requests', async () => {
+  it('should disable thinking for DeepSeek and known Custom hosts', () => {
+    assert.strictEqual(
+      shouldDisableThinking('DeepSeek', 'https://api.deepseek.com/chat/completions'),
+      true
+    );
+    assert.strictEqual(
+      shouldDisableThinking('Custom', 'https://api.z.ai/api/paas/v4/chat/completions'),
+      true
+    );
+    assert.strictEqual(
+      shouldDisableThinking('Custom', 'https://open.bigmodel.cn/api/paas/v4/chat/completions'),
+      true
+    );
+    assert.strictEqual(
+      shouldDisableThinking('Custom', 'https://api.openai.com/v1/chat/completions'),
+      false
+    );
+    assert.strictEqual(
+      shouldDisableThinking('OpenAI', 'https://api.openai.com/v1/chat/completions'),
+      false
+    );
+  });
+
+  it('should disable thinking for DeepSeek requests', async () => {
     let requestBody = '';
     const server = http.createServer((request, response) => {
       request.on('data', (chunk: Buffer) => {
@@ -391,10 +409,10 @@ describe('Thinking-capable providers', () => {
       const address = server.address();
       assert.ok(address && typeof address !== 'string');
       const result = await callLLM({
-        provider: 'GLM',
+        provider: 'DeepSeek',
         endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
-        apiKey: 'glm-key',
-        model: 'glm-4.7-flashx',
+        apiKey: 'deepseek-key',
+        model: 'deepseek-v4-flash',
         systemPrompt: 'Return a commit message.',
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
@@ -410,7 +428,7 @@ describe('Thinking-capable providers', () => {
     }
   });
 
-  it('should stream GLM answer content when thinking is disabled', async () => {
+  it('should stream answer content when thinking is disabled', async () => {
     let requestBody = '';
     const server = http.createServer((request, response) => {
       request.on('data', (chunk: Buffer) => {
@@ -431,10 +449,10 @@ describe('Thinking-capable providers', () => {
       assert.ok(address && typeof address !== 'string');
       const chunks: string[] = [];
       const result = await callLLM({
-        provider: 'GLM',
+        provider: 'DeepSeek',
         endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
-        apiKey: 'glm-key',
-        model: 'glm-4.7-flashx',
+        apiKey: 'deepseek-key',
+        model: 'deepseek-v4-flash',
         systemPrompt: 'Return a commit message.',
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,

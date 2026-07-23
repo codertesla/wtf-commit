@@ -114,12 +114,27 @@ export function buildRequestBody(
     temperature: DEFAULT_TEMPERATURE,
     max_tokens: MAX_OUTPUT_TOKENS,
     stream: useStreaming || undefined,
-    ...(shouldDisableThinking(input.provider) ? { thinking: { type: 'disabled' as const } } : {}),
+    ...(shouldDisableThinking(input.provider, input.endpoint) ? { thinking: { type: 'disabled' as const } } : {}),
   };
 }
 
-function shouldDisableThinking(provider: ProviderName): boolean {
-  return provider === 'GLM' || provider === 'Z.AI' || provider === 'DeepSeek';
+/** DeepSeek / GLM / Z.AI thinking mode slows commit messages; also detect via Custom host. */
+export function shouldDisableThinking(provider: ProviderName, endpoint: string): boolean {
+  if (provider === 'DeepSeek') {
+    return true;
+  }
+  try {
+    const host = new URL(endpoint).hostname.toLowerCase();
+    return (
+      host === 'api.deepseek.com'
+      || host === 'open.bigmodel.cn'
+      || host.endsWith('.bigmodel.cn')
+      || host === 'api.z.ai'
+      || host.endsWith('.z.ai')
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function buildAuthHeaders(apiKey: string, provider: ProviderName): Record<string, string> {

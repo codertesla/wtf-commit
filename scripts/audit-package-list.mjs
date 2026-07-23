@@ -29,6 +29,7 @@ const allowedFiles = new Set([
   'out/config.js',
   'out/settings-resolve.js',
   'out/settings-migrate.js',
+  'out/legacy-provider-migrate.js',
   'out/ui.js',
   'out/i18n.js',
   'out/push-failure.js',
