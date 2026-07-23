@@ -7,7 +7,6 @@ function base(overrides: Partial<DiffSourceInput> = {}): DiffSourceInput {
     hasStaged: false,
     hasWorkingTree: false,
     autoCommit: false,
-    smartStage: true,
     mixedStageReminderDismissed: false,
     workingTreeReminderDismissed: false,
     ...overrides,
@@ -39,27 +38,16 @@ describe('planDiffSource', () => {
     );
   });
 
-  it('auto-stages working tree when Auto Commit + Smart Stage', () => {
+  it('auto-stages working tree when Auto Commit is on', () => {
     assert.deepStrictEqual(
-      planDiffSource(base({ hasWorkingTree: true, autoCommit: true, smartStage: true })),
+      planDiffSource(base({ hasWorkingTree: true, autoCommit: true })),
       { action: 'auto_stage_working_tree' }
     );
   });
 
-  it('aborts when working tree only and Smart Stage is off', () => {
+  it('requires working-tree confirmation for non-autoCommit', () => {
     assert.deepStrictEqual(
-      planDiffSource(base({ hasWorkingTree: true, smartStage: false })),
-      { action: 'abort_no_staged' }
-    );
-    assert.deepStrictEqual(
-      planDiffSource(base({ hasWorkingTree: true, autoCommit: true, smartStage: false })),
-      { action: 'abort_no_staged' }
-    );
-  });
-
-  it('requires working-tree confirmation for non-autoCommit + Smart Stage', () => {
-    assert.deepStrictEqual(
-      planDiffSource(base({ hasWorkingTree: true, autoCommit: false, smartStage: true })),
+      planDiffSource(base({ hasWorkingTree: true, autoCommit: false })),
       { action: 'confirm_working_tree' }
     );
     assert.deepStrictEqual(
@@ -67,7 +55,6 @@ describe('planDiffSource', () => {
         base({
           hasWorkingTree: true,
           autoCommit: false,
-          smartStage: true,
           workingTreeReminderDismissed: true,
         })
       ),

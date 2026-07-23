@@ -6,6 +6,8 @@ import {
 } from '../types';
 
 const MAX_OUTPUT_TOKENS = 512;
+/** Fixed sampling temperature for OpenAI-compatible providers (not sent to Gemini). */
+const DEFAULT_TEMPERATURE = 1;
 
 export interface ChatCompletionRequest {
   model: string;
@@ -22,7 +24,6 @@ export interface GeminiInteractionRequest {
   system_instruction: string;
   generation_config: {
     thinking_level: 'minimal';
-    temperature: number;
     max_output_tokens: number;
   };
   stream?: boolean;
@@ -98,7 +99,6 @@ export function buildRequestBody(
       system_instruction: systemPrompt,
       generation_config: {
         thinking_level: 'minimal',
-        temperature: input.temperature,
         max_output_tokens: MAX_OUTPUT_TOKENS,
       },
       stream: useStreaming || undefined,
@@ -111,7 +111,7 @@ export function buildRequestBody(
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userContent },
     ],
-    temperature: input.temperature,
+    temperature: DEFAULT_TEMPERATURE,
     max_tokens: MAX_OUTPUT_TOKENS,
     stream: useStreaming || undefined,
     ...(shouldDisableThinking(input.provider) ? { thinking: { type: 'disabled' as const } } : {}),

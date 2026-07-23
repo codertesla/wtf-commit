@@ -53,7 +53,7 @@ describe('i18n', () => {
       'commitSuccessful',
       'welcomeTitle',
       'mixedStageWarning',
-      'updatedToVersion',
+      'pushSuccessful',
     ] as const;
     for (const key of keys) {
       enValues.add(t(key));

@@ -71,17 +71,11 @@ export interface ExtensionConfig {
   uiLanguage: 'en' | 'zh';
   autoCommit: boolean;
   autoPush: boolean;
-  smartStage: boolean;
-  confirmBeforeCommit: boolean;
   confirmAutoPush: boolean;
-  warnOnTruncatedDiff: boolean;
   ignorePaths: string[];
   systemPrompt: string;
   baseUrl: string;
   model: string;
-  temperature: number;
-  maxDiffChars: number;
-  maxUntrackedFiles: number;
 }
 
 export interface LlmCallInput {
@@ -96,7 +90,6 @@ export interface LlmCallInput {
   repairReason?: string;
   token: vscode.CancellationToken;
   timeoutMs: number;
-  temperature: number;
   onStream?: (chunk: string) => void;
 }
 

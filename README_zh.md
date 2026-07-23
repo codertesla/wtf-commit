@@ -46,7 +46,7 @@
 
 ## ② 日常使用（每次提交）
 
-1. 改完代码（尽量先 stage；开启 Auto Commit + Smart Stage 时，未暂存变更也可自动 stage）。
+1. 改完代码（尽量先 stage；开启 Auto Commit 时，未暂存变更会自动 stage）。
 2. 按下生成快捷键 — 信息流式写入，并在默认配置下 **直接 commit**（不再多弹「确认提交」）。
 3. 需要推远程时再 push — **Auto Push 默认关闭**，避免新用户误推。
 
@@ -64,9 +64,9 @@
 
 > 只想生成信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.15.1）
+## 🆕 最新更新（v1.16.0）
 
-- **Gemini 默认模型**：服务商默认从 `gemini-3.1-flash-lite` 更新为 GA `gemini-3.5-flash-lite`（**Model** 留空即可使用）。
+- **更精简的设置**：去掉少用旋钮（`temperature`、Smart Stage、Confirm Before Commit、diff 上限、更新日志弹窗等）。日常只需 Provider + Auto Commit / Auto Push（+ Confirm Before Push）。
 
 > 更早版本的更新说明请查看 [CHANGELOG](CHANGELOG.md)。
 
@@ -98,11 +98,9 @@
 | **Provider** | AI 服务商（默认 DeepSeek）。 |
 | **Auto Commit** | **默认开启** — 生成后自动 commit。关闭则只写入 SCM，自行提交。 |
 | **Auto Push** | **默认关闭** — 开启后自动推送。需同时开启 Auto Commit。 |
-| **Smart Stage** | Auto Commit 开启且暂存区为空时，生成前自动 stage。 |
-| **Confirm Before Commit** | **默认关闭** — 自动提交前不再弹窗；需要最终确认时再打开。 |
 | **Confirm Before Push** | **默认开启** — 自动推送前询问；老手可关掉以做到完全一键。 |
 
-**高级** — Prompt、温度、Custom 的 Base URL/Model、Provider Overrides、diff 限制、状态栏 / 更新日志开关等。
+**高级** — Prompt、Custom 的 Base URL/Model、Provider Overrides、ignore paths、状态栏开关等。
 
 ### 2. 自定义模型与端点 (Custom Model)
 使用任意 OpenAI 兼容模型（如本地 Ollama）：

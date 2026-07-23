@@ -238,7 +238,6 @@ describe('Gemini Interactions API', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 0.5,
       });
 
       const parsedBody = JSON.parse(requestBody) as Record<string, unknown>;
@@ -250,7 +249,6 @@ describe('Gemini Interactions API', () => {
       assert.strictEqual(typeof parsedBody.input, 'string');
       assert.deepStrictEqual(parsedBody.generation_config, {
         thinking_level: 'minimal',
-        temperature: 0.5,
         max_output_tokens: 512,
       });
     } finally {
@@ -290,7 +288,6 @@ describe('Gemini Interactions API', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 1,
         onStream: (chunk) => chunks.push(chunk),
       });
 
@@ -325,7 +322,6 @@ describe('Gemini Interactions API', () => {
           diff: 'diff --git a/a.ts b/a.ts',
           token: cancellationToken,
           timeoutMs: 1_000,
-          temperature: 1,
         }),
         (error: unknown) => error instanceof RequestFailure && error.status === 400
       );
@@ -365,7 +361,6 @@ describe('Gemini Interactions API', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 5_000,
-        temperature: 1,
       });
       assert.strictEqual(result, 'feat: recovered after retry');
       assert.strictEqual(requestCount, 2);
@@ -404,12 +399,12 @@ describe('Thinking-capable providers', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 0.5,
       });
 
-      const parsedBody = JSON.parse(requestBody) as { thinking?: { type?: string } };
+      const parsedBody = JSON.parse(requestBody) as { thinking?: { type?: string }; temperature?: number };
       assert.strictEqual(result, 'feat: disable thinking');
       assert.deepStrictEqual(parsedBody.thinking, { type: 'disabled' });
+      assert.strictEqual(parsedBody.temperature, 1);
     } finally {
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     }
@@ -444,7 +439,6 @@ describe('Thinking-capable providers', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 0.5,
         onStream: (chunk) => chunks.push(chunk),
       });
 
@@ -481,7 +475,6 @@ describe('Thinking-capable providers', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 0.5,
         onStream: (chunk) => chunks.push(chunk),
       });
 
@@ -511,7 +504,6 @@ describe('Thinking-capable providers', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 0.5,
         onStream: () => undefined,
       });
 
@@ -561,7 +553,6 @@ describe('Thinking-capable providers', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 0.5,
         onStream: () => undefined,
       });
 
@@ -598,7 +589,6 @@ describe('Thinking-capable providers', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 0.5,
         onStream: (chunk) => chunks.push(chunk),
       });
 
@@ -632,7 +622,6 @@ describe('Thinking-capable providers', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 1_000,
-        temperature: 0.5,
         onStream: (chunk) => chunks.push(chunk),
       });
 
@@ -683,7 +672,6 @@ describe('Thinking-capable providers', () => {
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
         timeoutMs: 400,
-        temperature: 0.5,
         onStream: () => undefined,
       });
 
@@ -716,7 +704,6 @@ describe('Thinking-capable providers', () => {
           diff: 'diff --git a/a.ts b/a.ts',
           token: cancellationToken,
           timeoutMs: 80,
-          temperature: 0.5,
           onStream: () => undefined,
         }),
         (error: unknown) => error instanceof RequestFailure && error.code === 'timeout'

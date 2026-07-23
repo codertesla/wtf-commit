@@ -3,11 +3,8 @@ export type UiLanguage = 'en' | 'zh';
 export type MessageKey =
   | 'statusBarButtonTooltip'
   | 'generateInProgress'
-  | 'noStagedChangesSmartStageOff'
   | 'noChangesDetected'
   | 'noDiffContent'
-  | 'diffTruncatedWarning'
-  | 'untrackedOmittedWarning'
   | 'generatingProgress'
   | 'repairingProgress'
   | 'pushingProgress'
@@ -61,9 +58,6 @@ export type MessageKey =
   | 'providerBaseUrlMissing'
   | 'providerModelMissing'
   | 'cancel'
-  | 'readyToCommit'
-  | 'commit'
-  | 'editInSourceControl'
   | 'pushNowConfirm'
   | 'push'
   | 'authFailed'
@@ -72,8 +66,6 @@ export type MessageKey =
   | 'welcomeTitle'
   | 'remindMeLater'
   | 'dontShowAgain'
-  | 'updatedToVersion'
-  | 'viewChangelog'
   | 'providerPickerSwitchTitle'
   | 'pushCompletedWithRefreshWarning';
 
@@ -82,14 +74,8 @@ type Dictionary = Record<MessageKey, string>;
 const en: Dictionary = {
   statusBarButtonTooltip: 'WTF Commit: Generate commit message',
   generateInProgress: 'Commit message generation already in progress.',
-  noStagedChangesSmartStageOff:
-    'No staged changes. Stage files first, or enable Smart Stage.',
   noChangesDetected: 'No changes detected in working tree or staging area.',
   noDiffContent: 'No diff content found.',
-  diffTruncatedWarning:
-    'The diff is large; only a summarized/partial diff was sent to the AI. The commit message may be less precise.',
-  untrackedOmittedWarning:
-    '{count} untracked file(s) were omitted (limit: {cap}). Raise "Wtf Commit: Max Untracked Files" to include more.',
   generatingProgress: 'Generating commit message...',
   repairingProgress: 'Repairing commit message...',
   pushingProgress: 'Pushing changes...',
@@ -152,9 +138,6 @@ const en: Dictionary = {
   providerModelMissing:
     'Model is missing for {provider}. Set it under Settings → WTF Commit › Advanced (Custom Model, or Provider Overrides for built-ins).',
   cancel: 'Cancel',
-  readyToCommit: 'Ready to commit',
-  commit: 'Commit',
-  editInSourceControl: 'Edit in Source Control',
   pushNowConfirm: 'Push the commit to the remote now?',
   push: 'Push',
   authFailed: 'Authentication failed ({status})',
@@ -164,8 +147,6 @@ const en: Dictionary = {
     'Welcome to WTF Commit! Step 1: set a provider + API key once. Step 2: generate anytime with your shortcut (default Cmd/Ctrl+Alt+G — rebindable).',
   remindMeLater: 'Remind Me Later',
   dontShowAgain: "Don't Show Again",
-  updatedToVersion: 'WTF Commit has been updated to v{version}!',
-  viewChangelog: 'View Changelog',
   providerPickerSwitchTitle: 'WTF Commit: Provider Status',
   pushCompletedWithRefreshWarning: 'Push completed with a follow-up refresh warning.',
 };
@@ -173,12 +154,8 @@ const en: Dictionary = {
 const zh: Dictionary = {
   statusBarButtonTooltip: 'WTF Commit：生成提交信息',
   generateInProgress: '正在生成提交信息，请稍候。',
-  noStagedChangesSmartStageOff: '没有已暂存的变更。请先暂存文件，或开启 Smart Stage。',
   noChangesDetected: '工作区与暂存区均无变更。',
   noDiffContent: '未找到 diff 内容。',
-  diffTruncatedWarning: 'diff 较大，仅向 AI 发送了摘要/部分 diff，提交信息可能不够精确。',
-  untrackedOmittedWarning:
-    '已省略 {count} 个未跟踪文件（上限 {cap}）。可在「Wtf Commit: Max Untracked Files」调高以纳入更多。',
   generatingProgress: '正在生成提交信息...',
   repairingProgress: '正在修复提交信息...',
   pushingProgress: '正在推送变更...',
@@ -236,9 +213,6 @@ const zh: Dictionary = {
   providerModelMissing:
     '{provider} 缺少 Model。请在设置 → WTF Commit › Advanced 中配置（Custom 用 Model；内置服务商用 Provider Overrides）。',
   cancel: '取消',
-  readyToCommit: '准备提交',
-  commit: '提交',
-  editInSourceControl: '在源代码管理中编辑',
   pushNowConfirm: '现在推送到远程吗？',
   push: '推送',
   authFailed: '认证失败（{status}）',
@@ -248,8 +222,6 @@ const zh: Dictionary = {
     '欢迎使用 WTF Commit！① 先配置一次：选择服务商并设置 API Key；② 日常用快捷键生成（默认 Cmd/Ctrl+Alt+G，可改成例如连按两次 Cmd+G）。',
   remindMeLater: '稍后提醒',
   dontShowAgain: '不再显示',
-  updatedToVersion: 'WTF Commit 已更新到 v{version}！',
-  viewChangelog: '查看更新日志',
   providerPickerSwitchTitle: 'WTF Commit：Provider 状态',
   pushCompletedWithRefreshWarning: '推送完成，但有一个后续刷新警告。',
 };

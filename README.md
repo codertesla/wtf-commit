@@ -46,7 +46,7 @@ Need a key? [DeepSeek](https://platform.deepseek.com/api_keys) · [Gemini](https
 
 ## ② Daily use (every commit)
 
-1. Make your code changes (stage when you can; with Auto Commit + Smart Stage, unstaged work can be staged for you).
+1. Make your code changes (stage when you can; with Auto Commit on, unstaged work is staged for you).
 2. Press the generate shortcut — the message streams in, then **commits by default** (no extra “confirm commit” dialog).
 3. Push yourself when ready — **Auto Push is off by default** so new users never surprise-push.
 
@@ -64,9 +64,9 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.15.1)
+## 🆕 Latest (v1.16.0)
 
-- **Gemini default model**: Provider default updated from `gemini-3.1-flash-lite` to GA `gemini-3.5-flash-lite` (leave **Model** empty to use it).
+- **Leaner settings**: Dropped rarely used knobs (`temperature`, Smart Stage, Confirm Before Commit, diff-limit toggles, changelog popup). Defaults cover the fast-commit path — Provider + Auto Commit / Auto Push (+ Confirm Before Push).
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -98,11 +98,9 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit`. Settings are sp
 | **Provider** | AI backend (default DeepSeek). |
 | **Auto Commit** | **Default on** — commit after generate. Off = message only in Source Control. |
 | **Auto Push** | **Default off** — enable for push after commit. Requires Auto Commit. |
-| **Smart Stage** | With Auto Commit, stage current changes before generation when nothing is staged. |
-| **Confirm Before Commit** | **Default off** — no modal before auto-commit. Turn on for a final check. |
 | **Confirm Before Push** | **Default on** — ask before auto-push. Power users can disable for a full hands-off shortcut. |
 
-**Advanced** — prompt, temperature, Custom Base URL/Model, Provider Overrides, diff limits, status bar / changelog toggles.
+**Advanced** — prompt, Custom Base URL/Model, Provider Overrides, ignore paths, status bar toggle.
 
 ### 2. Custom Model & Endpoints
 You can use any OpenAI-compatible model (like local models via Ollama):

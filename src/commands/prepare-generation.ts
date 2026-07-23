@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
-import type { ExtensionConfig, Repository } from '../types';
+import {
+  type ExtensionConfig,
+  type Repository,
+  DEFAULT_MAX_DIFF_CHARS,
+  DEFAULT_MAX_UNTRACKED_FILES,
+} from '../types';
 import { collectStageablePaths } from '../git';
 import { getOptimizedDiff } from '../diff';
 import { planDiffSource } from '../flow/diff-source';
@@ -30,7 +35,6 @@ export async function prepareGeneration(
     hasStaged,
     hasWorkingTree,
     autoCommit: config.autoCommit,
-    smartStage: config.smartStage,
     mixedStageReminderDismissed: Boolean(context.globalState.get(MIXED_STAGE_DISMISSED_KEY)),
     workingTreeReminderDismissed: Boolean(context.globalState.get(WORKING_TREE_DISMISSED_KEY)),
   });
@@ -39,9 +43,6 @@ export async function prepareGeneration(
   switch (plan.action) {
     case 'abort_no_changes':
       showStatusMessage(`$(circle-slash) ${t('noChangesDetected')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
-      return undefined;
-    case 'abort_no_staged':
-      vscode.window.showErrorMessage(t('noStagedChangesSmartStageOff'));
       return undefined;
     case 'confirm_mixed_then_staged':
       if (!await confirmDiffSource(context, 'mixed')) {
@@ -77,23 +78,20 @@ export async function prepareGeneration(
   const result = await getOptimizedDiff(
     repository,
     diffUsesStaged,
-    useWorkingTreeDiff ? true : config.smartStage,
     config.ignorePaths,
-    { maxDiffChars: config.maxDiffChars, maxUntrackedFiles: config.maxUntrackedFiles }
+    { maxDiffChars: DEFAULT_MAX_DIFF_CHARS, maxUntrackedFiles: DEFAULT_MAX_UNTRACKED_FILES }
   );
   if (!result.diff.trim()) {
     showStatusMessage(`$(circle-slash) ${t('noDiffContent')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
     return undefined;
   }
-  if (result.truncated && config.warnOnTruncatedDiff) {
-    logInfo(`Diff truncated before sending to AI (length exceeded ${config.maxDiffChars} chars).`);
-    vscode.window.showWarningMessage(t('diffTruncatedWarning'));
+  if (result.truncated) {
+    logInfo(`Diff truncated before sending to AI (length exceeded ${DEFAULT_MAX_DIFF_CHARS} chars).`);
   }
-  if (result.untrackedFilesOmitted > 0 && config.warnOnTruncatedDiff) {
-    vscode.window.showWarningMessage(t('untrackedOmittedWarning', {
-      count: result.untrackedFilesOmitted,
-      cap: result.untrackedFileCap,
-    }));
+  if (result.untrackedFilesOmitted > 0) {
+    logInfo(
+      `Omitted ${result.untrackedFilesOmitted} untracked file(s) (cap: ${result.untrackedFileCap}).`
+    );
   }
   return {
     diff: result.diff,
@@ -131,4 +129,3 @@ async function confirmDiffSource(
   }
   return action === useLabel;
 }
-

@@ -7,7 +7,6 @@ import {
 } from '../types';
 import { readExtensionConfig, getSecretKeyName } from '../config';
 import { resolveRepository } from '../git';
-import { DiffPreparationError } from '../diff';
 import { IncompleteProviderConfigError } from '../provider-config';
 import { buildProviderEndpoint, callLLM } from '../llm/provider';
 import { runAutoPush } from './auto-push';
@@ -84,17 +83,16 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
             systemPrompt: config.systemPrompt,
             diff,
             intent,
-            temperature: config.temperature,
           },
           repository.inputBox
         ),
         resolveIssues: (message, issues) => resolveCommitIssues(
           { message, issues, provider: config.provider, endpoint, apiKey, model: config.model,
-            systemPrompt: config.systemPrompt, diff, intent, temperature: config.temperature },
+            systemPrompt: config.systemPrompt, diff, intent },
           repository.inputBox
         ),
         setMessage: (message) => { repository.inputBox.value = message; },
-        confirmCommit: (message) => confirmCommitIfNeeded(config.confirmBeforeCommit, config.provider, message),
+        confirmCommit: async () => true,
         readSnapshot: () => readStagedSnapshot(repository.rootUri.fsPath),
         commit: (message) => repository.commit(message),
         onLocalRepair: () => logInfo('Applied local Conventional Commits repair.'),
@@ -140,11 +138,6 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
       await runAutoPush(repository, normalizedCommitMessage, config.confirmAutoPush);
     }
   } catch (error) {
-    if (error instanceof DiffPreparationError && error.code === 'NO_STAGED_CHANGES') {
-      vscode.window.showErrorMessage(t('noStagedChangesSmartStageOff'));
-      return;
-    }
-
     if (error instanceof IncompleteProviderConfigError) {
       const messageKey =
         error.field === 'baseUrl' ? 'providerBaseUrlMissing' : 'providerModelMissing';
@@ -176,27 +169,6 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
   }
 }
 
-async function confirmCommitIfNeeded(
-  confirmBeforeCommit: boolean,
-  provider: ProviderName,
-  message: string
-): Promise<boolean> {
-  if (!confirmBeforeCommit) {
-    return true;
-  }
-  const response = await vscode.window.showInformationMessage(
-    `[${provider}] ${t('readyToCommit')}`,
-    { modal: true, detail: message },
-    t('commit'),
-    t('editInSourceControl'),
-    t('cancel')
-  );
-  if (response === t('editInSourceControl')) {
-    await vscode.commands.executeCommand('workbench.view.scm');
-  }
-  return response === t('commit');
-}
-
 async function resolveCommitIssues(
   input: {
     message: string;
@@ -208,7 +180,6 @@ async function resolveCommitIssues(
     systemPrompt: string;
     diff: string;
     intent: string;
-    temperature: number;
   },
   inputBox?: { value: string }
 ): Promise<string | undefined> {
@@ -234,7 +205,6 @@ async function resolveCommitIssues(
         intent: input.intent,
         repairMessage: input.message,
         repairReason: input.issues.map((issue) => issue.repairReason).join('\n'),
-        temperature: input.temperature,
       },
       inputBox
     );
@@ -276,7 +246,6 @@ async function generateCommitMessage(
     systemPrompt: string;
     diff: string;
     intent?: string;
-    temperature: number;
   },
   inputBox?: { value: string }
 ): Promise<string | undefined> {
@@ -309,7 +278,6 @@ async function repairCommitMessage(
     intent?: string;
     repairMessage: string;
     repairReason?: string;
-    temperature: number;
   },
   inputBox?: { value: string }
 ): Promise<string | undefined> {

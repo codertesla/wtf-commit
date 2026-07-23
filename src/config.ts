@@ -6,8 +6,6 @@ import {
   DEFAULT_PROVIDER,
   DEFAULT_SYSTEM_PROMPT,
   SECRET_KEY_PREFIX,
-  DEFAULT_MAX_DIFF_CHARS,
-  DEFAULT_MAX_UNTRACKED_FILES,
   DEFAULT_IGNORE_PATHS,
 } from './types';
 import { resolveProviderConfig } from './provider-config';
@@ -50,22 +48,11 @@ export function readExtensionConfig(): ExtensionConfig {
     uiLanguage: asUiLanguage(config.get<string>('uiLanguage')),
     autoCommit: config.get<boolean>('autoCommit') ?? true,
     autoPush: config.get<boolean>('autoPush') ?? false,
-    smartStage: config.get<boolean>('smartStage') ?? true,
-    confirmBeforeCommit: config.get<boolean>('confirmBeforeCommit') ?? false,
     confirmAutoPush: config.get<boolean>('confirmAutoPush') ?? true,
-    warnOnTruncatedDiff: config.get<boolean>('warnOnTruncatedDiff') ?? false,
     ignorePaths: readIgnorePaths(config),
     systemPrompt,
     baseUrl,
     model,
-    temperature: clampNumber(config.get<unknown>('temperature'), 1.0, 0, 2),
-    maxDiffChars: clampInt(config.get<number>('maxDiffChars'), DEFAULT_MAX_DIFF_CHARS, 1000),
-    maxUntrackedFiles: clampInt(
-      config.get<number>('maxUntrackedFiles'),
-      DEFAULT_MAX_UNTRACKED_FILES,
-      0,
-      1_000
-    ),
   };
 }
 
@@ -96,20 +83,6 @@ function readIgnorePaths(config: vscode.WorkspaceConfiguration): string[] {
     result.push(trimmed);
   }
   return result;
-}
-
-function clampInt(value: number | undefined, fallback: number, minimum: number, maximum = 1_000_000): number {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    return fallback;
-  }
-  return Math.min(maximum, Math.max(minimum, Math.floor(value)));
-}
-
-function clampNumber(value: unknown, fallback: number, minimum: number, maximum: number): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return fallback;
-  }
-  return Math.min(maximum, Math.max(minimum, value));
 }
 
 export function asProviderName(rawProvider: string | undefined): ProviderName {

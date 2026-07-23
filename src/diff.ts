@@ -26,18 +26,6 @@ export {
   finalizeDiffForLlm,
 } from './diff-optimize';
 
-export type DiffPreparationErrorCode = 'NO_STAGED_CHANGES';
-
-export class DiffPreparationError extends Error {
-  constructor(
-    public readonly code: DiffPreparationErrorCode,
-    message: string
-  ) {
-    super(message);
-    this.name = 'DiffPreparationError';
-  }
-}
-
 export const DEFAULT_DIFF_LIMITS: DiffLimits = {
   maxDiffChars: DEFAULT_MAX_DIFF_CHARS,
   maxUntrackedFiles: DEFAULT_MAX_UNTRACKED_FILES,
@@ -46,7 +34,6 @@ export const DEFAULT_DIFF_LIMITS: DiffLimits = {
 export async function getOptimizedDiff(
   repository: Repository,
   hasStagedChanges: boolean,
-  smartStage: boolean,
   ignorePatterns: ReadonlyArray<string> = [],
   limits: DiffLimits = DEFAULT_DIFF_LIMITS
 ): Promise<OptimizedDiffResult> {
@@ -54,17 +41,12 @@ export async function getOptimizedDiff(
 
   if (hasStagedChanges) {
     diff = await repository.diff(true);
-  } else if (smartStage) {
-    diff = await repository.diff(false);
   } else {
-    throw new DiffPreparationError(
-      'NO_STAGED_CHANGES',
-      'No staged changes found. Please stage your changes first, or enable Smart Stage.'
-    );
+    diff = await repository.diff(false);
   }
 
   const untrackedCap = Math.max(0, limits.maxUntrackedFiles);
-  const shouldIncludeUntrackedChanges = !hasStagedChanges && smartStage && untrackedCap > 0;
+  const shouldIncludeUntrackedChanges = !hasStagedChanges && untrackedCap > 0;
   const allUntracked = shouldIncludeUntrackedChanges
     ? getUntrackedChanges(repository.state)
     : [];

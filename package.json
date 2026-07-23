@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, Gemini, OpenAI, and more.",
-  "version": "1.15.1",
+  "version": "1.16.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -136,23 +136,11 @@
             "markdownDescription": "**Automation — Auto Push** (default off): After auto-commit, push to the remote. Keep off for new users; enable when you want a full local generate → commit → push shortcut. ⚠️ Requires **Auto Commit**.",
             "order": 11
           },
-          "wtfCommit.smartStage": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "**Automation — Smart Stage**: When Auto Commit is on and nothing is staged, stage current changes before generation so later edits cannot sneak into the commit. Only relevant when Auto Commit is enabled.",
-            "order": 12
-          },
-          "wtfCommit.confirmBeforeCommit": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "**Safety — Confirm Before Commit** (default off): Extra dialog before auto-commit. Leave off for a smooth generate → commit flow; turn on if you want a final check.",
-            "order": 20
-          },
           "wtfCommit.confirmAutoPush": {
             "type": "boolean",
             "default": true,
             "markdownDescription": "**Safety — Confirm Before Push** (default on): Ask before pushing when Auto Push is enabled. New users should keep this on; experienced users can turn it off for a fully unattended generate → commit → push shortcut.",
-            "order": 21
+            "order": 20
           }
         }
       },
@@ -165,32 +153,12 @@
             "description": "Show the WTF Commit icon in the status bar.",
             "order": 0
           },
-          "wtfCommit.changelogPopup": {
-            "type": "boolean",
-            "default": false,
-            "description": "Show a notification with a View Changelog action after the extension is updated. Takes effect immediately when toggled.",
-            "order": 1
-          },
-          "wtfCommit.warnOnTruncatedDiff": {
-            "type": "boolean",
-            "default": false,
-            "description": "Show a warning when the diff is too large and only a summarized/partial diff is sent to the AI.",
-            "order": 2
-          },
           "wtfCommit.prompt": {
             "type": "string",
             "default": "Generate a concise Git commit message from the provided diff.\n\nRules:\n1. Use Conventional Commits: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters; use imperative mood\n4. If a new file is added, mention it in the description (especially docs or features); output only the commit message",
             "description": "System Prompt for AI (supports multi-line)",
             "editPresentation": "multilineText",
             "order": 10
-          },
-          "wtfCommit.temperature": {
-            "type": "number",
-            "default": 1,
-            "minimum": 0,
-            "maximum": 2,
-            "description": "Temperature for AI generation. Lower values produce more deterministic results.",
-            "order": 11
           },
           "wtfCommit.baseUrl": {
             "type": "string",
@@ -234,20 +202,6 @@
             ],
             "markdownDescription": "Extra file or directory name patterns to exclude from the diff sent to the AI. Each entry is matched against a path segment (for a bare name like `generated`) or as a filename suffix (for an entry starting with `.` or `*`, e.g. `*.snap`, `.gen.ts`). Matches are case-insensitive. Built-in filters (lock files, build outputs, binaries, etc.) always apply. Set to `[]` to disable these defaults.",
             "order": 30
-          },
-          "wtfCommit.maxDiffChars": {
-            "type": "number",
-            "default": 10000,
-            "minimum": 1000,
-            "description": "Maximum total characters of the diff sent to the AI. Larger diffs are summarized or truncated.",
-            "order": 31
-          },
-          "wtfCommit.maxUntrackedFiles": {
-            "type": "number",
-            "default": 30,
-            "minimum": 0,
-            "description": "Maximum number of untracked (new) files included in the diff. Set to 0 to disable untracked-file inclusion.",
-            "order": 32
           }
         }
       }

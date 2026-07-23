@@ -55,13 +55,9 @@ export function activate(context: vscode.ExtensionContext) {
       if (event.affectsConfiguration('wtfCommit.autoPush') || event.affectsConfiguration('wtfCommit.autoCommit')) {
         void warnIfAutoPushWithoutAutoCommit();
       }
-      if (event.affectsConfiguration('wtfCommit.changelogPopup')) {
-        void syncChangelogTracking(context);
-      }
     })
   );
 
-  void syncChangelogTracking(context);
   void warnIfAutoPushWithoutAutoCommit();
 
   checkFirstUseGuidance(context).catch((error) => {
@@ -112,53 +108,6 @@ async function warnIfAutoPushWithoutAutoCommit(): Promise<void> {
 }
 
 export function deactivate() {}
-
-/**
- * Track extension version for changelog notices.
- * When the popup is off, still advance lastVersion so enabling later does not
- * replay stale update toasts for versions the user already ran.
- */
-async function syncChangelogTracking(context: vscode.ExtensionContext): Promise<void> {
-  const popupEnabled = vscode.workspace
-    .getConfiguration('wtfCommit')
-    .get<boolean>('changelogPopup', false);
-  if (popupEnabled) {
-    await checkChangelog(context);
-    return;
-  }
-  await advanceLastVersionQuietly(context);
-}
-
-async function advanceLastVersionQuietly(context: vscode.ExtensionContext): Promise<void> {
-  const currentVersion = String(context.extension.packageJSON.version);
-  const lastVersion = context.globalState.get<string>('wtfCommit.lastVersion');
-  if (currentVersion === lastVersion) {
-    return;
-  }
-  await context.globalState.update('wtfCommit.lastVersion', currentVersion);
-}
-
-async function checkChangelog(context: vscode.ExtensionContext): Promise<void> {
-  const currentVersion = String(context.extension.packageJSON.version);
-  const lastVersion = context.globalState.get<string>('wtfCommit.lastVersion');
-
-  if (currentVersion === lastVersion) {
-    return;
-  }
-
-  const viewChangelogLabel = t('viewChangelog');
-  const action = await vscode.window.showInformationMessage(
-    t('updatedToVersion', { version: currentVersion }),
-    viewChangelogLabel
-  );
-
-  if (action === viewChangelogLabel) {
-    const changelogUri = vscode.Uri.joinPath(context.extensionUri, 'CHANGELOG.md');
-    void vscode.commands.executeCommand('markdown.showPreview', changelogUri);
-  }
-
-  await context.globalState.update('wtfCommit.lastVersion', currentVersion);
-}
 
 async function checkFirstUseGuidance(context: vscode.ExtensionContext): Promise<void> {
   const dismissed = context.globalState.get<boolean>('wtfCommit.guidanceDismissed');
