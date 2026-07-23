@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, Gemini, OpenAI, and more.",
-  "version": "1.15.0",
+  "version": "1.15.1",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.15.1] - 2026-07-23
+### Changed
+- **Gemini Default Model**: Updated the default Gemini model from `gemini-3.1-flash-lite` to GA `gemini-3.5-flash-lite`.
+
 ## [1.15.0] - 2026-07-15
 ### Added
 - **Generation workflow integration tests**: Cover generation, local/AI repair, staged-snapshot verification, commit, and manual-message mode through injectable Git/LLM ports.

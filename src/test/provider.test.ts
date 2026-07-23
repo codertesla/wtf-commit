@@ -233,7 +233,7 @@ describe('Gemini Interactions API', () => {
         provider: 'Gemini',
         endpoint: `http://127.0.0.1:${address.port}/v1beta/interactions`,
         apiKey: 'gemini-key',
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.5-flash-lite',
         systemPrompt: 'Return a commit message.',
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,
@@ -245,7 +245,7 @@ describe('Gemini Interactions API', () => {
       assert.strictEqual(result, 'feat: use native Gemini');
       assert.strictEqual(requestHeaders['x-goog-api-key'], 'gemini-key');
       assert.strictEqual(requestHeaders.authorization, undefined);
-      assert.strictEqual(parsedBody.model, 'gemini-3.1-flash-lite');
+      assert.strictEqual(parsedBody.model, 'gemini-3.5-flash-lite');
       assert.strictEqual(parsedBody.system_instruction, 'Return a commit message.');
       assert.strictEqual(typeof parsedBody.input, 'string');
       assert.deepStrictEqual(parsedBody.generation_config, {
@@ -285,7 +285,7 @@ describe('Gemini Interactions API', () => {
         provider: 'Gemini',
         endpoint: `http://127.0.0.1:${address.port}/v1beta/interactions`,
         apiKey: 'gemini-key',
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.5-flash-lite',
         systemPrompt: 'Return a commit message.',
         diff: 'diff --git a/a.ts b/a.ts',
         token: cancellationToken,

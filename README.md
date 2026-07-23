@@ -64,12 +64,9 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.15.0)
+## 🆕 Latest (v1.15.1)
 
-- **More reliable commits**: Staged snapshots now come from authoritative Git output, independent of VS Code UI refresh timing.
-- **Stronger diff and config handling**: Quoted/UTF-8 paths are parsed correctly, and malformed settings are safely validated.
-- **Maintainable provider core**: Provider adapters, bounded HTTP/SSE transport, and a synchronized provider manifest reduce release drift.
-- **Broader regression coverage**: The complete generate → repair → snapshot check → commit transaction now has integration tests.
+- **Gemini default model**: Provider default updated from `gemini-3.1-flash-lite` to GA `gemini-3.5-flash-lite` (leave **Model** empty to use it).
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -144,7 +141,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 | **MiMo** | `mimo-v2.5` | `https://api.xiaomimimo.com/v1` |
 | **GLM** | `glm-4.7-flashx` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Z.AI** | `glm-4.7-flashx` | `https://api.z.ai/api/paas/v4` |
-| **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
+| **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | `https://integrate.api.nvidia.com/v1` |
 | **Custom** | - | - |
@@ -181,7 +178,7 @@ The list below is **our recommendation** — change **Provider** in settings to 
 | **GLM** | `glm-4.7-flashx` | ¥0.5 (~$0.07) | ¥3 (~$0.42) | ~$0.0004 | **GLM** provider default; often slower |
 | **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Default Provider** — fast, cheap, great quality |
 | **MiMo** | `mimo-v2.5` | $0.14 | $0.28 | ~$0.0007 | Same price tier as DeepSeek; OpenAI-compatible |
-| **Gemini** | `gemini-3.1-flash-lite` | $0.25 | $1.50 | ~$0.0015 | **Recommended** — fast; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
+| **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | **Recommended** — fast; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
 | **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | $0 | $0 | ~$0 | Free development endpoint; rate limits and availability vary |
 
 † Rough estimate for **~5K input + 150 output tokens** (typical diff + commit message), no prompt cache. GLM CNY prices converted at ~¥7.2/$ for comparison. Actual cost depends on diff size and model verbosity.
@@ -191,7 +188,7 @@ The list below is **our recommendation** — change **Provider** in settings to 
 **Our recommendation** (speed + value) — set **Provider** in settings to match your pick:
 
 1. **DeepSeek V4 Flash** — **Default Provider**; leave **Model** empty → `deepseek-v4-flash`. **Best overall**: fast, cheap, high quality. Thinking mode is disabled automatically.
-2. **Gemini 3.1 Flash Lite** — set **Provider** to **Gemini**; leave **Model** empty → `gemini-3.1-flash-lite`. **Also excellent**: fast with a generous free tier; uses `thinking_level: minimal`.
+2. **Gemini 3.5 Flash Lite** — set **Provider** to **Gemini**; leave **Model** empty → `gemini-3.5-flash-lite`. **Also excellent**: fast with a generous free tier; uses `thinking_level: minimal`.
 3. **MiMo V2.5** — set **Provider** to **MiMo**; leave **Model** empty → `mimo-v2.5`. Same USD price band as DeepSeek.
 4. **GLM / Z.AI** — set **Provider** to **GLM** (China) or **Z.AI** (international); leave **Model** empty → `glm-4.7-flashx`. Works reliably but is often **slower** than DeepSeek or Gemini Flash Lite. Requires a paid balance.
 5. **`openrouter/free`** — set **Provider** to **OpenRouter**; fine for experimenting.

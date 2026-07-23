@@ -64,12 +64,9 @@
 
 > 只想生成信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.15.0）
+## 🆕 最新更新（v1.15.1）
 
-- **提交一致性更可靠**：暂存快照改为读取 Git 权威输出，不再受 VS Code UI 状态刷新时机影响。
-- **Diff 与配置更健壮**：正确解析带空格、UTF-8 转义的 Git 路径，并安全校验异常设置值。
-- **Provider 核心更易维护**：协议适配、有限内存的 HTTP/SSE 传输和统一 Provider manifest 完成解耦。
-- **回归覆盖更完整**：生成 → 修复 → 快照校验 → commit 的完整事务已加入集成测试。
+- **Gemini 默认模型**：服务商默认从 `gemini-3.1-flash-lite` 更新为 GA `gemini-3.5-flash-lite`（**Model** 留空即可使用）。
 
 > 更早版本的更新说明请查看 [CHANGELOG](CHANGELOG.md)。
 
@@ -144,7 +141,7 @@
 | **MiMo** | `mimo-v2.5` | `https://api.xiaomimimo.com/v1` |
 | **GLM** | `glm-4.7-flashx` | `https://open.bigmodel.cn/api/paas/v4` |
 | **Z.AI** | `glm-4.7-flashx` | `https://api.z.ai/api/paas/v4` |
-| **Gemini** | `gemini-3.1-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
+| **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | `https://integrate.api.nvidia.com/v1` |
 | **Custom** | - | - |
@@ -181,7 +178,7 @@
 | **GLM** | `glm-4.7-flashx` | ¥0.5 | ¥3 | ~¥0.003 | **GLM** 服务商默认；通常较慢 |
 | **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **默认服务商** — 快、便宜、质量好 |
 | **MiMo** | `mimo-v2.5` | $0.14 | $0.28 | ~$0.0007 | 与 DeepSeek 同档；OpenAI 兼容 |
-| **Gemini** | `gemini-3.1-flash-lite` | $0.25 | $1.50 | ~$0.0015 | **推荐** — 快；[免费额度](https://ai.google.dev/gemini-api/docs/pricing) 慷慨 |
+| **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | **推荐** — 快；[免费额度](https://ai.google.dev/gemini-api/docs/pricing) 慷慨 |
 | **NVIDIA NIM** | `nvidia/nemotron-3-super-120b-a12b` | $0 | $0 | ~$0 | 免费开发端点；限流与可用性可能变化 |
 
 † 按 **约 5K 输入 + 150 输出 tokens** 估算。`glm-4.7-flashx` 国内单次约 **¥0.003**。美元行按未命中缓存计价。
@@ -193,7 +190,7 @@ MiMo 国内按量（`mimo-v2.5`）：输入 ¥1.00 / 百万 tokens，输出 ¥2.
 **使用推荐**（速度 + 性价比）— 在设置中将 **Provider** 改为对应项：
 
 1. **DeepSeek V4 Flash** — **默认服务商**；**Model** 留空 → `deepseek-v4-flash`。**综合首选**：快、便宜、质量好。扩展已自动关闭思考模式。
-2. **Gemini 3.1 Flash Lite** — **Provider** 选 **Gemini**，**Model** 留空 → `gemini-3.1-flash-lite`。**同样推荐**：速度快，免费额度慷慨；使用 `thinking_level: minimal`。
+2. **Gemini 3.5 Flash Lite** — **Provider** 选 **Gemini**，**Model** 留空 → `gemini-3.5-flash-lite`。**同样推荐**：速度快，免费额度慷慨；使用 `thinking_level: minimal`。
 3. **MiMo V2.5** — **Provider** 选 **MiMo**，**Model** 留空 → `mimo-v2.5`。与 DeepSeek 同美元价位。
 4. **GLM / Z.AI** — **Provider** 选 **GLM**（国内）或 **Z.AI**（国际），**Model** 留空 → `glm-4.7-flashx`。可用但通常**比 DeepSeek / Gemini Flash Lite 慢**，需账户余额。
 5. **`openrouter/free`** — **Provider** 选 **OpenRouter**；适合尝鲜。
