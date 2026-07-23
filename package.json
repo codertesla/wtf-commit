@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "WTF Commit",
   "description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, Gemini, OpenAI, and more.",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -80,13 +80,6 @@
       {
         "title": "WTF Commit",
         "properties": {
-          "wtfCommit.uiLanguage": {
-            "type": "string",
-            "enum": ["en", "zh"],
-            "default": "en",
-            "markdownDescription": "**Interface Language** — Language for the extension's own UI (buttons, prompts, notifications). Independent of the commit-message language. `en` = English, `zh` = 简体中文.",
-            "order": 0
-          },
           "wtfCommit.commitMessageLanguage": {
             "type": "string",
             "enum": [
@@ -99,13 +92,13 @@
             ],
             "default": "English",
             "markdownDescription": "**Commit Message Language** — Language for the generated commit message (not the extension UI).",
-            "order": 1
+            "order": 0
           },
           "wtfCommit.customCommitMessageLanguage": {
             "type": "string",
             "default": "English",
             "markdownDescription": "Used only when **Commit Message Language** is `Custom`. e.g. `French`, `Emoji only`, `Cantonese`.",
-            "order": 2
+            "order": 1
           },
           "wtfCommit.provider": {
             "type": "string",
@@ -122,7 +115,7 @@
             ],
             "default": "DeepSeek",
             "description": "Select an AI provider. Default is DeepSeek (deepseek-v4-flash) — fast and low-cost for commit messages.",
-            "order": 3
+            "order": 2
           },
           "wtfCommit.autoCommit": {
             "type": "boolean",
@@ -152,13 +145,6 @@
             "default": true,
             "description": "Show the WTF Commit icon in the status bar.",
             "order": 0
-          },
-          "wtfCommit.prompt": {
-            "type": "string",
-            "default": "Generate a concise Git commit message from the provided diff.\n\nRules:\n1. Use Conventional Commits: <type>(<scope>): <description>\n2. Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build\n3. Keep the first line under 72 characters; use imperative mood\n4. If a new file is added, mention it in the description (especially docs or features); output only the commit message",
-            "description": "System Prompt for AI (supports multi-line)",
-            "editPresentation": "multilineText",
-            "order": 10
           },
           "wtfCommit.baseUrl": {
             "type": "string",

@@ -64,9 +64,10 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.16.0)
+## 🆕 Latest (v1.16.1)
 
-- **Leaner settings**: Dropped rarely used knobs (`temperature`, Smart Stage, Confirm Before Commit, diff-limit toggles, changelog popup). Defaults cover the fast-commit path — Provider + Auto Commit / Auto Push (+ Confirm Before Push).
+- **UI follows VS Code**: Extension UI language tracks `vscode.env.language` (`zh*` → 中文, otherwise English); `wtfCommit.uiLanguage` removed.
+- **Prompt off Settings UI**: Override `wtfCommit.prompt` in `settings.json` only when you need a custom system prompt.
 
 > See [CHANGELOG](CHANGELOG.md) for earlier releases.
 
@@ -92,7 +93,6 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit`. Settings are sp
 
 | Setting | Description |
 |---------|-------------|
-| **UI Language** | Extension UI language (`en` / `zh`), independent of commit-message language. |
 | **Commit Message Language** | Language for generated commit messages. |
 | **Custom Commit Message Language** | Used only when Commit Message Language is `Custom`. |
 | **Provider** | AI backend (default DeepSeek). |
@@ -100,7 +100,9 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit`. Settings are sp
 | **Auto Push** | **Default off** — enable for push after commit. Requires Auto Commit. |
 | **Confirm Before Push** | **Default on** — ask before auto-push. Power users can disable for a full hands-off shortcut. |
 
-**Advanced** — prompt, Custom Base URL/Model, Provider Overrides, ignore paths, status bar toggle.
+**Advanced** — Custom Base URL/Model, Provider Overrides, ignore paths, status bar toggle.
+
+> Extension UI language follows VS Code (`vscode.env.language`): `zh*` → 中文, otherwise English. System prompt can be overridden in `settings.json` via `wtfCommit.prompt` (not shown in the Settings UI).
 
 ### 2. Custom Model & Endpoints
 You can use any OpenAI-compatible model (like local models via Ollama):

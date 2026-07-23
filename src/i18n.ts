@@ -253,7 +253,13 @@ export function t(key: MessageKey, params?: Record<string, string | number>): st
 }
 
 export function asUiLanguage(value: string | undefined): UiLanguage {
-  if (value === 'zh') {
+  if (!value) {
+    return 'en';
+  }
+  // vscode.env.language uses BCP-47 tags (e.g. zh-cn, zh-tw, fr, en).
+  // We only ship en/zh dictionaries — anything else falls back to English.
+  const normalized = value.trim().toLowerCase().replace(/_/g, '-');
+  if (normalized === 'zh' || normalized.startsWith('zh-')) {
     return 'zh';
   }
   return 'en';

@@ -3,11 +3,15 @@ import { describe, it } from 'mocha';
 import { t, setUiLanguage, getUiLanguage, asUiLanguage } from '../i18n';
 
 describe('i18n', () => {
-  it('asUiLanguage maps zh to zh and everything else to en', () => {
+  it('asUiLanguage maps zh locales to zh and everything else to en', () => {
     assert.strictEqual(asUiLanguage('zh'), 'zh');
+    assert.strictEqual(asUiLanguage('zh-cn'), 'zh');
+    assert.strictEqual(asUiLanguage('zh-TW'), 'zh');
+    assert.strictEqual(asUiLanguage('zh_CN'), 'zh');
     assert.strictEqual(asUiLanguage('en'), 'en');
     assert.strictEqual(asUiLanguage(undefined), 'en');
     assert.strictEqual(asUiLanguage('fr'), 'en');
+    assert.strictEqual(asUiLanguage('de-DE'), 'en');
   });
 
   it('t returns English by default and substitutes params', () => {

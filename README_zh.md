@@ -64,9 +64,10 @@
 
 > 只想生成信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.16.0）
+## 🆕 最新更新（v1.16.1）
 
-- **更精简的设置**：去掉少用旋钮（`temperature`、Smart Stage、Confirm Before Commit、diff 上限、更新日志弹窗等）。日常只需 Provider + Auto Commit / Auto Push（+ Confirm Before Push）。
+- **界面语言跟随 VS Code**：按 `vscode.env.language` 选择中/英（`zh*` → 中文，其余英文）；已移除 `wtfCommit.uiLanguage`。
+- **Prompt 不再出现在设置 UI**：需要自定义系统提示时，在 `settings.json` 写 `wtfCommit.prompt` 即可。
 
 > 更早版本的更新说明请查看 [CHANGELOG](CHANGELOG.md)。
 
@@ -92,7 +93,6 @@
 
 | 设置项目 | 描述 |
 |---------|-------------|
-| **UI Language** | 插件界面语言（`en` / `zh`），与提交信息语言相互独立。 |
 | **Commit Message Language** | 生成的提交信息语言。 |
 | **Custom Commit Message Language** | 仅当 Commit Message Language 为 `Custom` 时生效。 |
 | **Provider** | AI 服务商（默认 DeepSeek）。 |
@@ -100,7 +100,9 @@
 | **Auto Push** | **默认关闭** — 开启后自动推送。需同时开启 Auto Commit。 |
 | **Confirm Before Push** | **默认开启** — 自动推送前询问；老手可关掉以做到完全一键。 |
 
-**高级** — Prompt、Custom 的 Base URL/Model、Provider Overrides、ignore paths、状态栏开关等。
+**高级** — Custom 的 Base URL/Model、Provider Overrides、ignore paths、状态栏开关等。
+
+> 插件界面语言跟随 VS Code（`vscode.env.language`）：`zh*` → 中文，其余回退英文。系统 Prompt 可在 `settings.json` 用 `wtfCommit.prompt` 覆盖（不在设置 UI 中展示）。
 
 ### 2. 自定义模型与端点 (Custom Model)
 使用任意 OpenAI 兼容模型（如本地 Ollama）：

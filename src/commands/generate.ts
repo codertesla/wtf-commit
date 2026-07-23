@@ -11,7 +11,7 @@ import { IncompleteProviderConfigError } from '../provider-config';
 import { buildProviderEndpoint, callLLM } from '../llm/provider';
 import { runAutoPush } from './auto-push';
 import { createStreamingSink, restoreIntent, restoreIntentOnAbort } from '../ui';
-import { setUiLanguage, t } from '../i18n';
+import { setUiLanguage, t, asUiLanguage } from '../i18n';
 import { generateLock } from '../generate-lock';
 import { readStagedSnapshot } from '../git-staged-snapshot';
 import { executeGenerationWorkflow } from '../flow/generation-workflow';
@@ -40,7 +40,7 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
   let intentForRestore = '';
   try {
     const config = readExtensionConfig();
-    setUiLanguage(config.uiLanguage);
+    setUiLanguage(asUiLanguage(vscode.env.language));
     const apiKey = await context.secrets.get(getSecretKeyName(config.provider));
 
     if (!apiKey) {

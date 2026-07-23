@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(statusBarItem);
 
   const syncUiLanguage = (): UiLanguage => {
-    const language = asUiLanguageFromConfig();
+    const language = asUiLanguage(vscode.env.language);
     setUiLanguage(language);
     statusBarItem.tooltip = t('statusBarButtonTooltip');
     return language;
@@ -48,9 +48,6 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration('wtfCommit.showStatusBarItem')) {
         updateStatusBarVisibility();
-      }
-      if (event.affectsConfiguration('wtfCommit.uiLanguage')) {
-        syncUiLanguage();
       }
       if (event.affectsConfiguration('wtfCommit.autoPush') || event.affectsConfiguration('wtfCommit.autoCommit')) {
         void warnIfAutoPushWithoutAutoCommit();
@@ -77,11 +74,6 @@ export function activate(context: vscode.ExtensionContext) {
       outputChannel.show();
     })
   );
-}
-
-function asUiLanguageFromConfig(): UiLanguage {
-  const raw = vscode.workspace.getConfiguration('wtfCommit').get<string>('uiLanguage');
-  return asUiLanguage(raw);
 }
 
 /**

@@ -8,8 +8,7 @@ import { LONG_STATUS_MESSAGE_TIMEOUT_MS, showStatusMessage } from '../status';
 
 export async function runSetApiKey(context: vscode.ExtensionContext): Promise<void> {
   try {
-    const raw = vscode.workspace.getConfiguration('wtfCommit').get<string>('uiLanguage');
-    setUiLanguage(asUiLanguage(raw));
+    setUiLanguage(asUiLanguage(vscode.env.language));
 
     const config = vscode.workspace.getConfiguration('wtfCommit');
     const currentProvider = config.get<string>('provider');

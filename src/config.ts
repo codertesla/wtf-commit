@@ -9,7 +9,6 @@ import {
   DEFAULT_IGNORE_PATHS,
 } from './types';
 import { resolveProviderConfig } from './provider-config';
-import { asUiLanguage } from './i18n';
 import { readProviderOverride, resolveCommitMessageLanguage } from './settings-resolve';
 
 export function readExtensionConfig(): ExtensionConfig {
@@ -39,13 +38,17 @@ export function readExtensionConfig(): ExtensionConfig {
     customModel: globalModel,
   });
 
-  let systemPrompt = config.get<string>('prompt') || DEFAULT_SYSTEM_PROMPT;
+  // Prompt is intentionally not shown in Settings UI; power users can still
+  // override it via settings.json (`wtfCommit.prompt`).
+  const configuredPrompt = config.get<unknown>('prompt');
+  let systemPrompt = typeof configuredPrompt === 'string' && configuredPrompt.trim()
+    ? configuredPrompt
+    : DEFAULT_SYSTEM_PROMPT;
   systemPrompt += `\n\nIMPORTANT: Please write the commit message in ${language}.`;
 
   return {
     provider,
     language,
-    uiLanguage: asUiLanguage(config.get<string>('uiLanguage')),
     autoCommit: config.get<boolean>('autoCommit') ?? true,
     autoPush: config.get<boolean>('autoPush') ?? false,
     confirmAutoPush: config.get<boolean>('confirmAutoPush') ?? true,

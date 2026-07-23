@@ -68,7 +68,6 @@ export interface ExtensionConfig {
   provider: ProviderName;
   /** Resolved commit-message language (Custom already expanded). */
   language: string;
-  uiLanguage: 'en' | 'zh';
   autoCommit: boolean;
   autoPush: boolean;
   confirmAutoPush: boolean;

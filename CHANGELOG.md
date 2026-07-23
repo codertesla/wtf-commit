@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.1] - 2026-07-23
+### Changed
+- **UI language follows VS Code**: Removed `wtfCommit.uiLanguage`. The extension UI now tracks `vscode.env.language` (`zh*` → Chinese, otherwise English).
+- **System prompt off Settings UI**: `wtfCommit.prompt` is no longer shown in Settings; power users can still override it in `settings.json`.
+
 ## [1.16.0] - 2026-07-23
 ### Changed
 - **Leaner settings**: Removed rarely used knobs — `temperature` (fixed at `1`; omitted for Gemini), `smartStage` (always on), `confirmBeforeCommit`, `warnOnTruncatedDiff`, `changelogPopup`, `maxDiffChars`, and `maxUntrackedFiles` (built-in defaults). Everyday flow is Provider + Auto Commit / Auto Push (+ Confirm Before Push).
