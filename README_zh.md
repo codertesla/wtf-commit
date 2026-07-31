@@ -63,11 +63,9 @@
 
 > 只想生成信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.17.0）
+## 🆕 最新更新（v1.17.1）
 
-- **仅保留五个服务商**：DeepSeek、Gemini、OpenAI、OpenRouter、Custom；原 MiMo / GLM / Z.AI / NVIDIA NIM 会自动迁移为 Custom。
-- **DeepSeek 优先**：Set API Key 默认 DeepSeek，并提供申请 Key 链接，减少首次选择。
-- **更少打断**：混合暂存改为状态栏提示；AI 修复自动执行；提交后若仍有未暂存变更会提示。
+- **OpenAI 默认模型改为 `gpt-5.6-luna`**：替换 `gpt-5-nano`；降价后能力更强、成本仍低，适合已有 OpenAI Key 的用户。
 
 > 完整历史见 [CHANGELOG](CHANGELOG.md)。
 
@@ -144,7 +142,7 @@
 |----------|---------------|-----------------|
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
 | **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
-| **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
+| **OpenAI** | `gpt-5.6-luna` | `https://api.openai.com/v1` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
 <!-- provider-manifest:end -->
@@ -175,8 +173,8 @@
 | 服务商 | 模型 | 输入 | 输出 | 约单次成本† | 说明 |
 |--------|------|-----:|-----:|------------:|------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | 零成本试用；质量与延迟不稳定 |
-| **OpenAI** | `gpt-5-nano` | $0.05 | $0.40 | ~$0.0003 | OpenAI 服务商默认 |
 | **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **默认 — 就用这个** |
+| **OpenAI** | `gpt-5.6-luna` | $0.20 | $1.20 | ~$0.0012 | OpenAI 服务商默认 |
 | **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | 备选；[免费额度](https://ai.google.dev/gemini-api/docs/pricing) 慷慨 |
 
 † 按 **约 5K 输入 + 150 输出 tokens** 估算。实际成本取决于 diff 大小与模型输出长度。

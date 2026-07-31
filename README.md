@@ -63,11 +63,9 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.17.0)
+## 🆕 Latest (v1.17.1)
 
-- **Five providers only**: DeepSeek, Gemini, OpenAI, OpenRouter, Custom — former MiMo/GLM/Z.AI/NVIDIA NIM settings migrate to Custom automatically.
-- **DeepSeek-first setup**: Set API Key defaults to DeepSeek with a Get API Key link; fewer choices on first run.
-- **Fewer interruptions**: Mixed staged/unstaged is a status tip (not a modal); AI repair runs automatically; post-commit tip when unstaged files remain.
+- **OpenAI default → `gpt-5.6-luna`**: Replaces `gpt-5-nano` after the price cut — stronger model at a still-low cost when you use the OpenAI provider.
 
 > See [CHANGELOG](CHANGELOG.md) for full history.
 
@@ -144,7 +142,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 |----------|---------------|-----------------|
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
 | **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
-| **OpenAI** | `gpt-5-nano` | `https://api.openai.com/v1` |
+| **OpenAI** | `gpt-5.6-luna` | `https://api.openai.com/v1` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
 | **Custom** | - | - |
 <!-- provider-manifest:end -->
@@ -175,8 +173,8 @@ Generating a commit message is a lightweight task — you don't need a frontier 
 | Provider | Model | Input | Output | ~Cost / generation† | Notes |
 |----------|-------|------:|-------:|--------------------:|-------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | Zero-cost trials; quality/latency vary |
-| **OpenAI** | `gpt-5-nano` | $0.05 | $0.40 | ~$0.0003 | OpenAI provider default |
 | **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Default — use this** |
+| **OpenAI** | `gpt-5.6-luna` | $0.20 | $1.20 | ~$0.0012 | OpenAI provider default |
 | **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | Alternative; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
 
 † Rough estimate for **~5K input + 150 output tokens** (typical diff + commit message), no prompt cache. Actual cost depends on diff size and model verbosity.

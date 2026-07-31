@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.17.1] - 2026-07-31
+### Changed
+- **OpenAI Default Model**: Updated the default OpenAI model from `gpt-5-nano` to `gpt-5.6-luna` after the price cut (better capability at similar cost).
+
 ## [1.17.0] - 2026-07-23
 ### Changed
 - **Slimmer provider list**: Built-in providers are now **DeepSeek**, **Gemini**, **OpenAI**, **OpenRouter**, and **Custom**. MiMo, GLM, Z.AI, and NVIDIA NIM were removed from Settings.

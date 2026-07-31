@@ -1,7 +1,7 @@
 export const PROVIDER_MANIFEST = {
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.5-flash-lite' },
-  OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5-nano' },
+  OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5.6-luna' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
 } as const;
 
