@@ -367,9 +367,17 @@ describe('Gemini Interactions API', () => {
 });
 
 describe('Thinking-capable providers', () => {
-  it('should disable thinking for DeepSeek and known Custom hosts', () => {
+  it('should disable thinking for DeepSeek, OpenCode Go, and known Custom hosts', () => {
     assert.strictEqual(
       shouldDisableThinking('DeepSeek', 'https://api.deepseek.com/chat/completions'),
+      true
+    );
+    assert.strictEqual(
+      shouldDisableThinking('OpenCode Go', 'https://opencode.ai/zen/go/v1/chat/completions'),
+      true
+    );
+    assert.strictEqual(
+      shouldDisableThinking('Custom', 'https://opencode.ai/zen/go/v1/chat/completions'),
       true
     );
     assert.strictEqual(
@@ -387,6 +395,13 @@ describe('Thinking-capable providers', () => {
     assert.strictEqual(
       shouldDisableThinking('OpenAI', 'https://api.openai.com/v1/chat/completions'),
       false
+    );
+  });
+
+  it('should build the OpenCode Go chat completions endpoint', () => {
+    assert.strictEqual(
+      buildProviderEndpoint('https://opencode.ai/zen/go/v1', 'OpenCode Go'),
+      'https://opencode.ai/zen/go/v1/chat/completions'
     );
   });
 

@@ -1,5 +1,6 @@
 export const PROVIDER_MANIFEST = {
   DeepSeek: { baseUrl: 'https://api.deepseek.com', model: 'deepseek-v4-flash' },
+  'OpenCode Go': { baseUrl: 'https://opencode.ai/zen/go/v1', model: 'deepseek-v4-flash' },
   Gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-3.5-flash-lite' },
   OpenAI: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-5.6-luna' },
   OpenRouter: { baseUrl: 'https://openrouter.ai/api/v1', model: 'openrouter/free' },
@@ -32,6 +33,7 @@ export function isLegacyProviderName(name: string): name is LegacyProviderName {
 /** Where users create API keys (opened from Set API Key / missing-key prompts). */
 export const PROVIDER_API_KEY_URLS: Partial<Record<ProviderName, string>> = {
   DeepSeek: 'https://platform.deepseek.com/api_keys',
+  'OpenCode Go': 'https://opencode.ai/go?ref=J9E8732NMP',
   Gemini: 'https://aistudio.google.com/api-keys',
   OpenAI: 'https://platform.openai.com/api-keys',
   OpenRouter: 'https://openrouter.ai/keys',

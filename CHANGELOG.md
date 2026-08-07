@@ -5,7 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.18.0] - 2026-08-07
+### Added
+- **OpenCode Go provider**: Select **OpenCode Go**, paste your Go API key, and use the built-in default `deepseek-v4-flash` via `https://opencode.ai/zen/go/v1` (no Custom Base URL needed). Thinking mode is disabled automatically for faster commit messages.
+- **OpenCode Go docs**: Clarify Flash list rates match DeepSeek official; recommend Go when you already subscribe (included ~$60 Flash credit / ~6× value). Subscribe / Get API Key links use the referral URL (`opencode.ai/go?ref=…`) for an extra **$5** Go credit; pricing docs stay on the official Go page.
 
 ## [1.17.1] - 2026-07-31
 ### Changed

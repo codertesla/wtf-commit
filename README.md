@@ -15,7 +15,8 @@ Works in **VS Code** (Microsoft Marketplace — search, install, **auto-update**
 
 | | |
 |:--|:--|
-| **Default provider** | **DeepSeek** (`deepseek-v4-flash`) — fast and cheap for commit messages |
+| **Default provider** | **DeepSeek** (`deepseek-v4-flash`) — fast and cheap pay-as-you-go |
+| **Also recommended** | **[OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP)** — same Flash model; subscribe via that link for an extra **$5** Go credit; commits draw from your Go quota |
 | **Setup once** | Paste an API key for your provider (~1 minute) |
 | **Default flow** | Generate → **auto commit** (no extra confirm). **Auto Push stays off** until you enable it |
 | **Power users** | Turn on Auto Push (+ optionally turn off Confirm Before Push) for generate → commit → push in one shortcut |
@@ -57,15 +58,15 @@ Defaults are enough: **Provider = DeepSeek**. You only need a key.
 2. Search **`WTF Commit: Generate`**.
 3. Double-click the keybinding → press **`Cmd+G` twice** (or `Ctrl+G` twice on Windows/Linux) → Enter.
 
-**One-keystroke power flow (optional):** Settings → enable **Auto Push**. Leave **Confirm Before Push** on until you trust it; turn that confirm off only when you want generate → commit → push with zero dialogs.
+**One-keystroke power flow (optional):** Settings → enable **Auto Push**. Leave **Confirm Before Push** on until you trust it; turn that confirm off only when you want a zero-dialog generate → commit → push flow.
 
 Other triggers: ✨ on the Source Control title bar, or Command Palette → **`WTF Commit: Generate`**.
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.17.1)
+## 🆕 Latest (v1.18.0)
 
-- **OpenAI default → `gpt-5.6-luna`**: Replaces `gpt-5-nano` after the price cut — stronger model at a still-low cost when you use the OpenAI provider.
+- **OpenCode Go provider**: New built-in provider — the same `deepseek-v4-flash` model via `https://opencode.ai/zen/go/v1`. Set **Provider** to **OpenCode Go** and paste your Go API key; thinking mode is disabled automatically for faster commit messages.
 
 > See [CHANGELOG](CHANGELOG.md) for full history.
 
@@ -95,11 +96,11 @@ Open VS Code **Settings** (`Cmd+,`) and search for `WTF Commit`. Settings are sp
 | **Provider** | AI backend (default DeepSeek). |
 | **Auto Commit** | **Default on** — commit after generate. Off = message only in Source Control. |
 | **Auto Push** | **Default off** — enable for push after commit. Requires Auto Commit. |
-| **Confirm Before Push** | **Default on** — ask before auto-push. Power users can disable for a full hands-off shortcut. |
+| **Confirm Before Push** | **Default on** — ask before auto-push. Power users can disable it for a fully hands-off shortcut. |
 
 **Advanced** — Custom Base URL/Model, Provider Overrides, ignore paths, status bar toggle.
 
-> Extension UI language follows VS Code (`vscode.env.language`): `zh*` → 中文, otherwise English. Power-user overrides in `settings.json` only: `wtfCommit.prompt`, and when Commit Message Language is `Custom`, `wtfCommit.customCommitMessageLanguage`.
+> Extension UI language follows VS Code (`vscode.env.language`): `zh*` → 中文, otherwise English. Power-user overrides live in `settings.json` only: `wtfCommit.prompt`, and when Commit Message Language is `Custom`, `wtfCommit.customCommitMessageLanguage`.
 
 ### 2. Custom Model & Endpoints
 You can use any OpenAI-compatible model (like local models via Ollama):
@@ -133,7 +134,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 |------|---------|
 | **Default Provider** | **DeepSeek** — used on first install until you change **Provider** in settings. |
 | **Provider default** | Each built-in provider has its own default **Model** and **Base URL** (table below). Applies when that provider is **selected** and no **Provider Overrides** (or Custom Base URL/Model) are set. |
-| **Our recommendation** | Editorial picks for commit messages (see [Choosing a model](#choosing-a-model-for-commit-messages)) — **not** the extension default provider. |
+| **Our recommendation** | Our picks for commit-message generation (see [Choosing a model](#choosing-a-model-for-commit-messages)) — DeepSeek and OpenCode Go are both recommended; this is **not** the same as the extension default provider. |
 
 **Provider defaults** — when **Base URL** and **Model** are left empty:
 
@@ -141,6 +142,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 | Provider | Default Model | Default Base URL |
 |----------|---------------|-----------------|
 | **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
+| **OpenCode Go** | `deepseek-v4-flash` | `https://opencode.ai/zen/go/v1` |
 | **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenAI** | `gpt-5.6-luna` | `https://api.openai.com/v1` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
@@ -152,6 +154,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 | Provider | Get API Key |
 |----------|-------------|
 | **DeepSeek** | [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) |
+| **OpenCode Go** | [Subscribe / get key](https://opencode.ai/go?ref=J9E8732NMP) (+$5 Go credit) · [pricing docs](https://opencode.ai/docs/go) |
 | **Gemini** | [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys) |
 | **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **OpenRouter** | [openrouter.ai/keys](https://openrouter.ai/keys) |
@@ -162,24 +165,30 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 
 Generating a commit message is a lightweight task — you don't need a frontier model. Pick based on **cost**, **latency**, and whether you already have an API key.
 
-**Stick with the default** unless you already have another key:
+**Recommended providers:**
 
-1. **DeepSeek V4 Flash** — **Default Provider**; leave **Model** empty → `deepseek-v4-flash`. Fast, cheap, high quality. Thinking mode is disabled automatically.
-2. **Gemini 3.5 Flash Lite** — optional alternative with a free tier; set **Provider** to **Gemini**.
-3. **OpenAI / OpenRouter / Custom** — use these if you already have keys or a proxy endpoint.
+1. **DeepSeek** (`deepseek-v4-flash`) — **Default Provider**; leave **Model** empty. Fast, high quality, pay-as-you-go. Thinking mode is disabled automatically.
+2. **OpenCode Go** (`deepseek-v4-flash`) — **Recommended** if you already have (or want) an [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) subscription (that link adds an extra **$5** toward Go quota): set **Provider** to **OpenCode Go**, paste the Go API key. Same model via OpenCode’s endpoint; commits draw from your Go quota (no separate DeepSeek top-up).
+3. **Gemini 3.5 Flash Lite** — optional alternative with a free tier; set **Provider** to **Gemini**.
+4. **OpenAI / OpenRouter / Custom** — use these if you already have keys or a proxy endpoint.
+
+**DeepSeek vs OpenCode Go (same model):** list rates for `deepseek-v4-flash` match DeepSeek’s official API (**$0.14** input / **$0.28** output per 1M tokens). Go is **not** cheaper on sticker price — its advantage is the subscription: **$5** first month, then **$10**/mo, with roughly **6×** the usage value included (Flash gets a **~$60**/mo usage credit, about 158k agent-style requests per month by their published estimate). For light, commit-only use, official DeepSeek pay-as-you-go stays cheapest; if you already pay for Go, prefer **OpenCode Go** so commit messages are covered by that quota.
 
 **Pricing comparison** (USD per 1M tokens, cache-miss input; sources linked below):
 
 | Provider | Model | Input | Output | ~Cost / generation† | Notes |
 |----------|-------|------:|-------:|--------------------:|-------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | Zero-cost trials; quality/latency vary |
-| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Default — use this** |
+| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **Default** — pay-as-you-go |
+| **OpenCode Go** | `deepseek-v4-flash` | $0.14‡ | $0.28‡ | ~$0.0007‡ / ~$0 in quota | **Recommended** with Go sub — same list rates; $10/mo ≈ $60 Flash credit (~6×) |
 | **OpenAI** | `gpt-5.6-luna` | $0.20 | $1.20 | ~$0.0012 | OpenAI provider default |
 | **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | Alternative; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
 
 † Rough estimate for **~5K input + 150 output tokens** (typical diff + commit message), no prompt cache. Actual cost depends on diff size and model verbosity.
 
-Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [OpenRouter](https://openrouter.ai/models)
+‡ OpenCode Go publishes the same Flash list rates as DeepSeek to meter subscription quota ([Go pricing](https://opencode.ai/docs/go)); within the included credit, marginal cost for commits is effectively ~$0 until you hit Go limits.
+
+Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [OpenCode Go](https://opencode.ai/docs/go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [OpenRouter](https://openrouter.ai/models)
 
 > OpenRouter **provider default** is `openrouter/free`.
 

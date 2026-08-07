@@ -18,6 +18,16 @@ describe('resolveProviderConfig', () => {
     );
   });
 
+  it('should resolve OpenCode Go built-in defaults', () => {
+    assert.deepStrictEqual(
+      resolveProviderConfig({ provider: 'OpenCode Go' }),
+      {
+        baseUrl: 'https://opencode.ai/zen/go/v1',
+        model: 'deepseek-v4-flash',
+      }
+    );
+  });
+
   it('should prefer provider-specific overrides', () => {
     assert.deepStrictEqual(
       resolveProviderConfig({

@@ -1,8 +1,8 @@
 {
   "name": "wtf-commit",
   "displayName": "WTF Commit",
-  "description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, Gemini, OpenAI, and more.",
-  "version": "1.17.1",
+  "description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, OpenCode Go, Gemini, OpenAI, and more.",
+  "version": "1.18.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",
@@ -24,6 +24,8 @@
     "scm",
     "source control",
     "deepseek",
+    "opencode",
+    "opencode go",
     "gemini",
     "openai",
     "cursor",
@@ -98,13 +100,14 @@
             "type": "string",
             "enum": [
               "DeepSeek",
+              "OpenCode Go",
               "Gemini",
               "OpenAI",
               "OpenRouter",
               "Custom"
             ],
             "default": "DeepSeek",
-            "markdownDescription": "**Provider** — Default is **DeepSeek** (`deepseek-v4-flash`). Use **OpenRouter** or **Custom** for other OpenAI-compatible endpoints (MiMo, GLM, Z.AI, NVIDIA NIM, proxies). Leave Model empty for built-in defaults.",
+            "markdownDescription": "**Provider** — Default is **DeepSeek** (`deepseek-v4-flash`). Choose **OpenCode Go** if you have (or want) an [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) subscription — same default model via `opencode.ai/zen/go`; subscribe via that link for an extra **$5** Go credit. Use **OpenRouter** or **Custom** for other OpenAI-compatible endpoints. Leave Model empty for built-in defaults.",
             "order": 1
           },
           "wtfCommit.autoCommit": {

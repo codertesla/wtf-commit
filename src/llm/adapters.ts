@@ -118,15 +118,17 @@ export function buildRequestBody(
   };
 }
 
-/** DeepSeek / GLM / Z.AI thinking mode slows commit messages; also detect via Custom host. */
+/** DeepSeek / OpenCode Go / GLM / Z.AI thinking mode slows commit messages; also detect via Custom host. */
 export function shouldDisableThinking(provider: ProviderName, endpoint: string): boolean {
-  if (provider === 'DeepSeek') {
+  if (provider === 'DeepSeek' || provider === 'OpenCode Go') {
     return true;
   }
   try {
     const host = new URL(endpoint).hostname.toLowerCase();
     return (
       host === 'api.deepseek.com'
+      || host === 'opencode.ai'
+      || host.endsWith('.opencode.ai')
       || host === 'open.bigmodel.cn'
       || host.endsWith('.bigmodel.cn')
       || host === 'api.z.ai'
