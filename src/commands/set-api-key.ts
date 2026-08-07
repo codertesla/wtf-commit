@@ -2,12 +2,13 @@ import * as vscode from 'vscode';
 import {
   PROVIDER_NAMES,
   PROVIDER_API_KEY_URLS,
+  PROVIDER_KEY_NOTES,
   DEFAULT_PROVIDER,
   type ProviderName,
 } from '../types';
 import { asProviderName, getSecretKeyName } from '../config';
-import { maskApiKey } from '../ui';
-import { setUiLanguage, t, asUiLanguage } from '../i18n';
+import { maskApiKey, validateApiKeyInput } from '../ui';
+import { setUiLanguage, t, getUiLanguage, asUiLanguage } from '../i18n';
 import { getErrorMessage, logError } from '../prompt';
 import { LONG_STATUS_MESSAGE_TIMEOUT_MS, showStatusMessage } from '../status';
 
@@ -20,24 +21,17 @@ export async function runSetApiKey(context: vscode.ExtensionContext): Promise<vo
 
     const provider = await pickProviderForApiKey(context, currentProvider);
     if (!provider) {
+      showStatusMessage(`$(key) ${t('setApiKeyCancelled')}`);
       return;
     }
 
-    const keyUrl = PROVIDER_API_KEY_URLS[provider];
-    if (keyUrl) {
-      const getKeyLabel = t('getApiKey');
-      const continueLabel = t('enterApiKeyContinue');
-      const preAction = await vscode.window.showInformationMessage(
-        t('setApiKeyHint', { provider }),
-        continueLabel,
-        getKeyLabel
-      );
-      if (!preAction) {
-        return;
-      }
-      if (preAction === getKeyLabel) {
-        await vscode.env.openExternal(vscode.Uri.parse(keyUrl));
-      }
+    // First-time setup: guide users who still need to obtain a key (e.g.
+    // OpenCode Go requires a subscription). Users who already have a key just
+    // press Enter and go straight to the input box.
+    const hasKey = Boolean(await context.secrets.get(getSecretKeyName(provider)));
+    if (!hasKey && !(await promptOpenKeyPageOrPaste(provider))) {
+      showStatusMessage(`$(key) ${t('setApiKeyCancelled')}`);
+      return;
     }
 
     const apiKey = await vscode.window.showInputBox({
@@ -45,20 +39,23 @@ export async function runSetApiKey(context: vscode.ExtensionContext): Promise<vo
       prompt: t('enterApiKeyPrompt'),
       password: true,
       ignoreFocusOut: true,
+      validateInput: validateApiKeyInput,
     });
 
     const trimmedApiKey = apiKey?.trim();
     if (!trimmedApiKey) {
+      showStatusMessage(`$(key) ${t('setApiKeyCancelled')}`);
       return;
     }
 
     await context.secrets.store(getSecretKeyName(provider), trimmedApiKey);
+    const masked = maskApiKey(trimmedApiKey);
 
     const isCurrentProvider = provider === currentProvider;
     let switchedProvider = isCurrentProvider;
     if (!isCurrentProvider) {
       const switchAction = await vscode.window.showInformationMessage(
-        t('apiKeySavedSwitched', { provider }),
+        t('apiKeySavedSwitched', { provider, masked }),
         t('switchProvider'),
         t('keepCurrent')
       );
@@ -73,14 +70,59 @@ export async function runSetApiKey(context: vscode.ExtensionContext): Promise<vo
     showStatusMessage(
       `$(key) ${
         switchedProvider
-          ? t('apiKeySwitchedTo', { provider })
-          : t('apiKeySavedUnchanged', { provider, current: String(currentProvider) })
+          ? t('apiKeySwitchedTo', { provider, masked })
+          : t('apiKeySavedUnchanged', { provider, masked, current: String(currentProvider) })
       }`,
       LONG_STATUS_MESSAGE_TIMEOUT_MS
     );
   } catch (error) {
     logError('Failed to set API key', error);
     vscode.window.showErrorMessage(t('failedToSaveKey', { message: getErrorMessage(error) }));
+  }
+}
+
+/**
+ * Wizard for providers whose key is not set yet: either paste a key now, or
+ * open the key page in the browser. After the page is opened the wizard stays
+ * open (ignoreFocusOut), so the user can come back and pick "paste" — the
+ * flow never ends silently while waiting for a key. Returns false on cancel.
+ */
+async function promptOpenKeyPageOrPaste(provider: ProviderName): Promise<boolean> {
+  const keyUrl = PROVIDER_API_KEY_URLS[provider];
+  if (!keyUrl) {
+    return true;
+  }
+  const note = PROVIDER_KEY_NOTES[provider]?.[getUiLanguage()];
+  const openPageLabel = t('openKeyPage', { provider });
+  while (true) {
+    const choice = await vscode.window.showQuickPick(
+      [
+        {
+          label: `$(key) ${t('enterKeyNow')}`,
+          detail: t('enterKeyNowDetail'),
+          action: 'paste' as const,
+        },
+        {
+          label: `$(link-external) ${openPageLabel}`,
+          detail: note ? `${note}\n${keyUrl}` : keyUrl,
+          action: 'open' as const,
+        },
+      ],
+      {
+        title: t('setApiKeyFlowTitle'),
+        placeHolder: t('keyWizardPlaceholder'),
+        ignoreFocusOut: true,
+      }
+    );
+    if (!choice) {
+      return false;
+    }
+    if (choice.action === 'open') {
+      await vscode.env.openExternal(vscode.Uri.parse(keyUrl));
+      showStatusMessage(t('keyPageOpened', { provider }), LONG_STATUS_MESSAGE_TIMEOUT_MS);
+      continue;
+    }
+    return true;
   }
 }
 

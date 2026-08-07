@@ -6,7 +6,9 @@ import {
   previewStreamText,
   restoreIntent,
   restoreIntentOnAbort,
+  validateApiKeyInput,
 } from '../ui';
+import { setUiLanguage } from '../i18n';
 
 describe('maskApiKey', () => {
   it('should mask the middle of a long key', () => {
@@ -20,6 +22,35 @@ describe('maskApiKey', () => {
 
   it('should mask keys just over the threshold', () => {
     assert.strictEqual(maskApiKey('123456789'), '1234••••6789');
+  });
+});
+
+describe('validateApiKeyInput', () => {
+  it('should accept a plausible long key with a trailing newline', () => {
+    assert.strictEqual(validateApiKeyInput('sk-abcdef1234567890wxyz\n'), undefined);
+  });
+
+  it('should accept a leading/trailing-space paste of a long key', () => {
+    assert.strictEqual(validateApiKeyInput('  sk-abcdef1234567890wxyz  '), undefined);
+  });
+
+  it('should reject inner whitespace as a paste error', () => {
+    assert.ok(validateApiKeyInput('sk-abc def1234567890wxyz'));
+  });
+
+  it('should reject implausibly short values', () => {
+    assert.ok(validateApiKeyInput('sk-short'));
+  });
+
+  it('should pass empty values so callers can treat them as cancel', () => {
+    assert.strictEqual(validateApiKeyInput(''), undefined);
+    assert.strictEqual(validateApiKeyInput('   '), undefined);
+  });
+
+  it('should localize the error message', () => {
+    setUiLanguage('zh');
+    assert.match(validateApiKeyInput('sk-abc def1234567890wxyz') ?? '', /空格/);
+    setUiLanguage('en');
   });
 });
 

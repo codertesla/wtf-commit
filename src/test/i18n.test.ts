@@ -34,8 +34,8 @@ describe('i18n', () => {
   it('t replaces multiple occurrences of the same param', () => {
     setUiLanguage('en');
     assert.strictEqual(
-      t('apiKeySwitchedTo', { provider: 'OpenAI' }),
-      'API Key for OpenAI saved. Active provider is now OpenAI.'
+      t('apiKeySwitchedTo', { provider: 'OpenAI', masked: 'sk-12••••abcd' }),
+      'API Key for OpenAI saved (sk-12••••abcd). Active provider is now OpenAI.'
     );
   });
 

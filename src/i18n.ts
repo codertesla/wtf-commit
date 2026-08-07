@@ -22,8 +22,14 @@ export type MessageKey =
   | 'apiKeyNotSet'
   | 'setApiKey'
   | 'getApiKey'
-  | 'enterApiKeyContinue'
-  | 'setApiKeyHint'
+  | 'enterKeyNow'
+  | 'enterKeyNowDetail'
+  | 'openKeyPage'
+  | 'keyPageOpened'
+  | 'keyWizardPlaceholder'
+  | 'setApiKeyCancelled'
+  | 'keyContainsWhitespace'
+  | 'keyLooksInvalid'
   | 'setApiKeyFlowTitle'
   | 'setKeyForDefaultProvider'
   | 'setKeyForCurrentProvider'
@@ -105,18 +111,26 @@ const en: Dictionary = {
   apiKeyNotSet: 'API Key for {provider} is not set.',
   setApiKey: 'Set API Key',
   getApiKey: 'Get API Key',
-  enterApiKeyContinue: 'I have a key',
-  setApiKeyHint: 'Paste your {provider} API key next. Need one? Open the key page first.',
+  enterKeyNow: 'Paste API Key now',
+  enterKeyNowDetail: 'Opens the input box — paste the key and press Enter',
+  openKeyPage: 'Open {provider} key page',
+  keyPageOpened: 'Opened the {provider} key page — paste the key here when you have it.',
+  keyWizardPlaceholder: 'Paste your API key, or open the key page first',
+  setApiKeyCancelled: 'Set API Key cancelled — nothing was changed.',
+  keyContainsWhitespace: 'The key contains spaces — check the paste for stray characters.',
+  keyLooksInvalid: 'Does not look like a complete API key — check that it was copied fully.',
   setApiKeyFlowTitle: 'WTF Commit: Set API Key',
   setKeyForDefaultProvider: 'Set key for {provider} (default)',
   setKeyForCurrentProvider: 'Set key for {provider} (current)',
   defaultProviderBadge: 'default',
   chooseOtherProvider: 'Choose another provider…',
   chooseOtherProviderDetail: 'Only if you are not using the default DeepSeek provider.',
-  apiKeySavedSwitched: 'API Key for {provider} saved. Switch the active provider to {provider}?',
-  apiKeySwitchedTo: 'API Key for {provider} saved. Active provider is now {provider}.',
+  apiKeySavedSwitched:
+    'API Key for {provider} saved ({masked}). Switch the active provider to {provider}?',
+  apiKeySwitchedTo:
+    'API Key for {provider} saved ({masked}). Active provider is now {provider}.',
   apiKeySavedUnchanged:
-    'API Key for {provider} saved. Active provider unchanged ({current}).',
+    'API Key for {provider} saved ({masked}). Active provider unchanged ({current}).',
   switchProvider: 'Switch Provider',
   keepCurrent: 'Keep Current',
   selectProviderPlaceholder: 'Select Provider to set API Key for',
@@ -194,17 +208,23 @@ const zh: Dictionary = {
   apiKeyNotSet: '尚未设置 {provider} 的 API Key。',
   setApiKey: '设置 API Key',
   getApiKey: '申请 API Key',
-  enterApiKeyContinue: '我已有 Key',
-  setApiKeyHint: '接下来粘贴 {provider} 的 API Key。还没有？可先打开申请页。',
+  enterKeyNow: '我已有 Key，开始粘贴',
+  enterKeyNowDetail: '打开输入框，粘贴 Key 后回车',
+  openKeyPage: '打开 {provider} 申请页',
+  keyPageOpened: '已打开 {provider} 申请页，拿到 Key 后回到此处粘贴。',
+  keyWizardPlaceholder: '粘贴 API Key，或先打开申请页',
+  setApiKeyCancelled: '已取消设置 API Key，未做任何修改。',
+  keyContainsWhitespace: 'Key 中包含空格，请检查复制的内容是否混入了多余字符。',
+  keyLooksInvalid: '看起来不像完整的 API Key，请确认已完整复制。',
   setApiKeyFlowTitle: 'WTF Commit：设置 API Key',
   setKeyForDefaultProvider: '为 {provider} 设置 Key（默认）',
   setKeyForCurrentProvider: '为 {provider} 设置 Key（当前）',
   defaultProviderBadge: '默认',
   chooseOtherProvider: '选择其他服务商…',
   chooseOtherProviderDetail: '仅当你不使用默认的 DeepSeek 时再选。',
-  apiKeySavedSwitched: '已保存 {provider} 的 API Key。是否将当前 Provider 切换为 {provider}？',
-  apiKeySwitchedTo: '已保存 {provider} 的 API Key。当前 Provider 已切换为 {provider}。',
-  apiKeySavedUnchanged: '已保存 {provider} 的 API Key。当前 Provider 未变（{current}）。',
+  apiKeySavedSwitched: '已保存 {provider} 的 API Key（{masked}）。是否将当前 Provider 切换为 {provider}？',
+  apiKeySwitchedTo: '已保存 {provider} 的 API Key（{masked}）。当前 Provider 已切换为 {provider}。',
+  apiKeySavedUnchanged: '已保存 {provider} 的 API Key（{masked}）。当前 Provider 未变（{current}）。',
   switchProvider: '切换 Provider',
   keepCurrent: '保持当前',
   selectProviderPlaceholder: '选择要设置 API Key 的 Provider',

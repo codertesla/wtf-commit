@@ -5,6 +5,13 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.0] - 2026-08-07
+### Changed
+- **Friendlier Set API Key flow**: Replaced the blocking pre-paste notification with a two-step wizard — "Paste API Key now" or "Open {provider} key page" (the wizard stays open while the browser loads, so you can paste once you have a key). Cancelling at any step now shows a status message instead of ending silently, and saved keys are echoed masked (`sk-ab••••wxyz`) in the status bar for verification.
+- **Paste-error checks**: The API key input now flags obvious paste mistakes inline (inner whitespace, implausibly short values) before saving.
+- **Provider key guidance**: OpenCode Go's key-page entry explains that a subscription is required first (subscribe via the referral link for an extra **$5** Go credit).
+- **Docs**: README (EN/ZH) configuration section now documents the full Set API Key flow.
+
 ## [1.18.0] - 2026-08-07
 ### Added
 - **OpenCode Go provider**: Select **OpenCode Go**, paste your Go API key, and use the built-in default `deepseek-v4-flash` via `https://opencode.ai/zen/go/v1` (no Custom Base URL needed). Thinking mode is disabled automatically for faster commit messages.

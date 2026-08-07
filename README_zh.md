@@ -37,7 +37,11 @@
 默认设置就够了：**Provider = DeepSeek**，你只需要一个 Key。
 
 1. **安装** — 在编辑器扩展视图搜索 **`WTF Commit`**（VS Code 或 Cursor）。
-2. **设置 API Key** — 命令面板 → **`WTF Commit: Set API Key`** → 接受 DeepSeek 默认 → 粘贴 Key。
+2. **设置 API Key** — 命令面板 → **`WTF Commit: Set API Key`**，然后：
+   - 第一项就是**当前服务商**（会显示 Key 是否已设置）；要换别的服务商，选 **选择其他服务商…**。
+   - 首次设置会出现向导：**我已有 Key，开始粘贴** 直接回车即可；还没有 Key 就选 **打开申请页** —— 浏览器打开后向导会留在原地，拿到 Key 回来继续粘贴就行。
+   - 粘贴 Key 时输入框遮罩显示并带实时校验（能拦下复制不全、混入空格等明显错误）；保存成功后在状态栏回显掩码（如 **`sk-ab••••wxyz`**）方便核对。
+   - 若设置的是**其他服务商**的 Key，会询问是否**切换 Provider**。
 3. 还没有 Key？[DeepSeek API keys](https://platform.deepseek.com/api_keys)（扩展内也可一键打开）。
 
 > 以后要用别的服务商：在 Set API Key 里选 **选择其他服务商…**，或在设置里改 **Provider**。内置服务商请把 **Model** 留空。
@@ -64,9 +68,9 @@
 
 > 只想生成提交信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.18.0）
+## 🆕 最新更新（v1.19.0）
 
-- **新增 OpenCode Go 服务商**：内置同一 `deepseek-v4-flash` 模型（端点 `https://opencode.ai/zen/go/v1`）。将 **Provider** 设为 **OpenCode Go**，粘贴 Go API Key 即可；扩展会自动关闭思考模式，生成更快。
+- **更友好的 API Key 配置**：设置 Key 时先用两步向导引导——直接粘贴，或打开服务商申请页（向导不会消失，拿到 Key 回来继续即可）。任何一步取消都有状态栏提示，不再无声退出；保存后回显掩码（`sk-ab••••wxyz`）便于核对。
 
 > 完整历史见 [CHANGELOG](CHANGELOG.md)。
 

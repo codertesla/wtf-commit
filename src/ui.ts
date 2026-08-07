@@ -1,4 +1,5 @@
 import { normalizeCommitMessage } from './prompt';
+import { t } from './i18n';
 
 export interface ProgressReporter {
   report(value: { message?: string; increment?: number }): void;
@@ -68,6 +69,26 @@ export function maskApiKey(apiKey: string): string {
     return '••••';
   }
   return `${apiKey.slice(0, 4)}••••${apiKey.slice(-4)}`;
+}
+
+/**
+ * Lightweight sanity check for a pasted API key, used as the input-box
+ * validator. Catches obvious paste mistakes (stray inner whitespace, an
+ * implausibly short value) with a clear message; empty values pass so
+ * callers can treat them as cancel.
+ */
+export function validateApiKeyInput(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  if (/\s/.test(trimmed)) {
+    return t('keyContainsWhitespace');
+  }
+  if (trimmed.length < 16) {
+    return t('keyLooksInvalid');
+  }
+  return undefined;
 }
 
 /**

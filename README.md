@@ -37,7 +37,11 @@ Onboarding is intentionally **two phases**. You only configure AI once; after th
 Defaults are enough: **Provider = DeepSeek**. You only need a key.
 
 1. **Install** — search **`WTF Commit`** in your editor’s Extensions view (VS Code or Cursor).
-2. **Set API Key** — Command Palette → **`WTF Commit: Set API Key`** → accept the DeepSeek default → paste the key.
+2. **Set API Key** — Command Palette → **`WTF Commit: Set API Key`**, then:
+   - The first entry is your **current provider** (it shows whether a key is already stored); pick **Choose another provider…** to switch.
+   - First-time setup shows a small wizard: press Enter on **Paste API Key now**, or pick **Open {provider} key page** — the wizard stays open while the browser opens, so you can come back and paste once you have a key.
+   - Pasting is masked with live paste-error checks; on success the status bar echoes the masked key (e.g. **`sk-ab••••wxyz`**) so you can verify what was stored.
+   - A key saved for another provider asks whether to **Switch Provider**.
 3. Need a key? [DeepSeek API keys](https://platform.deepseek.com/api_keys) (linked from the extension too).
 
 > Want another provider later? In Set API Key choose **Choose another provider…**, or change **Provider** in Settings. Leave **Model** empty for built-in defaults.
@@ -64,9 +68,9 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.18.0)
+## 🆕 Latest (v1.19.0)
 
-- **OpenCode Go provider**: New built-in provider — the same `deepseek-v4-flash` model via `https://opencode.ai/zen/go/v1`. Set **Provider** to **OpenCode Go** and paste your Go API key; thinking mode is disabled automatically for faster commit messages.
+- **Friendlier API key setup**: Set API Key now guides you with a two-step wizard — paste your key, or open the provider's key page (the wizard stays open while you get one). Cancelling never ends silently, and saved keys are echoed masked (`sk-ab••••wxyz`) in the status bar so you can verify what was stored.
 
 > See [CHANGELOG](CHANGELOG.md) for full history.
 
