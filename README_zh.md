@@ -9,19 +9,21 @@
 
 链接： [GitHub](https://github.com/codertesla/wtf-commit) · [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit) · [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) · [插件介绍页](https://codertesla.github.io/wtf-commit/)
 
-**一键生成 commit message。** WTF Commit 读取你的 git diff，按约定式提交规范生成清晰标题，并写入源代码管理输入框——**使用你自己的 API Key**，不绑定任何单一服务商。
+**一个快捷键：几秒内写完提交信息、完成提交、可选推送。**
 
-适用于 **VS Code**（微软 Marketplace：可搜索安装、**自动更新**）、**Cursor**、**VSCodium** 等。**持续维护**，MIT 免费开源。
+WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `feat: add dark mode`），写入源代码管理输入框并在同一按键下直接 commit——开启 Auto Push 后连推送一起完成。不再为「提交信息写什么」卡壳，告别手打模板。
+
+**流程：** `git diff → ✨ 快捷键 → 生成信息 → commit →（可选）push`
 
 | | |
 |:--|:--|
-| **默认服务商** | **DeepSeek**（`deepseek-v4-flash`）— 按量付费，生成提交信息又快又便宜 |
-| **同样推荐** | **[OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP)** — 同一 Flash 模型；经该链接订阅可额外获得 **$5** Go 额度，提交计入订阅额度 |
-| **配置一次** | 填好对应服务商的 API Key（大约一分钟） |
-| **默认流程** | 生成后 **自动 commit**（不再多弹确认）。**Auto Push 默认关闭**，避免新用户误推远程 |
-| **老手一键流** | 打开 Auto Push（可选再关掉「推送前确认」），一次快捷键完成「生成 → 提交 → 推送」 |
+| ⚡ **约 1 分钟配置** | 粘贴一次自己的 API Key（默认 DeepSeek） |
+| 🎁 **OpenCode Go（可选）** | 同一 Flash 模型——经[我们的链接](https://opencode.ai/go?ref=J9E8732NMP)订阅额外 +**$5** Go 额度，提交计入 Go 配额 |
+| 🔑 **自带 Key，无锁定** | DeepSeek / OpenAI / Gemini / OpenRouter，或任意 OpenAI 兼容端点（Ollama、代理），无需订阅 |
+| 🚀 **一键流水线** | Auto Commit 默认开；开启 Auto Push 后一次快捷键「生成 → 提交 → 推送」 |
+| 🖥️ **全编辑器可用** | VS Code（Marketplace 自动更新）、Cursor、VSCodium、其他 Open VSX 编辑器。MIT 免费开源，持续维护 |
 
-上手刻意分成 **两个阶段**：AI 只配置一次，之后就是按快捷键的肌肉记忆。
+**已安装？** 直接看 [① 配置 AI](#-配置-ai只需一次)（约 1 分钟）→ [② 日常使用](#-日常使用每次提交)。
 
 ### 安装方式
 
@@ -68,9 +70,9 @@
 
 > 只想生成提交信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.19.0）
+## 🆕 最新更新（v1.19.1）
 
-- **更友好的 API Key 配置**：设置 Key 时先用两步向导引导——直接粘贴，或打开服务商申请页（向导不会消失，拿到 Key 回来继续即可）。任何一步取消都有状态栏提示，不再无声退出；保存后回显掩码（`sk-ab••••wxyz`）便于核对。
+- **README 开头重写**：第一屏直接讲清完整管线——一个快捷键写完信息、完成提交、（可选）推送——新增一行流程说明、精简卖点表格，以及「已安装？」直达「配置 AI → 日常使用」的跳转入口。
 
 > 完整历史见 [CHANGELOG](CHANGELOG.md)。
 

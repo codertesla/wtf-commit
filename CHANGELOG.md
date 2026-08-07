@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.1] - 2026-08-07
+### Changed
+- **README (EN/ZH) opening rewrite**: The headline now covers the full one-keystroke pipeline (message written → committed → optional push), adds a one-line flow (`git diff → ✨ shortcut → message → commit → (optional) push`), a slimmed benefit table (setup time, no lock-in, one-keystroke pipeline, editor support), and a direct **Already installed?** jump link to the Configure AI / Daily use sections so returning users can start in ~1 minute.
+
 ## [1.19.0] - 2026-08-07
 ### Changed
 - **Friendlier Set API Key flow**: Replaced the blocking pre-paste notification with a two-step wizard — "Paste API Key now" or "Open {provider} key page" (the wizard stays open while the browser loads, so you can paste once you have a key). Cancelling at any step now shows a status message instead of ending silently, and saved keys are echoed masked (`sk-ab••••wxyz`) in the status bar for verification.

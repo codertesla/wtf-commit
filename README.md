@@ -9,19 +9,21 @@ English | [简体中文](README_zh.md)
 
 Links: [GitHub](https://github.com/codertesla/wtf-commit) · [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=CoderTesla.wtf-commit) · [Open VSX](https://open-vsx.org/extension/codertesla/wtf-commit) · [Website](https://codertesla.github.io/wtf-commit/)
 
-**One shortcut to generate your commit message.** WTF Commit reads your git diff and fills the Source Control box with a clear Conventional Commit — with **your own API key**, not a locked-in vendor.
+**One shortcut. Your commit message is written, committed, and pushed — in seconds.**
 
-Works in **VS Code** (Microsoft Marketplace — search, install, **auto-update**), **Cursor**, **VSCodium**, and other Open VSX–compatible editors. **Actively maintained** (MIT, free).
+WTF Commit reads your `git diff`, writes a clear Conventional Commit (e.g. `feat: add dark mode`), fills the Source Control box, and commits in the same keystroke — push too, once you enable Auto Push. No pausing to phrase a message, no boilerplate.
+
+**Flow:** `git diff → ✨ shortcut → message → commit → (optional) push`
 
 | | |
 |:--|:--|
-| **Default provider** | **DeepSeek** (`deepseek-v4-flash`) — fast and cheap pay-as-you-go |
-| **Also recommended** | **[OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP)** — same Flash model; subscribe via that link for an extra **$5** Go credit; commits draw from your Go quota |
-| **Setup once** | Paste an API key for your provider (~1 minute) |
-| **Default flow** | Generate → **auto commit** (no extra confirm). **Auto Push stays off** until you enable it |
-| **Power users** | Turn on Auto Push (+ optionally turn off Confirm Before Push) for generate → commit → push in one shortcut |
+| ⚡ **~1 min setup** | Paste your own API key once (DeepSeek by default) |
+| 🎁 **OpenCode Go (optional)** | Same Flash model — subscribe via [our link](https://opencode.ai/go?ref=J9E8732NMP) for +**$5** Go credit; commits draw from your Go quota |
+| 🔑 **No lock-in** | DeepSeek / OpenAI / Gemini / OpenRouter, or any OpenAI-compatible endpoint (Ollama, proxies). No subscription required |
+| 🚀 **One-keystroke pipeline** | Auto Commit on by default; enable Auto Push for generate → commit → push in one shot |
+| 🖥️ **Works everywhere** | VS Code (Marketplace auto-update), Cursor, VSCodium, other Open VSX editors. MIT, free, actively maintained |
 
-Onboarding is intentionally **two phases**. You only configure AI once; after that it should feel like a muscle-memory shortcut.
+**Already installed?** Skip ahead: [① Configure AI](#-configure-ai-once) (~1 min) → [② Daily use](#-daily-use-every-commit).
 
 ### Install
 
@@ -68,9 +70,9 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.19.0)
+## 🆕 Latest (v1.19.1)
 
-- **Friendlier API key setup**: Set API Key now guides you with a two-step wizard — paste your key, or open the provider's key page (the wizard stays open while you get one). Cancelling never ends silently, and saved keys are echoed masked (`sk-ab••••wxyz`) in the status bar so you can verify what was stored.
+- **README opening rewrite**: The first screen now sells the whole pipeline at a glance — one shortcut writes, commits, and (optionally) pushes — with a one-line flow, a slimmed benefit table, and a direct "Already installed?" jump link to Configure AI → Daily use.
 
 > See [CHANGELOG](CHANGELOG.md) for full history.
 
