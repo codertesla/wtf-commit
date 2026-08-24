@@ -169,14 +169,21 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 
 ### Choosing a model for commit messages
 
-Generating a commit message is a lightweight task — you don't need a frontier model. Pick based on **cost**, **latency**, and whether you already have an API key.
+Generating a commit message is a lightweight task — you don't need a frontier model. Pick based on your **use case**, **cost preference**, and whether you already have an API key:
 
-**Recommended providers:**
+**Recommended path:**
 
-1. **DeepSeek** (`deepseek-v4-flash`) — **Default Provider**; leave **Model** empty. Fast, high quality, pay-as-you-go. Thinking mode is disabled automatically.
-2. **OpenCode Go** (`deepseek-v4-flash`) — **Recommended** if you already have (or want) an [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) subscription (that link adds an extra **$5** toward Go quota): set **Provider** to **OpenCode Go**, paste the Go API key. Same model via OpenCode’s endpoint; commits draw from your Go quota (no separate DeepSeek top-up).
-3. **Gemini 3.5 Flash Lite** — optional alternative with a free tier; set **Provider** to **Gemini**.
-4. **OpenAI / OpenRouter / Custom** — use these if you already have keys or a proxy endpoint.
+1. 🎯 **Out-of-the-box / Pay-as-you-go (Recommended)** 👉 **DeepSeek** (`deepseek-v4-flash`)
+   - **Default Provider**; leave **Model** empty.
+   - True pay-as-you-go with no subscription barrier. Fast, high quality, and thinking mode is disabled automatically for sub-second responses.
+2. 🎁 **Existing Coding Sub / Global Access (Recommended)** 👉 **OpenCode Go** (`deepseek-v4-flash`)
+   - **Recommended** if you already have (or want) an [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) subscription (that link adds +**$5** toward Go quota): set **Provider** to **OpenCode Go**, paste the Go API key.
+   - Low-latency global endpoints; commits draw from your included **$30**/mo Flash quota with effectively ~$0 marginal cost.
+3. 🆓 **Zero Cost / Free Tier** 👉 **Gemini** (`gemini-3.5-flash-lite`)
+   - Google AI Studio provides a generous free tier (15 RPM / 1M tokens/day). Uses native Interactions API with `minimal` thinking for instant responses.
+4. 🔑 **OpenAI Key Holders** 👉 **OpenAI** (`gpt-5.6-luna`)
+   - Latest cost-effective standard model with top-tier instruction following and Conventional Commits consistency.
+5. 🧪 **Zero-Setup Trial / Self-Hosted** 👉 **OpenRouter** (`openrouter/free` trial) or **Custom** (local Ollama, MiMo, GLM, enterprise proxies).
 
 **DeepSeek vs OpenCode Go (same model):** list rates for `deepseek-v4-flash` match DeepSeek’s official API (off-peak: **$0.22** input / **$0.66** output; peak: **$0.44** input / **$1.32** output per 1M tokens). Go is **not** cheaper on sticker price — its advantage is the subscription: **$5** first month, then **$10**/mo, with a **$30**/mo Flash usage credit included (~**3×** value, about 37.8k agent-style requests per month by their published estimate). For light, commit-only use, official DeepSeek pay-as-you-go stays cheapest; if you already pay for Go, prefer **OpenCode Go** so commit messages are covered by that quota.
 

@@ -169,14 +169,22 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 
 ### 提交信息场景如何选型
 
-生成 Git 提交信息对模型智能要求不高，不必使用前沿大模型。按 **成本**、**延迟** 和是否已有 API Key 选择即可。
+生成 Git 提交信息对模型智能要求不高，不必使用前沿大模型。按 **场景需求**、**成本偏好** 和是否已有 API Key 选择即可：
 
-**推荐服务商：**
+**推荐选型路径：**
 
-1. **DeepSeek**（`deepseek-v4-flash`）— **默认服务商**；**Model** 留空。快、质量好、按量付费。扩展已自动关闭思考模式。
-2. **OpenCode Go**（`deepseek-v4-flash`）— 若已开通（或打算开通）[OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) 订阅（经该链接订阅可额外获得 **$5** Go 额度），**推荐**选它：**Provider** 选 **OpenCode Go**，粘贴 Go API Key。同一模型经 OpenCode 端点调用，提交消耗计入 Go 额度，无需再给 DeepSeek 充值。
-3. **Gemini 3.5 Flash Lite** — 备选（有免费额度）；**Provider** 选 **Gemini**。
-4. **OpenAI / OpenRouter / Custom** — 已有 Key 或中转端点时使用。
+1. 🎯 **国内直连 / 极简开箱（推荐）** 👉 **DeepSeek**（`deepseek-v4-flash`）
+   - **默认服务商**；设置中 **Model** 留空。
+   - 支持微信/支付宝充值、国内网络直连、纯按量计费（无月租门槛，充 $5 可用大半年）。
+   - 扩展已自动关闭思考模式，生成极速，对中文与 Conventional Commits 格式理解精准。
+2. 🎁 **已有编程订阅 / 海外网络（推荐）** 👉 **OpenCode Go**（`deepseek-v4-flash`）
+   - 若已有或打算开通 [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) 订阅（经链接订阅可额外获 **$5** 额度）：**Provider** 选 **OpenCode Go**，填入 Go Key。
+   - 全球多节点海外访问极稳，提交消耗计入每月包含的 **$30** Flash 额度，无需再给 DeepSeek 充值。
+3. 🆓 **零成本白嫖** 👉 **Gemini**（`gemini-3.5-flash-lite`）
+   - Google AI Studio 提供 15 RPM / 1M TPD 慷慨免费层；使用 Google 原生 Interactions API，首字延迟秒级响应。
+4. 🔑 **已有官方 API Key** 👉 **OpenAI**（`gpt-5.6-luna`）
+   - 新一代性价比主力模型，指令遵循最稳健，格式合格率极高。
+5. 🧪 **零门槛尝鲜 / 自定义端点** 👉 **OpenRouter**（`openrouter/free` 免费试用）或 **Custom**（本地 Ollama、MiMo、GLM、企业网关等）。
 
 **DeepSeek vs OpenCode Go（同一模型）：** `deepseek-v4-flash` 的标价与 DeepSeek 官方 API 一致（闲时输入 **$0.22** / 输出 **$0.66**，高峰输入 **$0.44** / 输出 **$1.32** / 百万 tokens）。Go 在标价上**并不**更便宜——优势在订阅：首月 **$5**，之后 **$10**/月，含 **$30**/月 的 Flash 使用额度（约 **3 倍**订阅价值；按其公布的口径估算，约 3.78 万次 Agent 风格请求/月）。如果只是写提交信息、用量很轻，官方 DeepSeek 按量付费仍然更省；如果你已经在付 Go 订阅，那就用 **OpenCode Go**，提交消耗计入订阅额度。
 

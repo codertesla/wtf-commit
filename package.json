@@ -107,7 +107,7 @@
               "Custom"
             ],
             "default": "DeepSeek",
-            "markdownDescription": "**Provider** — Default is **DeepSeek** (`deepseek-v4-flash`). Choose **OpenCode Go** if you have (or want) an [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) subscription — same default model via `opencode.ai/zen/go`; subscribe via that link for an extra **$5** Go credit. Use **OpenRouter** or **Custom** for other OpenAI-compatible endpoints. Leave Model empty for built-in defaults.",
+            "markdownDescription": "**Provider** — Default is **DeepSeek** (`deepseek-v4-flash`, pay-as-you-go). Choose **OpenCode Go** for subscription quota ([subscribe link](https://opencode.ai/go?ref=J9E8732NMP) for +$5 credit), **Gemini** for free tier (`gemini-3.5-flash-lite`), **OpenAI** (`gpt-5.6-luna`), or **OpenRouter** / **Custom** for other OpenAI-compatible endpoints. Leave Model empty for built-in defaults.",
             "order": 1
           },
           "wtfCommit.autoCommit": {

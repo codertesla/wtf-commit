@@ -49,4 +49,8 @@ export const PROVIDER_KEY_NOTES: Partial<Record<ProviderName, { en: string; zh: 
     en: 'Needs an active OpenCode Go subscription — subscribe via this link first, then copy the key from your dashboard.',
     zh: '需要先订阅 OpenCode Go（经该链接订阅可额外获得 $5 额度），订阅后到控制台复制 Key。',
   },
+  Gemini: {
+    en: 'Google AI Studio offers a generous free tier (15 RPM) — generate your API key for free without a credit card.',
+    zh: 'Google AI Studio 提供慷慨的免费额度（15 RPM）— 无需信用卡即可免费创建 API Key。',
+  },
 };
