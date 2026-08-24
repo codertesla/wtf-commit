@@ -9,7 +9,7 @@ describe('resolveProviderConfig', () => {
       resolveProviderConfig({
         provider: 'Gemini',
         customBaseUrl: 'https://api.openai.com/v1',
-        customModel: 'gpt-5-nano',
+        customModel: 'gpt-5.6-luna',
       }),
       {
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta',

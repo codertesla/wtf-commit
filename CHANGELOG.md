@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.2] - 2026-08-24
+### Changed
+- **Pricing & docs update**: Updated pricing tiers, peak/off-peak rates, OpenCode Go credit allocation, and per-generation cost estimates for DeepSeek (`deepseek-v4-flash`), OpenCode Go, and OpenAI (`gpt-5.6-luna`).
+
 ## [1.19.1] - 2026-08-07
 ### Changed
 - **README (EN/ZH) opening rewrite**: The headline now covers the full one-keystroke pipeline (message written → committed → optional push), adds a one-line flow (`git diff → ✨ shortcut → message → commit → (optional) push`), a slimmed benefit table (setup time, no lock-in, one-keystroke pipeline, editor support), and a direct **Already installed?** jump link to the Configure AI / Daily use sections so returning users can start in ~1 minute.

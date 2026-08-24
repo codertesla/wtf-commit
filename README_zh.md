@@ -70,9 +70,9 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 
 > 只想生成提交信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.19.1）
+## 🆕 最新更新（v1.19.2）
 
-- **README 开头重写**：第一屏直接讲清完整管线——一个快捷键写完信息、完成提交、（可选）推送——新增一行流程说明、精简卖点表格，以及「已安装？」直达「配置 AI → 日常使用」的跳转入口。
+- **定价与文档更新**：更新 DeepSeek、OpenCode Go 以及 OpenAI 的最新定价体系、高峰/闲时阶梯费率、OpenCode Go 额度口径与单次提交成本测算。
 
 > 完整历史见 [CHANGELOG](CHANGELOG.md)。
 
@@ -178,17 +178,19 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 3. **Gemini 3.5 Flash Lite** — 备选（有免费额度）；**Provider** 选 **Gemini**。
 4. **OpenAI / OpenRouter / Custom** — 已有 Key 或中转端点时使用。
 
-**DeepSeek vs OpenCode Go（同一模型）：** `deepseek-v4-flash` 的标价与 DeepSeek 官方 API 一致（输入 **$0.14** / 输出 **$0.28** / 百万 tokens）。Go 在标价上**并不**更便宜——优势在订阅：首月 **$5**，之后 **$10**/月，大约含 **6 倍**的使用额度（Flash 约合每月 **$60** 额度；按其公布的口径估算，约 15.8 万次 Agent 风格请求/月）。如果只是写提交信息、用量很轻，官方 DeepSeek 按量付费仍然更省；如果你已经在付 Go 订阅，那就用 **OpenCode Go**，提交消耗计入订阅额度。
+**DeepSeek vs OpenCode Go（同一模型）：** `deepseek-v4-flash` 的标价与 DeepSeek 官方 API 一致（闲时输入 **$0.22** / 输出 **$0.66**，高峰输入 **$0.44** / 输出 **$1.32** / 百万 tokens）。Go 在标价上**并不**更便宜——优势在订阅：首月 **$5**，之后 **$10**/月，含 **$30**/月 的 Flash 使用额度（约 **3 倍**订阅价值；按其公布的口径估算，约 3.78 万次 Agent 风格请求/月）。如果只是写提交信息、用量很轻，官方 DeepSeek 按量付费仍然更省；如果你已经在付 Go 订阅，那就用 **OpenCode Go**，提交消耗计入订阅额度。
 
 **价格对比**（美元 / 百万 tokens，输入按未命中缓存计价；来源见文末链接）：
 
 | 服务商 | 模型 | 输入 | 输出 | 约单次成本† | 说明 |
 |--------|------|-----:|-----:|------------:|------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | 零成本试用；质量与延迟不稳定 |
-| **DeepSeek** | `deepseek-v4-flash` | $0.14 | $0.28 | ~$0.0007 | **默认** — 按量付费 |
-| **OpenCode Go** | `deepseek-v4-flash` | $0.14‡ | $0.28‡ | ~$0.0007‡ / 额度内约 $0 | **推荐**（已有 Go 时）— 标价相同；$10/月约含 $60 Flash 额度（~6×） |
+| **DeepSeek** | `deepseek-v4-flash` | $0.22 / $0.44* | $0.66 / $1.32* | ~$0.0012 / ~$0.0024* | **默认** — 按量付费；闲时享受 5 折优惠 |
+| **OpenCode Go** | `deepseek-v4-flash` | $0.22‡ / $0.44*‡ | $0.66‡ / $1.32*‡ | ~$0.0012‡ / 额度内约 $0 | **推荐**（已有 Go 时）— 标价相同；$10/月约含 $30 Flash 额度（~3×） |
 | **OpenAI** | `gpt-5.6-luna` | $0.20 | $1.20 | ~$0.0012 | OpenAI 服务商默认 |
 | **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | 备选；[免费额度](https://ai.google.dev/gemini-api/docs/pricing) 慷慨 |
+
+* DeepSeek 与 OpenCode Go 实行高峰/闲时阶梯计价（UTC 01:00–04:00 与 06:00–10:00，即北京时间工作日 09:00–12:00 与 14:00–18:00 为高峰，其余时段为闲时 5 折）。
 
 † 按 **约 5K 输入 + 150 输出 tokens** 估算。实际成本取决于 diff 大小与模型输出长度。
 
