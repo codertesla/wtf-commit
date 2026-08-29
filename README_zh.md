@@ -70,9 +70,9 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 
 > 只想生成提交信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.19.2）
+## 🆕 最新更新（v1.19.3）
 
-- **定价与文档更新**：更新 DeepSeek、OpenCode Go 以及 OpenAI 的最新定价体系、高峰/闲时阶梯费率、OpenCode Go 额度口径与单次提交成本测算。
+- **文档与定价同步**：更新文档中的 OpenCode Go 定价说明，移除已下线的首月特惠，同步为标准 $10/月 订阅说明。
 
 > 完整历史见 [CHANGELOG](CHANGELOG.md)。
 
@@ -186,7 +186,7 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
    - 新一代性价比主力模型，指令遵循最稳健，格式合格率极高。
 5. 🧪 **零门槛尝鲜 / 自定义端点** 👉 **OpenRouter**（`openrouter/free` 免费试用）或 **Custom**（本地 Ollama、MiMo、GLM、企业网关等）。
 
-**DeepSeek vs OpenCode Go（同一模型）：** `deepseek-v4-flash` 的标价与 DeepSeek 官方 API 一致（闲时输入 **$0.22** / 输出 **$0.66**，高峰输入 **$0.44** / 输出 **$1.32** / 百万 tokens）。Go 在标价上**并不**更便宜——优势在订阅：首月 **$5**，之后 **$10**/月，含 **$30**/月 的 Flash 使用额度（约 **3 倍**订阅价值；按其公布的口径估算，约 3.78 万次 Agent 风格请求/月）。如果只是写提交信息、用量很轻，官方 DeepSeek 按量付费仍然更省；如果你已经在付 Go 订阅，那就用 **OpenCode Go**，提交消耗计入订阅额度。
+**DeepSeek vs OpenCode Go（同一模型）：** `deepseek-v4-flash` 的标价与 DeepSeek 官方 API 一致（闲时输入 **$0.22** / 输出 **$0.66**，高峰输入 **$0.44** / 输出 **$1.32** / 百万 tokens）。Go 在标价上**并不**更便宜——优势在订阅：**$10**/月，含 **$30**/月 的 Flash 使用额度（约 **3 倍**订阅价值；按其公布的口径估算，约 3.78 万次 Agent 风格请求/月）。如果只是写提交信息、用量很轻，官方 DeepSeek 按量付费仍然更省；如果你已经在付 Go 订阅，那就用 **OpenCode Go**，提交消耗计入订阅额度。
 
 **价格对比**（美元 / 百万 tokens，输入按未命中缓存计价；来源见文末链接）：
 

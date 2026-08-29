@@ -5,6 +5,10 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.3] - 2026-08-29
+### Changed
+- **OpenCode Go pricing doc sync**: Removed outdated first-month $5 promotional pricing references in README (EN/ZH), aligning with OpenCode Go's standard $10/month subscription pricing.
+
 ## [1.19.2] - 2026-08-24
 ### Changed
 - **Pricing & docs update**: Updated pricing tiers, peak/off-peak rates, OpenCode Go credit allocation, and per-generation cost estimates for DeepSeek (`deepseek-v4-flash`), OpenCode Go, and OpenAI (`gpt-5.6-luna`).

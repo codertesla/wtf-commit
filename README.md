@@ -70,9 +70,9 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.19.2)
+## 🆕 Latest (v1.19.3)
 
-- **Pricing & docs update**: Refreshed pricing structures, peak/off-peak rates, OpenCode Go credit quotas, and per-commit cost estimates across DeepSeek, OpenCode Go, and OpenAI.
+- **Pricing & docs sync**: Updated OpenCode Go pricing references in documentation to reflect current standard subscription terms ($10/mo).
 
 > See [CHANGELOG](CHANGELOG.md) for full history.
 
@@ -185,7 +185,7 @@ Generating a commit message is a lightweight task — you don't need a frontier 
    - Latest cost-effective standard model with top-tier instruction following and Conventional Commits consistency.
 5. 🧪 **Zero-Setup Trial / Self-Hosted** 👉 **OpenRouter** (`openrouter/free` trial) or **Custom** (local Ollama, MiMo, GLM, enterprise proxies).
 
-**DeepSeek vs OpenCode Go (same model):** list rates for `deepseek-v4-flash` match DeepSeek’s official API (off-peak: **$0.22** input / **$0.66** output; peak: **$0.44** input / **$1.32** output per 1M tokens). Go is **not** cheaper on sticker price — its advantage is the subscription: **$5** first month, then **$10**/mo, with a **$30**/mo Flash usage credit included (~**3×** value, about 37.8k agent-style requests per month by their published estimate). For light, commit-only use, official DeepSeek pay-as-you-go stays cheapest; if you already pay for Go, prefer **OpenCode Go** so commit messages are covered by that quota.
+**DeepSeek vs OpenCode Go (same model):** list rates for `deepseek-v4-flash` match DeepSeek’s official API (off-peak: **$0.22** input / **$0.66** output; peak: **$0.44** input / **$1.32** output per 1M tokens). Go is **not** cheaper on sticker price — its advantage is the subscription: **$10**/mo, with a **$30**/mo Flash usage credit included (~**3×** value, about 37.8k agent-style requests per month by their published estimate). For light, commit-only use, official DeepSeek pay-as-you-go stays cheapest; if you already pay for Go, prefer **OpenCode Go** so commit messages are covered by that quota.
 
 **Pricing comparison** (USD per 1M tokens, cache-miss input; sources linked below):
 
