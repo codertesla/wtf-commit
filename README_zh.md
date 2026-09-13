@@ -70,9 +70,9 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 
 > 只想生成提交信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.19.3）
+## 🆕 最新更新（v1.19.4）
 
-- **文档与定价同步**：更新文档中的 OpenCode Go 定价说明，移除已下线的首月特惠，同步为标准 $10/月 订阅说明。
+- **DeepSeek V4.1 Flash**：默认模型改为 `deepseek-flash`。定价已按新 Flash 价更新；OpenCode Go 上 V4.1 Flash 目前限时享受 **4 倍**使用额度。
 
 > 完整历史见 [CHANGELOG](CHANGELOG.md)。
 
@@ -147,8 +147,8 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 <!-- provider-manifest:start -->
 | 服务商 (Provider) | 默认模型 (Model) | 默认 Base URL |
 |----------|---------------|-----------------|
-| **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
-| **OpenCode Go** | `deepseek-v4-flash` | `https://opencode.ai/zen/go/v1` |
+| **DeepSeek** | `deepseek-flash` | `https://api.deepseek.com` |
+| **OpenCode Go** | `deepseek-flash` | `https://opencode.ai/zen/go/v1` |
 | **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenAI** | `gpt-5.6-luna` | `https://api.openai.com/v1` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
@@ -173,28 +173,28 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 
 **推荐选型路径：**
 
-1. 🎯 **国内直连 / 极简开箱（推荐）** 👉 **DeepSeek**（`deepseek-v4-flash`）
+1. 🎯 **国内直连 / 极简开箱（推荐）** 👉 **DeepSeek**（`deepseek-flash`）
    - **默认服务商**；设置中 **Model** 留空。
    - 支持微信/支付宝充值、国内网络直连、纯按量计费（无月租门槛，充 $5 可用大半年）。
    - 扩展已自动关闭思考模式，生成极速，对中文与 Conventional Commits 格式理解精准。
-2. 🎁 **已有编程订阅 / 海外网络（推荐）** 👉 **OpenCode Go**（`deepseek-v4-flash`）
+2. 🎁 **已有编程订阅 / 海外网络（推荐）** 👉 **OpenCode Go**（`deepseek-flash`）
    - 若已有或打算开通 [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) 订阅（经链接订阅可额外获 **$5** 额度）：**Provider** 选 **OpenCode Go**，填入 Go Key。
-   - 全球多节点海外访问极稳，提交消耗计入每月包含的 **$30** Flash 额度，无需再给 DeepSeek 充值。
+   - 全球多节点海外访问极稳，提交消耗计入 Go 额度。DeepSeek V4.1 Flash 目前限时享受 **4 倍**使用额度。
 3. 🆓 **零成本白嫖** 👉 **Gemini**（`gemini-3.5-flash-lite`）
    - Google AI Studio 提供 15 RPM / 1M TPD 慷慨免费层；使用 Google 原生 Interactions API，首字延迟秒级响应。
 4. 🔑 **已有官方 API Key** 👉 **OpenAI**（`gpt-5.6-luna`）
    - 新一代性价比主力模型，指令遵循最稳健，格式合格率极高。
 5. 🧪 **零门槛尝鲜 / 自定义端点** 👉 **OpenRouter**（`openrouter/free` 免费试用）或 **Custom**（本地 Ollama、MiMo、GLM、企业网关等）。
 
-**DeepSeek vs OpenCode Go（同一模型）：** `deepseek-v4-flash` 的标价与 DeepSeek 官方 API 一致（闲时输入 **$0.22** / 输出 **$0.66**，高峰输入 **$0.44** / 输出 **$1.32** / 百万 tokens）。Go 在标价上**并不**更便宜——优势在订阅：**$10**/月，含 **$30**/月 的 Flash 使用额度（约 **3 倍**订阅价值；按其公布的口径估算，约 3.78 万次 Agent 风格请求/月）。如果只是写提交信息、用量很轻，官方 DeepSeek 按量付费仍然更省；如果你已经在付 Go 订阅，那就用 **OpenCode Go**，提交消耗计入订阅额度。
+**DeepSeek vs OpenCode Go（同一模型）：** `deepseek-flash`（V4.1 Flash）的标价与 DeepSeek 官方 API 一致（闲时输入 **$0.15** / 输出 **$0.60**，高峰输入 **$0.30** / 输出 **$1.20** / 百万 tokens）。旧名 `deepseek-v4-flash` 仍会路由到 V4.1 Flash，并按该价计费。Go 在标价上**并不**更便宜——优势在 **$10**/月的订阅额度。DeepSeek V4.1 Flash 目前在 Go 上有限时 **4 倍**使用额度（见 [Go 定价](https://opencode.ai/docs/zh-cn/go)，活动可能调整）。如果只是写提交信息、用量很轻，官方 DeepSeek 按量付费仍然更省；如果你已经在付 Go 订阅，那就用 **OpenCode Go**，提交消耗计入订阅额度。
 
 **价格对比**（美元 / 百万 tokens，输入按未命中缓存计价；来源见文末链接）：
 
 | 服务商 | 模型 | 输入 | 输出 | 约单次成本† | 说明 |
 |--------|------|-----:|-----:|------------:|------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | 零成本试用；质量与延迟不稳定 |
-| **DeepSeek** | `deepseek-v4-flash` | $0.22 / $0.44* | $0.66 / $1.32* | ~$0.0012 / ~$0.0024* | **默认** — 按量付费；闲时享受 5 折优惠 |
-| **OpenCode Go** | `deepseek-v4-flash` | $0.22‡ / $0.44*‡ | $0.66‡ / $1.32*‡ | ~$0.0012‡ / 额度内约 $0 | **推荐**（已有 Go 时）— 标价相同；$10/月约含 $30 Flash 额度（~3×） |
+| **DeepSeek** | `deepseek-flash` | $0.15 / $0.30* | $0.60 / $1.20* | ~$0.0008 / ~$0.0017* | **默认** — V4.1 Flash 按量付费；闲时享受 5 折优惠 |
+| **OpenCode Go** | `deepseek-flash` | $0.15‡ / $0.30*‡ | $0.60‡ / $1.20*‡ | ~$0.0008‡ / 额度内约 $0 | **推荐**（已有 Go 时）— 标价相同；V4.1 Flash 目前限时 **4 倍**额度 |
 | **OpenAI** | `gpt-5.6-luna` | $0.20 | $1.20 | ~$0.0012 | OpenAI 服务商默认 |
 | **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | 备选；[免费额度](https://ai.google.dev/gemini-api/docs/pricing) 慷慨 |
 
@@ -202,7 +202,7 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 
 † 按 **约 5K 输入 + 150 输出 tokens** 估算。实际成本取决于 diff 大小与模型输出长度。
 
-‡ OpenCode Go 按与 DeepSeek 相同的 Flash 标价计量订阅额度（见 [Go 定价](https://opencode.ai/docs/zh-cn/go)）；额度内，写提交信息的边际成本约等于 $0，直到用完 Go 额度。
+‡ OpenCode Go 按与 DeepSeek 相同的 Flash 标价计量订阅额度（见 [Go 定价](https://opencode.ai/docs/zh-cn/go)）。DeepSeek V4.1 Flash 目前限时享受 **4 倍**使用额度；额度内，写提交信息的边际成本约等于 $0，直到用完 Go 额度。
 
 官方定价：[DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [OpenCode Go](https://opencode.ai/docs/zh-cn/go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [OpenRouter](https://openrouter.ai/models)
 

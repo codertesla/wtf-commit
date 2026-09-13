@@ -5,6 +5,11 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.4] - 2026-09-13
+### Changed
+- **DeepSeek V4.1 Flash**: Built-in defaults for DeepSeek and OpenCode Go are now `deepseek-flash` (V4.1 Flash). Legacy `deepseek-v4-flash` still routes to V4.1 Flash on the official API.
+- **Pricing & docs**: README (EN/ZH) now uses V4.1 Flash list rates (off-peak $0.15 / $0.60, peak $0.30 / $1.20 per 1M tokens) and notes OpenCode Go’s limited-time 4× usage credit on DeepSeek V4.1 Flash.
+
 ## [1.19.3] - 2026-08-29
 ### Changed
 - **OpenCode Go pricing doc sync**: Removed outdated first-month $5 promotional pricing references in README (EN/ZH), aligning with OpenCode Go's standard $10/month subscription pricing.

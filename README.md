@@ -70,9 +70,9 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.19.3)
+## 🆕 Latest (v1.19.4)
 
-- **Pricing & docs sync**: Updated OpenCode Go pricing references in documentation to reflect current standard subscription terms ($10/mo).
+- **DeepSeek V4.1 Flash**: Defaults are now `deepseek-flash`. Pricing docs use the new Flash rates; OpenCode Go currently gives V4.1 Flash a limited-time **4×** usage credit.
 
 > See [CHANGELOG](CHANGELOG.md) for full history.
 
@@ -147,8 +147,8 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 <!-- provider-manifest:start -->
 | Provider | Default Model | Default Base URL |
 |----------|---------------|-----------------|
-| **DeepSeek** | `deepseek-v4-flash` | `https://api.deepseek.com` |
-| **OpenCode Go** | `deepseek-v4-flash` | `https://opencode.ai/zen/go/v1` |
+| **DeepSeek** | `deepseek-flash` | `https://api.deepseek.com` |
+| **OpenCode Go** | `deepseek-flash` | `https://opencode.ai/zen/go/v1` |
 | **Gemini** | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta` |
 | **OpenAI** | `gpt-5.6-luna` | `https://api.openai.com/v1` |
 | **OpenRouter** | `openrouter/free` | `https://openrouter.ai/api/v1` |
@@ -173,27 +173,27 @@ Generating a commit message is a lightweight task — you don't need a frontier 
 
 **Recommended path:**
 
-1. 🎯 **Out-of-the-box / Pay-as-you-go (Recommended)** 👉 **DeepSeek** (`deepseek-v4-flash`)
+1. 🎯 **Out-of-the-box / Pay-as-you-go (Recommended)** 👉 **DeepSeek** (`deepseek-flash`)
    - **Default Provider**; leave **Model** empty.
    - True pay-as-you-go with no subscription barrier. Fast, high quality, and thinking mode is disabled automatically for sub-second responses.
-2. 🎁 **Existing Coding Sub / Global Access (Recommended)** 👉 **OpenCode Go** (`deepseek-v4-flash`)
+2. 🎁 **Existing Coding Sub / Global Access (Recommended)** 👉 **OpenCode Go** (`deepseek-flash`)
    - **Recommended** if you already have (or want) an [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) subscription (that link adds +**$5** toward Go quota): set **Provider** to **OpenCode Go**, paste the Go API key.
-   - Low-latency global endpoints; commits draw from your included **$30**/mo Flash quota with effectively ~$0 marginal cost.
+   - Low-latency global endpoints; commits draw from your Go quota. DeepSeek V4.1 Flash currently has a limited-time **4×** usage credit.
 3. 🆓 **Zero Cost / Free Tier** 👉 **Gemini** (`gemini-3.5-flash-lite`)
    - Google AI Studio provides a generous free tier (15 RPM / 1M tokens/day). Uses native Interactions API with `minimal` thinking for instant responses.
 4. 🔑 **OpenAI Key Holders** 👉 **OpenAI** (`gpt-5.6-luna`)
    - Latest cost-effective standard model with top-tier instruction following and Conventional Commits consistency.
 5. 🧪 **Zero-Setup Trial / Self-Hosted** 👉 **OpenRouter** (`openrouter/free` trial) or **Custom** (local Ollama, MiMo, GLM, enterprise proxies).
 
-**DeepSeek vs OpenCode Go (same model):** list rates for `deepseek-v4-flash` match DeepSeek’s official API (off-peak: **$0.22** input / **$0.66** output; peak: **$0.44** input / **$1.32** output per 1M tokens). Go is **not** cheaper on sticker price — its advantage is the subscription: **$10**/mo, with a **$30**/mo Flash usage credit included (~**3×** value, about 37.8k agent-style requests per month by their published estimate). For light, commit-only use, official DeepSeek pay-as-you-go stays cheapest; if you already pay for Go, prefer **OpenCode Go** so commit messages are covered by that quota.
+**DeepSeek vs OpenCode Go (same model):** list rates for `deepseek-flash` (V4.1 Flash) match DeepSeek’s official API (off-peak: **$0.15** input / **$0.60** output; peak: **$0.30** input / **$1.20** output per 1M tokens). Legacy `deepseek-v4-flash` is still accepted and routed to V4.1 Flash at these rates. Go is **not** cheaper on sticker price — its advantage is the **$10**/mo subscription quota. DeepSeek V4.1 Flash currently has a limited-time **4×** usage credit on Go (see [Go pricing](https://opencode.ai/docs/go); promo terms can change). For light, commit-only use, official DeepSeek pay-as-you-go stays cheapest; if you already pay for Go, prefer **OpenCode Go** so commit messages are covered by that quota.
 
 **Pricing comparison** (USD per 1M tokens, cache-miss input; sources linked below):
 
 | Provider | Model | Input | Output | ~Cost / generation† | Notes |
 |----------|-------|------:|-------:|--------------------:|-------|
 | **OpenRouter** | `openrouter/free` | $0 | $0 | ~$0 | Zero-cost trials; quality/latency vary |
-| **DeepSeek** | `deepseek-v4-flash` | $0.22 / $0.44* | $0.66 / $1.32* | ~$0.0012 / ~$0.0024* | **Default** — pay-as-you-go; 50% off during off-peak |
-| **OpenCode Go** | `deepseek-v4-flash` | $0.22‡ / $0.44*‡ | $0.66‡ / $1.32*‡ | ~$0.0012‡ / ~$0 in quota | **Recommended** with Go sub — same list rates; $10/mo ≈ $30 Flash credit (~3×) |
+| **DeepSeek** | `deepseek-flash` | $0.15 / $0.30* | $0.60 / $1.20* | ~$0.0008 / ~$0.0017* | **Default** — V4.1 Flash pay-as-you-go; 50% off during off-peak |
+| **OpenCode Go** | `deepseek-flash` | $0.15‡ / $0.30*‡ | $0.60‡ / $1.20*‡ | ~$0.0008‡ / ~$0 in quota | **Recommended** with Go sub — same list rates; V4.1 Flash currently **4×** usage credit (limited time) |
 | **OpenAI** | `gpt-5.6-luna` | $0.20 | $1.20 | ~$0.0012 | OpenAI provider default |
 | **Gemini** | `gemini-3.5-flash-lite` | $0.30 | $2.50 | ~$0.0019 | Alternative; generous [free tier](https://ai.google.dev/gemini-api/docs/pricing) |
 
@@ -201,7 +201,7 @@ Generating a commit message is a lightweight task — you don't need a frontier 
 
 † Rough estimate for **~5K input + 150 output tokens** (typical diff + commit message), no prompt cache. Actual cost depends on diff size and model verbosity.
 
-‡ OpenCode Go publishes the same Flash list rates as DeepSeek to meter subscription quota ([Go pricing](https://opencode.ai/docs/go)); within the included credit, marginal cost for commits is effectively ~$0 until you hit Go limits.
+‡ OpenCode Go publishes the same Flash list rates as DeepSeek to meter subscription quota ([Go pricing](https://opencode.ai/docs/go)). DeepSeek V4.1 Flash currently has a limited-time **4×** usage credit; within the included credit, marginal cost for commits is effectively ~$0 until you hit Go limits.
 
 Official pricing pages: [DeepSeek](https://api-docs.deepseek.com/quick_start/pricing) · [OpenCode Go](https://opencode.ai/docs/go) · [Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [OpenAI](https://developers.openai.com/api/docs/pricing) · [OpenRouter](https://openrouter.ai/models)
 

@@ -23,7 +23,7 @@ describe('resolveProviderConfig', () => {
       resolveProviderConfig({ provider: 'OpenCode Go' }),
       {
         baseUrl: 'https://opencode.ai/zen/go/v1',
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-flash',
       }
     );
   });
