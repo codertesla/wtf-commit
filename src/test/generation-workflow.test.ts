@@ -1,4 +1,5 @@
 import * as assert from 'node:assert';
+import { describe, it } from 'mocha';
 import { executeGenerationWorkflow } from '../flow/generation-workflow';
 import { createStagedSnapshotFromGitOutputs } from '../staged-snapshot';
 
@@ -74,4 +75,3 @@ describe('executeGenerationWorkflow integration', () => {
     assert.deepStrictEqual(result, { status: 'message_ready', message: 'docs: update guide' });
   });
 });
-

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.20.0] - 2026-09-21
 ### Changed
 - **OpenCode Go docs**: Removed “+$5 referral credit” claims from README (EN/ZH), settings description, and Set API Key notes — OpenCode no longer surfaces that offer on the public subscribe flow. Subscribe links (`?ref=…`) are kept as the Go entry point.
 - **Localized LLM errors**: Auth / rate-limit / timeout / network / API failure toasts use EN/ZH i18n instead of hardcoded English, with **Retry** and **Show Output** actions.
@@ -14,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Progress UX**: Generation progress keeps a static title; live preview stays in Source Control only.
 - **Keybinding**: `Cmd/Ctrl+Alt+G` only fires when a Git repository is open (`gitOpenRepositoryCount != 0`).
 - **Settings / commands i18n**: Added `package.nls.json` + `package.nls.zh-cn.json` so command titles and setting descriptions follow the VS Code display language.
+
+### Fixed
+- **Reliable Retry action**: LLM failure retries now start only after the active generation lock is released; retrying a failed AI repair also stops the current workflow instead of continuing toward a commit.
+- **Release packaging**: Added the localization bundles and request-failure UI module to the VSIX allowlist.
+- **Electron test runner**: Skip Marketplace installation for the built-in `vscode.git` dependency and explicitly import Mocha test functions, allowing the pinned VS Code host suite to run successfully.
 
 ## [1.19.4] - 2026-09-13
 ### Changed

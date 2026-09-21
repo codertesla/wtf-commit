@@ -1,4 +1,5 @@
 import * as assert from 'node:assert';
+import { describe, it } from 'mocha';
 import { readStagedSnapshot } from '../git-staged-snapshot';
 import { createStagedSnapshotFromGitOutputs } from '../staged-snapshot';
 
