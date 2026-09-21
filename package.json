@@ -2,7 +2,7 @@
   "name": "wtf-commit",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "1.19.4",
+  "version": "1.20.0",
   "license": "MIT",
   "publisher": "codertesla",
   "icon": "icon.png",

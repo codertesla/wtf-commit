@@ -70,9 +70,10 @@ Other triggers: ✨ on the Source Control title bar, or Command Palette → **`W
 
 > Prefer review-only? Turn **Auto Commit** off — the message stays in Source Control for you to edit and commit manually.
 
-## 🆕 Latest (v1.19.4)
+## 🆕 Latest (v1.20.0)
 
-- **DeepSeek V4.1 Flash**: Defaults are now `deepseek-flash`. Pricing docs use the new Flash rates; OpenCode Go currently gives V4.1 Flash a limited-time **4×** usage credit.
+- **Localized recovery**: LLM errors now follow the VS Code display language and offer reliable **Retry**, **Set API Key**, and **Show Output** actions.
+- **Polished first run**: “Remind Me Later” snoozes for 72 hours, API-key links continue into setup, and commands/settings now ship with English and Simplified Chinese metadata.
 
 > See [CHANGELOG](CHANGELOG.md) for full history.
 

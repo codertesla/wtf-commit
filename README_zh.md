@@ -70,9 +70,10 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 
 > 只想生成提交信息、自己点提交？把 **Auto Commit** 关掉即可。
 
-## 🆕 最新更新（v1.19.4）
+## 🆕 最新更新（v1.20.0）
 
-- **DeepSeek V4.1 Flash**：默认模型改为 `deepseek-flash`。定价已按新 Flash 价更新；OpenCode Go 上 V4.1 Flash 目前限时享受 **4 倍**使用额度。
+- **本地化错误恢复**：LLM 错误会跟随 VS Code 界面语言，并提供可靠的“重试”“设置 API Key”和“查看日志”操作。
+- **首次使用体验优化**：“稍后提醒”会暂停 72 小时，申请 Key 后继续进入设置流程，命令与设置元数据现已支持英文和简体中文。
 
 > 完整历史见 [CHANGELOG](CHANGELOG.md)。
 

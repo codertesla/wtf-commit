@@ -5,4 +5,7 @@ import { defineConfig } from '@vscode/test-cli';
 export default defineConfig({
 	files: 'out/test/**/*.test.js',
 	version: '1.75.0',
+	// vscode.git ships with VS Code; asking the CLI to install it from the
+	// Marketplace fails because built-in extensions are not published there.
+	skipExtensionDependencies: true,
 });
