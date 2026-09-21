@@ -18,7 +18,7 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 | | |
 |:--|:--|
 | ⚡ **约 1 分钟配置** | 粘贴一次自己的 API Key（默认 DeepSeek） |
-| 🎁 **OpenCode Go（可选）** | 同一 Flash 模型——经[我们的链接](https://opencode.ai/go?ref=J9E8732NMP)订阅额外 +**$5** Go 额度，提交计入 Go 配额 |
+| 🎁 **OpenCode Go（可选）** | 同一 Flash 模型——[订阅](https://opencode.ai/go?ref=J9E8732NMP)后，提交计入 Go 配额 |
 | 🔑 **自带 Key，无锁定** | DeepSeek / OpenAI / Gemini / OpenRouter，或任意 OpenAI 兼容端点（Ollama、代理），无需订阅 |
 | 🚀 **一键流水线** | Auto Commit 默认开；开启 Auto Push 后一次快捷键「生成 → 提交 → 推送」 |
 | 🖥️ **全编辑器可用** | VS Code（Marketplace 自动更新）、Cursor、VSCodium、其他 Open VSX 编辑器。MIT 免费开源，持续维护 |
@@ -160,7 +160,7 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
 | 服务商 | 获取 API Key |
 |--------|-------------|
 | **DeepSeek** | [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) |
-| **OpenCode Go** | [订阅 / 获取 Key](https://opencode.ai/go?ref=J9E8732NMP)（额外 +$5 Go 额度）· [定价文档](https://opencode.ai/docs/zh-cn/go) |
+| **OpenCode Go** | [订阅 / 获取 Key](https://opencode.ai/go?ref=J9E8732NMP) · [定价文档](https://opencode.ai/docs/zh-cn/go) |
 | **Gemini** | [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys) |
 | **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **OpenRouter** | [openrouter.ai/keys](https://openrouter.ai/keys) |
@@ -178,7 +178,7 @@ WTF Commit 读取你的 `git diff`，生成规范 Conventional Commit（如 `fea
    - 支持微信/支付宝充值、国内网络直连、纯按量计费（无月租门槛，充 $5 可用大半年）。
    - 扩展已自动关闭思考模式，生成极速，对中文与 Conventional Commits 格式理解精准。
 2. 🎁 **已有编程订阅 / 海外网络（推荐）** 👉 **OpenCode Go**（`deepseek-flash`）
-   - 若已有或打算开通 [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) 订阅（经链接订阅可额外获 **$5** 额度）：**Provider** 选 **OpenCode Go**，填入 Go Key。
+   - 若已有或打算开通 [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) 订阅：**Provider** 选 **OpenCode Go**，填入 Go Key。
    - 全球多节点海外访问极稳，提交消耗计入 Go 额度。DeepSeek V4.1 Flash 目前限时享受 **4 倍**使用额度。
 3. 🆓 **零成本白嫖** 👉 **Gemini**（`gemini-3.5-flash-lite`）
    - Google AI Studio 提供 15 RPM / 1M TPD 慷慨免费层；使用 Google 原生 Interactions API，首字延迟秒级响应。

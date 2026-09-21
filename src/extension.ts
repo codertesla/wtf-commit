@@ -101,9 +101,19 @@ async function warnIfAutoPushWithoutAutoCommit(): Promise<void> {
 
 export function deactivate() {}
 
+const GUIDANCE_DISMISSED_KEY = 'wtfCommit.guidanceDismissed';
+/** Persist "Remind Me Later" until this epoch ms. */
+const GUIDANCE_SNOOZE_UNTIL_KEY = 'wtfCommit.guidanceSnoozedUntil';
+const GUIDANCE_SNOOZE_MS = 72 * 60 * 60 * 1000;
+
 async function checkFirstUseGuidance(context: vscode.ExtensionContext): Promise<void> {
-  const dismissed = context.globalState.get<boolean>('wtfCommit.guidanceDismissed');
+  const dismissed = context.globalState.get<boolean>(GUIDANCE_DISMISSED_KEY);
   if (dismissed) {
+    return;
+  }
+
+  const snoozedUntil = context.globalState.get<number>(GUIDANCE_SNOOZE_UNTIL_KEY);
+  if (typeof snoozedUntil === 'number' && Date.now() < snoozedUntil) {
     return;
   }
 
@@ -112,19 +122,22 @@ async function checkFirstUseGuidance(context: vscode.ExtensionContext): Promise<
   ).then((keys) => keys.some(Boolean));
 
   if (hasAnyKey) {
-    await context.globalState.update('wtfCommit.guidanceDismissed', true);
+    await context.globalState.update(GUIDANCE_DISMISSED_KEY, true);
+    await context.globalState.update(GUIDANCE_SNOOZE_UNTIL_KEY, undefined);
     return;
   }
 
   const setKeyLabel = t('setApiKey');
   const getKeyLabel = t('getApiKey');
+  const remindLabel = t('remindMeLater');
+  const dontShowLabel = t('dontShowAgain');
   const deepSeekKeyUrl = PROVIDER_API_KEY_URLS[DEFAULT_PROVIDER];
   const action = await vscode.window.showInformationMessage(
     t('welcomeTitle'),
     setKeyLabel,
     ...(deepSeekKeyUrl ? [getKeyLabel] : []),
-    t('remindMeLater'),
-    t('dontShowAgain')
+    remindLabel,
+    dontShowLabel
   );
 
   if (action === setKeyLabel) {
@@ -134,10 +147,17 @@ async function checkFirstUseGuidance(context: vscode.ExtensionContext): Promise<
 
   if (action === getKeyLabel && deepSeekKeyUrl) {
     await vscode.env.openExternal(vscode.Uri.parse(deepSeekKeyUrl));
+    void vscode.commands.executeCommand('wtf-commit.setApiKey');
     return;
   }
 
-  if (action === t('dontShowAgain')) {
-    await context.globalState.update('wtfCommit.guidanceDismissed', true);
+  if (action === remindLabel) {
+    await context.globalState.update(GUIDANCE_SNOOZE_UNTIL_KEY, Date.now() + GUIDANCE_SNOOZE_MS);
+    return;
+  }
+
+  if (action === dontShowLabel) {
+    await context.globalState.update(GUIDANCE_DISMISSED_KEY, true);
+    await context.globalState.update(GUIDANCE_SNOOZE_UNTIL_KEY, undefined);
   }
 }

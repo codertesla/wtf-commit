@@ -166,17 +166,42 @@ export const GitStatus = {
   UNTRACKED: 7,
 };
 
+export type RequestFailureExtras = {
+  retryAfterMs?: number;
+  /** Seconds already rounded for UI copy (timeout failures). */
+  timeoutSeconds?: number;
+  /** Extra detail for UI (network cause, sanitized API body, …). */
+  detail?: string;
+};
+
 export class RequestFailure extends Error {
   public readonly retryAfterMs?: number;
+  public readonly timeoutSeconds?: number;
+  public readonly detail?: string;
+
   constructor(
     public readonly code: RequestFailureCode,
     message: string,
     public readonly status?: number,
-    retryAfterMs?: number
+    /**
+     * Either a Retry-After delay in ms (legacy callers) or structured extras
+     * used to localize the toast without parsing English log messages.
+     */
+    retryAfterMsOrExtras?: number | RequestFailureExtras
   ) {
     super(message);
-    if (retryAfterMs !== undefined && Number.isFinite(retryAfterMs) && retryAfterMs >= 0) {
-      this.retryAfterMs = retryAfterMs;
+    const extras =
+      typeof retryAfterMsOrExtras === 'number'
+        ? { retryAfterMs: retryAfterMsOrExtras }
+        : retryAfterMsOrExtras;
+    if (extras?.retryAfterMs !== undefined && Number.isFinite(extras.retryAfterMs) && extras.retryAfterMs >= 0) {
+      this.retryAfterMs = extras.retryAfterMs;
+    }
+    if (extras?.timeoutSeconds !== undefined && Number.isFinite(extras.timeoutSeconds) && extras.timeoutSeconds >= 0) {
+      this.timeoutSeconds = extras.timeoutSeconds;
+    }
+    if (extras?.detail) {
+      this.detail = extras.detail;
     }
   }
 }

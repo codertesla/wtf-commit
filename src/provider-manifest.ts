@@ -47,7 +47,7 @@ export const PROVIDER_API_KEY_URLS: Partial<Record<ProviderName, string>> = {
 export const PROVIDER_KEY_NOTES: Partial<Record<ProviderName, { en: string; zh: string }>> = {
   'OpenCode Go': {
     en: 'Needs an active OpenCode Go subscription — subscribe via this link first, then copy the key from your dashboard.',
-    zh: '需要先订阅 OpenCode Go（经该链接订阅可额外获得 $5 额度），订阅后到控制台复制 Key。',
+    zh: '需要先订阅 OpenCode Go，订阅后到控制台复制 Key。',
   },
   Gemini: {
     en: 'Google AI Studio offers a generous free tier (15 RPM) — generate your API key for free without a credit card.',

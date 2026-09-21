@@ -1,0 +1,21 @@
+{
+  "extension.displayName": "WTF Commit",
+  "extension.description": "AI commit messages from your git diff. Conventional Commits, your own API key — DeepSeek, OpenCode Go, Gemini, OpenAI, and more.",
+  "command.generate.title": "WTF Commit: Generate",
+  "command.setApiKey.title": "WTF Commit: Set API Key",
+  "command.showOutput.title": "WTF Commit: Show Output",
+  "config.title": "WTF Commit",
+  "config.advanced.title": "WTF Commit › Advanced",
+  "config.commitMessageLanguage": "**Commit Message Language** — Language for the generated commit message (not the extension UI). When set to `Custom`, also set `wtfCommit.customCommitMessageLanguage` in `settings.json` (e.g. `French`, `Emoji only`).",
+  "config.provider": "**Provider** — Default is **DeepSeek** (`deepseek-flash` / V4.1 Flash, pay-as-you-go). Choose **OpenCode Go** for subscription quota ([subscribe](https://opencode.ai/go?ref=J9E8732NMP)), **Gemini** for free tier (`gemini-3.5-flash-lite`), **OpenAI** (`gpt-5.6-luna`), or **OpenRouter** / **Custom** for other OpenAI-compatible endpoints. Leave Model empty for built-in defaults.",
+  "config.autoCommit": "**Auto Commit** (default on): Commit after generate. Turn off to only fill Source Control. **Auto Push** only runs when this is on.",
+  "config.autoPush": "**Auto Push** (default off): After auto-commit, push to the remote. Requires **Auto Commit**. Use **Confirm Before Push** as a safety gate.",
+  "config.confirmAutoPush": "**Confirm Before Push** (default on): Ask before pushing when Auto Push is enabled. Only applies when Auto Push is on.",
+  "config.showStatusBarItem": "Show the WTF Commit icon in the status bar.",
+  "config.baseUrl": "**Custom only.** API Base URL when **Provider** is `Custom`. Built-in providers ignore this — use **Provider Overrides** to change their endpoint/model.",
+  "config.baseUrl.description": "API Base URL for the Custom provider only.",
+  "config.model": "**Custom only.** Model name when **Provider** is `Custom`. Built-in providers ignore this — leave empty for the provider default, or use **Provider Overrides**.",
+  "config.model.description": "Model name for the Custom provider only.",
+  "config.providerOverrides": "Per-provider Base URL and Model overrides (preferred way to customize built-in providers).\n\n**Example in `settings.json`:**\n```json\n{\n  \"DeepSeek\": {\n    \"baseUrl\": \"https://api.deepseek.com/beta\",\n    \"model\": \"deepseek-flash\"\n  }\n}\n```",
+  "config.ignorePaths": "Extra file or directory name patterns to exclude from the diff sent to the AI. Each entry is matched against a path segment (for a bare name like `generated`) or as a filename suffix (for an entry starting with `.` or `*`, e.g. `*.snap`, `.gen.ts`). Matches are case-insensitive. Built-in filters (lock files, build outputs, binaries, etc.) always apply. Set to `[]` to disable these defaults."
+}

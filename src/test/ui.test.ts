@@ -80,8 +80,8 @@ describe('createStreamingSink', () => {
     sink.push(': add login');
     assert.strictEqual(inputBox.value, 'feat: add login');
     assert.strictEqual(sink.buffered, 'feat: add login');
-    // First chunk reports immediately so the user sees activity right away.
-    assert.deepStrictEqual(reports, ['feat']);
+    // Progress stays on the static title — stream text only updates SCM.
+    assert.deepStrictEqual(reports, []);
   });
 
   it('should write a fence-stripped preview into the input box', () => {
@@ -97,7 +97,7 @@ describe('createStreamingSink', () => {
     assert.strictEqual(sink.buffered, '```\nfeat: add login\n```');
   });
 
-  it('should report progress at most once per interval', () => {
+  it('should not mirror stream text into the progress notification', () => {
     let clock = 0;
     const reports: string[] = [];
     const sink = createStreamingSink(
@@ -113,12 +113,11 @@ describe('createStreamingSink', () => {
     sink.push('-chunk');
     clock = 120;
     sink.push('-chunk2');
-    // Two reports: at t=0 and t=120 (>= 100ms after the last report at 0).
-    assert.strictEqual(reports.length, 2);
-    assert.ok(reports[1].endsWith('-chunk2'));
+    sink.flush();
+    assert.deepStrictEqual(reports, []);
   });
 
-  it('should flush the latest buffer when asked', () => {
+  it('should keep the buffer after flush without progress updates', () => {
     const reports: string[] = [];
     const sink = createStreamingSink(
       { report: (value) => reports.push(value.message || '') },
@@ -129,7 +128,8 @@ describe('createStreamingSink', () => {
 
     sink.push('hello world');
     sink.flush();
-    assert.deepStrictEqual(reports, ['hello world', 'hello world']);
+    assert.strictEqual(sink.buffered, 'hello world');
+    assert.deepStrictEqual(reports, []);
   });
 });
 

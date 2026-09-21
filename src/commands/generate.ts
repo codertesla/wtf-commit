@@ -12,7 +12,7 @@ import { buildProviderEndpoint, callLLM } from '../llm/provider';
 import { runAutoPush } from './auto-push';
 import { createStreamingSink, restoreIntent, restoreIntentOnAbort } from '../ui';
 import { setUiLanguage, t, asUiLanguage } from '../i18n';
-import { generateLock } from '../generate-lock';
+import { finishGenerateRun, generateLock } from '../generate-lock';
 import { readStagedSnapshot } from '../git-staged-snapshot';
 import { executeGenerationWorkflow } from '../flow/generation-workflow';
 import { prepareGeneration } from './prepare-generation';
@@ -22,6 +22,7 @@ import {
   STATUS_MESSAGE_TIMEOUT_MS,
   showStatusMessage,
 } from '../status';
+import { formatRequestFailureMessage } from '../request-failure-ui';
 import {
   normalizeCommitMessage,
   findConventionalCommitIssues,
@@ -39,6 +40,7 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
 
   let repositoryForRestore: Repository | null = null;
   let intentForRestore = '';
+  let retryRequested = false;
   try {
     const config = readExtensionConfig();
     setUiLanguage(asUiLanguage(vscode.env.language));
@@ -84,7 +86,8 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
         resolveIssues: (message, issues) => resolveCommitIssues(
           { message, issues, provider: config.provider, endpoint, apiKey, model: config.model,
             systemPrompt: config.systemPrompt, diff, intent },
-          repository.inputBox
+          repository.inputBox,
+          () => { retryRequested = true; }
         ),
         setMessage: (message) => { repository.inputBox.value = message; },
         confirmCommit: async () => true,
@@ -167,7 +170,7 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
       } else {
         restoreIntent(repositoryForRestore?.inputBox, intentForRestore);
       }
-      await handleRequestFailure(error);
+      retryRequested = (await handleRequestFailure(error)) === 'retry';
       return;
     }
 
@@ -175,7 +178,9 @@ export async function runGenerate(context: vscode.ExtensionContext): Promise<voi
     vscode.window.showErrorMessage(t('generateFailed', { message: getErrorMessage(error) }));
     restoreIntent(repositoryForRestore?.inputBox, intentForRestore);
   } finally {
-    generateLock.release();
+    finishGenerateRun(generateLock, retryRequested, () => {
+      void vscode.commands.executeCommand('wtf-commit.generate');
+    });
   }
 }
 
@@ -191,7 +196,8 @@ async function resolveCommitIssues(
     diff: string;
     intent: string;
   },
-  inputBox?: { value: string }
+  inputBox?: { value: string },
+  onRetry?: () => void
 ): Promise<string | undefined> {
   const issueSummary = input.issues.map((issue) => issue.message).join(' ');
   logInfo(`Commit message needs adjustment (${issueSummary}); attempting AI repair.`);
@@ -238,7 +244,11 @@ async function resolveCommitIssues(
       inputBox.value = input.message;
     }
     if (error.code !== 'cancelled') {
-      await handleRequestFailure(error);
+      const action = await handleRequestFailure(error);
+      if (action === 'retry') {
+        onRetry?.();
+        return undefined;
+      }
     }
     showStatusMessage(`$(warning) ${t('repairFailedOriginalKept')}`, LONG_STATUS_MESSAGE_TIMEOUT_MS);
     return input.message;
@@ -307,31 +317,36 @@ async function repairCommitMessage(
   );
 }
 
-async function handleRequestFailure(error: RequestFailure): Promise<void> {
+type RequestFailureAction = 'dismissed' | 'retry';
+
+async function handleRequestFailure(error: RequestFailure): Promise<RequestFailureAction> {
   logError('LLM request failed', error);
 
   if (error.code === 'cancelled') {
     showStatusMessage(`$(debug-pause) ${t('cancelled')}`, STATUS_MESSAGE_TIMEOUT_MS);
-    return;
+    return 'dismissed';
   }
+
+  const message = formatRequestFailureMessage(error);
+  const showOutputLabel = t('showOutput');
+  const retryLabel = t('retry');
+  const setKeyLabel = t('setApiKey');
 
   if (error.code === 'auth') {
-    const action = await vscode.window.showErrorMessage(error.message, t('setApiKey'));
-    if (action === t('setApiKey')) {
+    const action = await vscode.window.showErrorMessage(message, setKeyLabel, showOutputLabel);
+    if (action === setKeyLabel) {
       void vscode.commands.executeCommand('wtf-commit.setApiKey');
+    } else if (action === showOutputLabel) {
+      void vscode.commands.executeCommand('wtf-commit.showOutput');
     }
-    return;
+    return 'dismissed';
   }
 
-  if (error.code === 'rate_limit' || error.code === 'timeout') {
-    vscode.window.showErrorMessage(error.message);
-    return;
+  const action = await vscode.window.showErrorMessage(message, retryLabel, showOutputLabel);
+  if (action === retryLabel) {
+    return 'retry';
+  } else if (action === showOutputLabel) {
+    void vscode.commands.executeCommand('wtf-commit.showOutput');
   }
-
-  if (error.code === 'invalid_response') {
-    vscode.window.showErrorMessage(t('invalidApiResponse', { message: error.message }));
-    return;
-  }
-
-  vscode.window.showErrorMessage(error.message);
+  return 'dismissed';
 }

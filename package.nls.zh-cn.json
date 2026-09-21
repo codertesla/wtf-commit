@@ -1,0 +1,21 @@
+{
+  "extension.displayName": "WTF Commit",
+  "extension.description": "根据 git diff 生成 AI 提交信息。Conventional Commits，使用你自己的 API Key — 支持 DeepSeek、OpenCode Go、Gemini、OpenAI 等。",
+  "command.generate.title": "WTF Commit: 生成",
+  "command.setApiKey.title": "WTF Commit: 设置 API Key",
+  "command.showOutput.title": "WTF Commit: 查看日志",
+  "config.title": "WTF Commit",
+  "config.advanced.title": "WTF Commit › 高级",
+  "config.commitMessageLanguage": "**提交信息语言** — 生成的提交信息所用语言（不是扩展界面语言）。设为 `Custom` 时，还需在 `settings.json` 中设置 `wtfCommit.customCommitMessageLanguage`（如 `French`、`Emoji only`）。",
+  "config.provider": "**服务商 (Provider)** — 默认为 **DeepSeek**（`deepseek-flash` / V4.1 Flash，按量付费）。可选 **OpenCode Go**（订阅额度，[订阅](https://opencode.ai/go?ref=J9E8732NMP)）、**Gemini**（免费层，`gemini-3.5-flash-lite`）、**OpenAI**（`gpt-5.6-luna`），或 **OpenRouter** / **Custom**（其他 OpenAI 兼容端点）。Model 留空即用内置默认。",
+  "config.autoCommit": "**Auto Commit**（默认开启）：生成后自动提交。关闭则只填入源代码管理输入框。**Auto Push** 仅在此项开启时生效。",
+  "config.autoPush": "**Auto Push**（默认关闭）：自动提交后推送到远程。需要开启 **Auto Commit**。可用 **Confirm Before Push** 作为确认门。",
+  "config.confirmAutoPush": "**Confirm Before Push**（默认开启）：启用 Auto Push 时，推送前询问确认。仅在 Auto Push 开启时生效。",
+  "config.showStatusBarItem": "在状态栏显示 WTF Commit 图标。",
+  "config.baseUrl": "**仅 Custom。** 当 **Provider** 为 `Custom` 时的 API Base URL。内置服务商会忽略此项 — 请用 **Provider Overrides** 改端点/模型。",
+  "config.baseUrl.description": "仅用于 Custom 服务商的 API Base URL。",
+  "config.model": "**仅 Custom。** 当 **Provider** 为 `Custom` 时的模型名。内置服务商会忽略此项 — 留空用默认，或用 **Provider Overrides**。",
+  "config.model.description": "仅用于 Custom 服务商的模型名。",
+  "config.providerOverrides": "按服务商覆盖 Base URL 与 Model（自定义内置服务商的推荐方式）。\n\n**`settings.json` 示例：**\n```json\n{\n  \"DeepSeek\": {\n    \"baseUrl\": \"https://api.deepseek.com/beta\",\n    \"model\": \"deepseek-flash\"\n  }\n}\n```",
+  "config.ignorePaths": "从发给 AI 的 diff 中额外排除的文件或目录名模式。每项按路径段匹配（如裸名 `generated`），或以 `.` / `*` 开头时按文件名后缀匹配（如 `*.snap`、`.gen.ts`）。匹配不区分大小写。内置过滤（锁文件、构建产物、二进制等）始终生效。设为 `[]` 可关闭这些默认项。"
+}

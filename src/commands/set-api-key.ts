@@ -208,5 +208,6 @@ export async function offerMissingApiKeyActions(provider: ProviderName): Promise
   }
   if (action === getKeyLabel && keyUrl) {
     await vscode.env.openExternal(vscode.Uri.parse(keyUrl));
+    void vscode.commands.executeCommand('wtf-commit.setApiKey');
   }
 }
