@@ -29,5 +29,17 @@ export function createGenerateLock(): GenerateLock {
   };
 }
 
+/** Release the active run before dispatching an optional retry. */
+export function finishGenerateRun(
+  lock: GenerateLock,
+  retryRequested: boolean,
+  retry: () => void
+): void {
+  lock.release();
+  if (retryRequested) {
+    retry();
+  }
+}
+
 /** Process-wide lock shared by the generate command. */
 export const generateLock = createGenerateLock();

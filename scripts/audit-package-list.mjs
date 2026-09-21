@@ -11,6 +11,8 @@ const packageFiles = Buffer.concat(chunks)
   .filter(Boolean);
 
 const allowedFiles = new Set([
+  'package.nls.json',
+  'package.nls.zh-cn.json',
   'package.json',
   'icon.png',
   'README.md',
@@ -33,6 +35,7 @@ const allowedFiles = new Set([
   'out/ui.js',
   'out/i18n.js',
   'out/push-failure.js',
+  'out/request-failure-ui.js',
   'out/generate-lock.js',
   'out/log.js',
   'out/errors.js',
