@@ -28,14 +28,18 @@ export function previewStreamText(buffered: string): string {
   return normalized || buffered;
 }
 
+/**
+ * Streams LLM chunks into the SCM input box for live preview.
+ * Progress notifications keep a static title — do not mirror commit text there
+ * (noisy for sighted users and poor for screen readers).
+ */
 export function createStreamingSink(
-  progress: ProgressReporter,
+  _progress: ProgressReporter,
   inputBox?: InputBoxLike,
-  reportIntervalMs = DEFAULT_REPORT_INTERVAL_MS,
-  now = () => Date.now()
+  _reportIntervalMs = DEFAULT_REPORT_INTERVAL_MS,
+  _now = () => Date.now()
 ): StreamingSink {
   let buffered = '';
-  let lastReportAt: number | undefined;
 
   return {
     get buffered() {
@@ -46,16 +50,9 @@ export function createStreamingSink(
       if (inputBox) {
         inputBox.value = previewStreamText(buffered);
       }
-      const current = now();
-      if (lastReportAt === undefined || current - lastReportAt >= reportIntervalMs) {
-        lastReportAt = current;
-        progress.report({ message: previewStreamText(buffered).slice(-60) });
-      }
     },
     flush() {
-      if (buffered) {
-        progress.report({ message: previewStreamText(buffered).slice(-60) });
-      }
+      // Progress title already covers status; SCM holds the preview.
     },
   };
 }

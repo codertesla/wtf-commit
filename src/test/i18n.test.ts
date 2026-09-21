@@ -58,6 +58,10 @@ describe('i18n', () => {
       'welcomeTitle',
       'mixedStageStatusTip',
       'pushSuccessful',
+      'rateLimit',
+      'showOutput',
+      'retry',
+      'autoPushNeedsAutoCommit',
     ] as const;
     for (const key of keys) {
       enValues.add(t(key));

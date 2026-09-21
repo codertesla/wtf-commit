@@ -22,6 +22,7 @@ import {
   STATUS_MESSAGE_TIMEOUT_MS,
   showStatusMessage,
 } from '../status';
+import { formatRequestFailureMessage } from '../request-failure-ui';
 import {
   normalizeCommitMessage,
   findConventionalCommitIssues,
@@ -315,23 +316,25 @@ async function handleRequestFailure(error: RequestFailure): Promise<void> {
     return;
   }
 
+  const message = formatRequestFailureMessage(error);
+  const showOutputLabel = t('showOutput');
+  const retryLabel = t('retry');
+  const setKeyLabel = t('setApiKey');
+
   if (error.code === 'auth') {
-    const action = await vscode.window.showErrorMessage(error.message, t('setApiKey'));
-    if (action === t('setApiKey')) {
+    const action = await vscode.window.showErrorMessage(message, setKeyLabel, showOutputLabel);
+    if (action === setKeyLabel) {
       void vscode.commands.executeCommand('wtf-commit.setApiKey');
+    } else if (action === showOutputLabel) {
+      void vscode.commands.executeCommand('wtf-commit.showOutput');
     }
     return;
   }
 
-  if (error.code === 'rate_limit' || error.code === 'timeout') {
-    vscode.window.showErrorMessage(error.message);
-    return;
+  const action = await vscode.window.showErrorMessage(message, retryLabel, showOutputLabel);
+  if (action === retryLabel) {
+    void vscode.commands.executeCommand('wtf-commit.generate');
+  } else if (action === showOutputLabel) {
+    void vscode.commands.executeCommand('wtf-commit.showOutput');
   }
-
-  if (error.code === 'invalid_response') {
-    vscode.window.showErrorMessage(t('invalidApiResponse', { message: error.message }));
-    return;
-  }
-
-  vscode.window.showErrorMessage(error.message);
 }

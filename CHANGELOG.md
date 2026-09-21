@@ -5,6 +5,16 @@ All notable changes to the "wtf-commit" extension will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- **OpenCode Go docs**: Removed “+$5 referral credit” claims from README (EN/ZH), settings description, and Set API Key notes — OpenCode no longer surfaces that offer on the public subscribe flow. Subscribe links (`?ref=…`) are kept as the Go entry point.
+- **Localized LLM errors**: Auth / rate-limit / timeout / network / API failure toasts use EN/ZH i18n instead of hardcoded English, with **Retry** and **Show Output** actions.
+- **First-run guidance**: “Remind Me Later” snoozes for 72 hours; “Get API Key” opens the provider page and continues into the Set API Key wizard (same for the missing-key prompt).
+- **Auto Push copy**: When Auto Commit is off, the warning clarifies the commit message is already ready and Auto Push was skipped.
+- **Progress UX**: Generation progress keeps a static title; live preview stays in Source Control only.
+- **Keybinding**: `Cmd/Ctrl+Alt+G` only fires when a Git repository is open (`gitOpenRepositoryCount != 0`).
+- **Settings / commands i18n**: Added `package.nls.json` + `package.nls.zh-cn.json` so command titles and setting descriptions follow the VS Code display language.
+
 ## [1.19.4] - 2026-09-13
 ### Changed
 - **DeepSeek V4.1 Flash**: Built-in defaults for DeepSeek and OpenCode Go are now `deepseek-flash` (V4.1 Flash). Legacy `deepseek-v4-flash` still routes to V4.1 Flash on the official API.

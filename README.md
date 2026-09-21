@@ -18,7 +18,7 @@ WTF Commit reads your `git diff`, writes a clear Conventional Commit (e.g. `feat
 | | |
 |:--|:--|
 | ⚡ **~1 min setup** | Paste your own API key once (DeepSeek by default) |
-| 🎁 **OpenCode Go (optional)** | Same Flash model — subscribe via [our link](https://opencode.ai/go?ref=J9E8732NMP) for +**$5** Go credit; commits draw from your Go quota |
+| 🎁 **OpenCode Go (optional)** | Same Flash model — [subscribe](https://opencode.ai/go?ref=J9E8732NMP), then commits draw from your Go quota |
 | 🔑 **No lock-in** | DeepSeek / OpenAI / Gemini / OpenRouter, or any OpenAI-compatible endpoint (Ollama, proxies). No subscription required |
 | 🚀 **One-keystroke pipeline** | Auto Commit on by default; enable Auto Push for generate → commit → push in one shot |
 | 🖥️ **Works everywhere** | VS Code (Marketplace auto-update), Cursor, VSCodium, other Open VSX editors. MIT, free, actively maintained |
@@ -160,7 +160,7 @@ If you want the AI to use a specific language (e.g., French, Cantonese, or Emoji
 | Provider | Get API Key |
 |----------|-------------|
 | **DeepSeek** | [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) |
-| **OpenCode Go** | [Subscribe / get key](https://opencode.ai/go?ref=J9E8732NMP) (+$5 Go credit) · [pricing docs](https://opencode.ai/docs/go) |
+| **OpenCode Go** | [Subscribe / get key](https://opencode.ai/go?ref=J9E8732NMP) · [pricing docs](https://opencode.ai/docs/go) |
 | **Gemini** | [aistudio.google.com/api-keys](https://aistudio.google.com/api-keys) |
 | **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **OpenRouter** | [openrouter.ai/keys](https://openrouter.ai/keys) |
@@ -177,7 +177,7 @@ Generating a commit message is a lightweight task — you don't need a frontier 
    - **Default Provider**; leave **Model** empty.
    - True pay-as-you-go with no subscription barrier. Fast, high quality, and thinking mode is disabled automatically for sub-second responses.
 2. 🎁 **Existing Coding Sub / Global Access (Recommended)** 👉 **OpenCode Go** (`deepseek-flash`)
-   - **Recommended** if you already have (or want) an [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) subscription (that link adds +**$5** toward Go quota): set **Provider** to **OpenCode Go**, paste the Go API key.
+   - **Recommended** if you already have (or want) an [OpenCode Go](https://opencode.ai/go?ref=J9E8732NMP) subscription: set **Provider** to **OpenCode Go**, paste the Go API key.
    - Low-latency global endpoints; commits draw from your Go quota. DeepSeek V4.1 Flash currently has a limited-time **4×** usage credit.
 3. 🆓 **Zero Cost / Free Tier** 👉 **Gemini** (`gemini-3.5-flash-lite`)
    - Google AI Studio provides a generous free tier (15 RPM / 1M tokens/day). Uses native Interactions API with `minimal` thinking for instant responses.

@@ -73,7 +73,15 @@ export type MessageKey =
   | 'pushNowConfirm'
   | 'push'
   | 'authFailed'
+  | 'rateLimit'
+  | 'rateLimitWithRetry'
+  | 'requestTimedOut'
+  | 'networkFailed'
+  | 'apiRequestFailed'
+  | 'serviceUnavailable'
   | 'invalidApiResponse'
+  | 'showOutput'
+  | 'retry'
   | 'undoCommit'
   | 'welcomeTitle'
   | 'remindMeLater'
@@ -103,7 +111,7 @@ const en: Dictionary = {
   commitSuccessfulUnstagedRemain: 'Commit successful. {count} unstaged file(s) left untouched.',
   autoPushSkipped: 'Auto Push skipped. Commit is local only.',
   autoPushNeedsAutoCommit:
-    'Auto Push needs Auto Commit on. Enable Auto Commit so push can run after generate?',
+    'Commit message is ready in Source Control. Auto Push was skipped because Auto Commit is off. Enable Auto Commit so push can run after generate?',
   enableAutoCommit: 'Enable Auto Commit',
   dismiss: 'Dismiss',
   messageReadyInScm: 'Commit message ready in Source Control.',
@@ -124,7 +132,7 @@ const en: Dictionary = {
   setKeyForCurrentProvider: 'Set key for {provider} (current)',
   defaultProviderBadge: 'default',
   chooseOtherProvider: 'Choose another provider…',
-  chooseOtherProviderDetail: 'Only if you are not using the default DeepSeek provider.',
+  chooseOtherProviderDetail: 'Pick a different provider than the one above.',
   apiKeySavedSwitched:
     'API Key for {provider} saved ({masked}). Switch the active provider to {provider}?',
   apiKeySwitchedTo:
@@ -170,7 +178,15 @@ const en: Dictionary = {
   pushNowConfirm: 'Push the commit to the remote now?',
   push: 'Push',
   authFailed: 'Authentication failed ({status})',
+  rateLimit: 'Rate limit reached. Please retry later.',
+  rateLimitWithRetry: 'Rate limit reached. Please retry in {seconds} seconds.',
+  requestTimedOut: 'Request timed out after {seconds} seconds.',
+  networkFailed: 'Network request failed: {detail}',
+  apiRequestFailed: 'API request failed ({status}): {detail}',
+  serviceUnavailable: 'Service unavailable ({status}). Please retry later.',
   invalidApiResponse: 'Invalid API response: {message}',
+  showOutput: 'Show Output',
+  retry: 'Retry',
   undoCommit: 'Undo Commit',
   welcomeTitle:
     'Welcome to WTF Commit! Default provider is DeepSeek — set an API key once, then generate with your shortcut (Cmd/Ctrl+Alt+G).',
@@ -200,7 +216,8 @@ const zh: Dictionary = {
   commitSuccessful: '提交成功。',
   commitSuccessfulUnstagedRemain: '提交成功。另有 {count} 个未暂存文件未纳入本次提交。',
   autoPushSkipped: '已跳过 Auto Push，提交仅保留在本地。',
-  autoPushNeedsAutoCommit: 'Auto Push 需要先开启 Auto Commit。是否开启 Auto Commit？',
+  autoPushNeedsAutoCommit:
+    '提交信息已就绪于源代码管理。因未开启 Auto Commit，已跳过 Auto Push。是否开启 Auto Commit，以便生成后自动推送？',
   enableAutoCommit: '开启 Auto Commit',
   dismiss: '忽略',
   messageReadyInScm: '提交信息已就绪于源代码管理。',
@@ -221,7 +238,7 @@ const zh: Dictionary = {
   setKeyForCurrentProvider: '为 {provider} 设置 Key（当前）',
   defaultProviderBadge: '默认',
   chooseOtherProvider: '选择其他服务商…',
-  chooseOtherProviderDetail: '仅当你不使用默认的 DeepSeek 时再选。',
+  chooseOtherProviderDetail: '选择与上方不同的服务商。',
   apiKeySavedSwitched: '已保存 {provider} 的 API Key（{masked}）。是否将当前 Provider 切换为 {provider}？',
   apiKeySwitchedTo: '已保存 {provider} 的 API Key（{masked}）。当前 Provider 已切换为 {provider}。',
   apiKeySavedUnchanged: '已保存 {provider} 的 API Key（{masked}）。当前 Provider 未变（{current}）。',
@@ -262,7 +279,15 @@ const zh: Dictionary = {
   pushNowConfirm: '现在推送到远程吗？',
   push: '推送',
   authFailed: '认证失败（{status}）',
+  rateLimit: '已达到速率限制，请稍后再试。',
+  rateLimitWithRetry: '已达到速率限制，请在 {seconds} 秒后重试。',
+  requestTimedOut: '请求在 {seconds} 秒后超时。',
+  networkFailed: '网络请求失败：{detail}',
+  apiRequestFailed: 'API 请求失败（{status}）：{detail}',
+  serviceUnavailable: '服务不可用（{status}），请稍后再试。',
   invalidApiResponse: '无效的 API 响应：{message}',
+  showOutput: '查看日志',
+  retry: '重试',
   undoCommit: '撤销提交',
   welcomeTitle:
     '欢迎使用 WTF Commit！默认服务商是 DeepSeek — 先设置一次 API Key，再用快捷键生成（Cmd/Ctrl+Alt+G）。',

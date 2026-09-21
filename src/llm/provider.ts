@@ -203,7 +203,8 @@ async function runWithTimeout<T>(
     if (timedOut) {
       throw timeoutFailure(timeoutMs);
     }
-    throw new RequestFailure('network', `Network request failed: ${getErrorMessage(error)}`);
+    const detail = getErrorMessage(error);
+    throw new RequestFailure('network', `Network request failed: ${detail}`, undefined, { detail });
   } finally {
     clearTimeout(timeoutHandle);
     cancellationDisposable.dispose();
@@ -223,17 +224,21 @@ function handleHttpError(status: number, errorText: string, retryAfterMs?: numbe
   }
   if (status === 429) {
     const hint = retryAfterMs !== undefined ? ` Please retry in ${Math.ceil(retryAfterMs / 1000)} seconds.` : '';
-    throw new RequestFailure('rate_limit', `Rate limit reached.${hint} Please retry later.`, status, retryAfterMs);
+    throw new RequestFailure('rate_limit', `Rate limit reached.${hint} Please retry later.`, status, {
+      retryAfterMs,
+    });
   }
   if (status === 503 && retryAfterMs !== undefined) {
-    throw new RequestFailure('api', `Service unavailable (${status}). Please retry later.`, status, retryAfterMs);
+    throw new RequestFailure('api', `Service unavailable (${status}). Please retry later.`, status, {
+      retryAfterMs,
+      detail: 'unavailable',
+    });
   }
-  throw new RequestFailure(
-    'api',
-    `API request failed (${status}): ${sanitizeErrorText(errorText)}`,
-    status,
-    retryAfterMs
-  );
+  const detail = sanitizeErrorText(errorText);
+  throw new RequestFailure('api', `API request failed (${status}): ${detail}`, status, {
+    retryAfterMs,
+    detail,
+  });
 }
 
 function getEffectiveTimeout(input: LlmCallInput): number {
@@ -279,7 +284,10 @@ function sleep(ms: number, token: LlmCallInput['token']): Promise<void> {
 }
 
 function timeoutFailure(timeoutMs: number): RequestFailure {
-  return new RequestFailure('timeout', `Request timed out after ${Math.round(timeoutMs / 1000)} seconds.`);
+  const timeoutSeconds = Math.round(timeoutMs / 1000);
+  return new RequestFailure('timeout', `Request timed out after ${timeoutSeconds} seconds.`, undefined, {
+    timeoutSeconds,
+  });
 }
 
 function isEmptyStreamingResponse(error: unknown): boolean {
