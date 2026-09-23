@@ -23,7 +23,17 @@ describe('resolveProviderConfig', () => {
       resolveProviderConfig({ provider: 'OpenCode Go' }),
       {
         baseUrl: 'https://opencode.ai/zen/go/v1',
-        model: 'deepseek-flash',
+        model: 'deepseek-v4.1-flash',
+      }
+    );
+  });
+
+  it('should resolve the OpenAI built-in model to GPT-6 Luna', () => {
+    assert.deepStrictEqual(
+      resolveProviderConfig({ provider: 'OpenAI' }),
+      {
+        baseUrl: 'https://api.openai.com/v1',
+        model: 'gpt-6-luna',
       }
     );
   });

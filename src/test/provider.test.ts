@@ -367,6 +367,46 @@ describe('Gemini Interactions API', () => {
 });
 
 describe('Thinking-capable providers', () => {
+  it('sends GPT-6 Luna with a non-reasoning Chat Completions token budget', async () => {
+    let requestBody = '';
+    const server = http.createServer((request, response) => {
+      request.on('data', (chunk: Buffer) => {
+        requestBody += chunk.toString('utf8');
+      });
+      request.on('end', () => {
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ choices: [{ message: { content: 'feat: add login' } }] }));
+      });
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== 'string');
+      const result = await callLLM({
+        provider: 'OpenAI',
+        endpoint: `http://127.0.0.1:${address.port}/chat/completions`,
+        apiKey: 'test-key',
+        model: 'gpt-6-luna',
+        systemPrompt: 'Return a commit message.',
+        diff: 'diff --git a/login.ts b/login.ts',
+        token: cancellationToken,
+        timeoutMs: 1_000,
+      });
+
+      const parsedBody = JSON.parse(requestBody) as Record<string, unknown>;
+      assert.strictEqual(result, 'feat: add login');
+      assert.strictEqual(parsedBody.model, 'gpt-6-luna');
+      assert.strictEqual(parsedBody.reasoning_effort, 'none');
+      assert.strictEqual(parsedBody.max_completion_tokens, 512);
+      assert.ok(!('temperature' in parsedBody));
+      assert.ok(!('max_tokens' in parsedBody));
+      assert.ok(!('thinking' in parsedBody));
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
   it('should disable thinking for DeepSeek, OpenCode Go, and known Custom hosts', () => {
     assert.strictEqual(
       shouldDisableThinking('DeepSeek', 'https://api.deepseek.com/chat/completions'),

@@ -12,8 +12,10 @@ const DEFAULT_TEMPERATURE = 1;
 export interface ChatCompletionRequest {
   model: string;
   messages: Array<{ role: 'system' | 'user'; content: string }>;
-  temperature: number;
-  max_tokens: number;
+  temperature?: number;
+  max_tokens?: number;
+  max_completion_tokens?: number;
+  reasoning_effort?: 'none';
   stream?: boolean;
   thinking?: { type: 'disabled' | 'enabled' };
 }
@@ -105,14 +107,16 @@ export function buildRequestBody(
     };
   }
 
+  const useOpenAILuna = input.provider === 'OpenAI' && input.model.toLowerCase() === 'gpt-6-luna';
   return {
     model: input.model,
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userContent },
     ],
-    temperature: DEFAULT_TEMPERATURE,
-    max_tokens: MAX_OUTPUT_TOKENS,
+    ...(useOpenAILuna
+      ? { reasoning_effort: 'none' as const, max_completion_tokens: MAX_OUTPUT_TOKENS }
+      : { temperature: DEFAULT_TEMPERATURE, max_tokens: MAX_OUTPUT_TOKENS }),
     stream: useStreaming || undefined,
     ...(shouldDisableThinking(input.provider, input.endpoint) ? { thinking: { type: 'disabled' as const } } : {}),
   };
@@ -221,4 +225,3 @@ export function extractStreamContent(
 function firstText(...values: Array<string | undefined>): string {
   return values.find((value) => typeof value === 'string' && value.length > 0) || '';
 }
-

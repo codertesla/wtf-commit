@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.20.1] - 2026-09-23
+### Changed
+- **OpenAI default model**: Use `gpt-6-luna` with `reasoning_effort: none` and the Chat Completions `max_completion_tokens` limit for short commit messages; update English and Chinese pricing guidance.
+- **OpenCode Go default model ID**: Use the documented `deepseek-v4.1-flash` ID while leaving DeepSeek's direct `deepseek-flash` default unchanged.
+
 ## [1.20.0] - 2026-09-21
 ### Changed
 - **OpenCode Go docs**: Removed “+$5 referral credit” claims from README (EN/ZH), settings description, and Set API Key notes — OpenCode no longer surfaces that offer on the public subscribe flow. Subscribe links (`?ref=…`) are kept as the Go entry point.
